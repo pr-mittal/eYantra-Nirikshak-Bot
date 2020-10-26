@@ -61,10 +61,12 @@ threshold=0.7
 #print(res)
 
 loc=np.where(res>threshold)
+#loc is location where there is more that 70 % match
 #print(loc)
 #in location y and x coordinates are stored in separate arrays so we zip(*loc[::-1])
 #zip basically takes one term from  the two arrays and *loc(* operator) is used to unzip the two terms into p
 for p in zip(*loc[::-1]):
+    #print(p)
     cv2.rectangle(img_bgr,(p[0],p[1]),(p[0]+w,p[1]+h),(0,0,255),2)
 cv2.imshow('detected',img_bgr)
-
+#cv2.waitKey(0)

@@ -18,10 +18,10 @@ while True:
     edges=cv2.Canny(frame,lowCanny,highCanny)
 
     
-    cv2.imshow('original',frame)
-    #cv2.imshow('soblex',soblex)
-    #cv2.imshow('sobley',sobley)
-    #cv2.imshow('laplacian',laplacian)
+    cv2.imshow('image',frame)
+    cv2.imshow('soblex',soblex)
+    cv2.imshow('sobley',sobley)
+    cv2.imshow('laplacian',laplacian)
     cv2.imshow('edges',edges)
 
 
