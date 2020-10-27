@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[6]:
+# In[40]:
 
 
 '''
@@ -44,7 +44,7 @@ import os
 ##############################################################
 
 
-# In[42]:
+# In[41]:
 
 
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
@@ -122,7 +122,7 @@ def getContours(img,imgColor):
     #print(imgT[cX][cY])
 
 
-# In[43]:
+# In[48]:
 
 
 def getShape4(cnt):
@@ -141,7 +141,9 @@ def getShape4(cnt):
     #checking for shapes having al least opposite sides equal
     if(eq1 and eq2) :
         obj="Parallelogram"
+        #print(cnt)
         if(isPerpendicular(v1,v2)):
+            
             obj="Rectangle"
         if(eq3):
             obj="Rhombus"
@@ -167,11 +169,19 @@ def isPerpendicular(v1,v2):
     #print(v1,v2)
     #angle=abs(np.angle(v2/v1,deg=True))
     #print("Perpendicular angle=",angle)
-    #if(angle>85 and angle<95):
+    #if(angle>85 and angle<95)or(angle<-85 and angle>-95) :
         #return True
     #checking for prouct of slopes
-    pro=((v2[1]/v2[0])*(v1[1]/v1[0]))
-    if pro<=-0.97 and pro >=-1.03:
+    #pro=((v2[1]/v2[0])*(v1[1]/v1[0]))
+    #print("Perprndicular Product:",pro)
+    #if pro<=-0.97 and pro >=-1.03:
+        #return True
+    #else:
+        #return False
+    #doing dot product of vectors
+    dot=(v1[0]*v2[0]+v2[1]*v1[1])/((v1[0]**2+v1[1]**2)**(0.5)*(v2[0]**2+v2[1]**2)**(0.5))
+    #print(dot)
+    if dot < 0.03 and dot > -0.03:
         return True
     else:
         return False
@@ -184,7 +194,7 @@ def isParallel(v1,v2):
         return False
 
 
-# In[44]:
+# In[49]:
 
 
 ##############################################################
@@ -224,12 +234,16 @@ def scan_image(img_file_path):
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
     ret,thresh = cv2.threshold(imgGray,120,255,cv2.THRESH_BINARY)
     shapes=getContours(thresh,img)
+    #sort the shapes according to area
+    #kv is the tupple of ('Shape' , ('color', Area, cX, cY)), area is kv[1][1]
+    shapes=dict(sorted(shapes.items(),key=lambda kv: kv[1][1]))
+    
     #print(shapes)
     
     ##################################################
     
     return shapes
-#path=os.getcwd()+"/Samples/Sample2.png";
+#path=os.getcwd()+"/Test_Images/Test3.png";
 #print(path)
 #shapes = scan_image(path);
 
