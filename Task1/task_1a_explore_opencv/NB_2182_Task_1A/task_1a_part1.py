@@ -24,7 +24,7 @@
 '''
 
 # Team ID:			2182
-# Author List:		Pranav Mittal,Priyank Sisodia,Aman Sharma,Yatharth Bhargava
+# Author List:		Aman Kumar,Pranav Mittal,Priyank Sisodia,Yatharth Bhargava
 # Filename:			task_1a_part1.py
 # Functions:		scan_image
 # 					getContours,getShape4,isEqual,isPerpendicular

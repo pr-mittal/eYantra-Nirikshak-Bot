@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[25]:
+# In[1]:
 
 
 '''
@@ -23,11 +23,11 @@
 *****************************************************************************************
 '''
 
-# Team ID:			[ Team-ID ]
-# Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Team ID:			2182
+# Author List:		Priyank Sisodia,Pranav Mittal
 # Filename:			task_1b.py
 # Functions:		applyPerspectiveTransform, detectMaze, writeToCsv
-# 					[ Comma separated list of functions in this file ]
+# 					getBorderCoordinates,orderedPolyDp
 # Global variables:	
 # 					[ List of global variables defined in this file ]
 
@@ -44,7 +44,7 @@ import csv
 ##############################################################
 
 
-# In[26]:
+# In[2]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -98,7 +98,7 @@ def getBorderCoordinates(imgMorph):
 ##############################################################
 
 
-# In[27]:
+# In[3]:
 
 
 def applyPerspectiveTransform(input_img):
@@ -182,7 +182,7 @@ def applyPerspectiveTransform(input_img):
 # applyPerspectiveTransform(cv2.imread(path))
 
 
-# In[28]:
+# In[6]:
 
 
 def detectMaze(warped_img):
@@ -278,12 +278,12 @@ def detectMaze(warped_img):
     ##################################################
     maze_array=maze_array.tolist()
     return maze_array
-path="test_cases/maze04.jpg"
-cv2.imread(path)
-detectMaze(applyPerspectiveTransform(cv2.imread(path)))
+#path="test_cases/maze04.jpg"
+#cv2.imread(path)
+#detectMaze(applyPerspectiveTransform(cv2.imread(path)))
 
 
-# In[29]:
+# In[7]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -312,7 +312,7 @@ def writeToCsv(csv_file_path, maze_array):
 		writer.writerows(maze_array)
 
 
-# In[30]:
+# In[ ]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
