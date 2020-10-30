@@ -1,0 +1,43 @@
+void setup() 
+{
+  pinMode(7,OUTPUT);
+  pinMode(8,OUTPUT);
+  pinMode(12,OUTPUT);
+  digitalWrite(7,LOW);
+  digitalWrite(8,LOW);
+  digitalWrite(12,LOW);
+  Serial.begin(9600);
+}
+char c;
+void loop() 
+{
+   if(Serial.available()>0)
+   {
+    c=Serial.read();
+    if(c=='r')
+    {
+      digitalWrite(7,HIGH);
+      delay(2000);
+    }
+    else
+    if(c=='g')
+    {
+      digitalWrite(8,HIGH);
+      delay(2000);
+    }
+    else
+    if(c=='b')
+    {
+      digitalWrite(12,HIGH)
+      delay(2000);
+    }
+    else  
+    if(c=='a')
+    {
+     digitalWrite(7,HIGH);
+     digitalWrite(8,HIGH);
+     digitalWrite(12,HIGH);
+     delay(2000);
+     }
+  }
+}  
