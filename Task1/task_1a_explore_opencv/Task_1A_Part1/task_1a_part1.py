@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
 
-# In[55]:
+# In[2]:
 
 
 '''
@@ -44,7 +42,7 @@ import os
 ##############################################################
 
 
-# In[56]:
+# In[3]:
 
 
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
@@ -124,7 +122,7 @@ def getContours(img,imgColor):
     #print(imgT[cX][cY])
 
 
-# In[57]:
+# In[4]:
 
 
 def getShape4(cnt):
@@ -161,7 +159,7 @@ def getShape4(cnt):
 def isEqual(v1,v2):
     ratio=(v1[0]**2+v1[1]**2)/(v2[0]**2+v2[1]**2)
     #print("Equal ratio=",ratio)
-    if ratio > 0.97 and ratio < 1.03:
+    if ratio > 0.95 and ratio < 1.05:
         return True
     else:
         return False
@@ -184,20 +182,24 @@ def isPerpendicular(v1,v2):
     #doing dot product of vectors
     dot=(v1[0]*v2[0]+v2[1]*v1[1])/((v1[0]**2+v1[1]**2)**(0.5)*(v2[0]**2+v2[1]**2)**(0.5))
     #print(dot)
-    if dot < 0.03 and dot > -0.03:
+    #cos(85)=0.087156
+    if dot < 0.087 and dot > -0.087:
         return True
     else:
         return False
 def isParallel(v1,v2):
-    ratio=(v2[1]/v2[0])/(v1[1]/v1[0])
+    #ratio=(v2[1]/v2[0])/(v1[1]/v1[0])
     #print("Parallel ratio=",ratio)
-    if ratio > 0.97 and ratio < 1.03:
-        return True
+    #if ratio > 0.9 and ratio < 1.1:
+    #    return True
+    dot=(v1[0]*v2[0]+v2[1]*v1[1])/((v1[0]**2+v1[1]**2)**(0.5)*(v2[0]**2+v2[1]**2)**(0.5))
+    if dot > 0.9 and dot < 1.1:
+       return True
     else:
         return False
 
 
-# In[58]:
+# In[5]:
 
 
 ##############################################################
@@ -248,12 +250,12 @@ def scan_image(img_file_path):
     ##################################################
     
     return shapes
-#path=os.getcwd()+"/Samples/Sample3.png";
+path=os.getcwd()+"/Samples/Sample5.png";
 #print(path)
-#shapes = scan_image(path);
+shapes = scan_image(path);
 
 
-# In[59]:
+# In[6]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
