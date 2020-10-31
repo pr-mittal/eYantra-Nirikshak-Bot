@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
 
-# In[9]:
+# In[2]:
 
 
 '''
@@ -44,7 +42,7 @@ import os
 ##############################################################
 
 
-# In[22]:
+# In[3]:
 
 
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
@@ -124,7 +122,7 @@ def getContours(img,imgColor):
     #print(imgT[cX][cY])
 
 
-# In[23]:
+# In[4]:
 
 
 def getShape4(cnt):
@@ -190,15 +188,18 @@ def isPerpendicular(v1,v2):
     else:
         return False
 def isParallel(v1,v2):
-    ratio=(v2[1]/v2[0])/(v1[1]/v1[0])
+    #ratio=(v2[1]/v2[0])/(v1[1]/v1[0])
     #print("Parallel ratio=",ratio)
-    if ratio > 0.9 and ratio < 1.1:
-        return True
+    #if ratio > 0.9 and ratio < 1.1:
+    #    return True
+    dot=(v1[0]*v2[0]+v2[1]*v1[1])/((v1[0]**2+v1[1]**2)**(0.5)*(v2[0]**2+v2[1]**2)**(0.5))
+    if dot > 0.9 and dot < 1.1:
+       return True
     else:
         return False
 
 
-# In[26]:
+# In[5]:
 
 
 ##############################################################
@@ -254,7 +255,7 @@ path=os.getcwd()+"/Samples/Sample5.png";
 shapes = scan_image(path);
 
 
-# In[27]:
+# In[6]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
