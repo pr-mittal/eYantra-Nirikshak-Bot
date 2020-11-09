@@ -1,5 +1,7 @@
+#!/usr/bin/env python
+# coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 '''
@@ -42,7 +44,7 @@ import os
 ##############################################################
 
 
-# In[3]:
+# In[2]:
 
 
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
@@ -122,7 +124,7 @@ def getContours(img,imgColor):
     #print(imgT[cX][cY])
 
 
-# In[4]:
+# In[3]:
 
 
 def getShape4(cnt):
@@ -193,13 +195,14 @@ def isParallel(v1,v2):
     #if ratio > 0.9 and ratio < 1.1:
     #    return True
     dot=(v1[0]*v2[0]+v2[1]*v1[1])/((v1[0]**2+v1[1]**2)**(0.5)*(v2[0]**2+v2[1]**2)**(0.5))
+    dot=abs(dot)
     if dot > 0.9 and dot < 1.1:
        return True
     else:
         return False
 
 
-# In[5]:
+# In[4]:
 
 
 ##############################################################
@@ -243,19 +246,19 @@ def scan_image(img_file_path):
     #print("Before Sort:",shapes)
     #sort the shapes according to area
     #kv is the tupple of ('Shape' , ('color', Area, cX, cY)), area is kv[1][1]
-    shapes=dict(sorted(shapes.items(),key=lambda kv: kv[1][1]))
+    shapes=dict(sorted(shapes.items(),key=lambda kv: kv[1][1],reverse=True))
     
     #print(shapes)
     
     ##################################################
     
     return shapes
-path=os.getcwd()+"/Samples/Sample5.png";
+#path=os.getcwd()+"/Samples/Sample5.png";
 #print(path)
-shapes = scan_image(path);
+#shapes = scan_image(path);
 
 
-# In[6]:
+# In[5]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
