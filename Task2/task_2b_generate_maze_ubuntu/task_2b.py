@@ -17,7 +17,7 @@
 *****************************************************************************************
 '''
 
-# Team ID:			[ Team-ID ]
+# Team ID:			2182
 # Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
 # Filename:			task_2b.py
 # Functions:		init_remote_api_server, exit_remote_api_server, get_vision_sensor_image,
@@ -103,13 +103,17 @@ def init_remote_api_server():
 	global client_id
 
 	##############	ADD YOUR CODE HERE	##############
-	
-	
+	sim.simxFinish(-1) #stop and previously running processes
+    IP = '127.0.0.1'
+    PORT = 19997
+    client_id = sim.simxStart(IP, PORT, True, True, 5000, 5)
+
+    if client_id!=-1:
+        print("client_id is not -1 and first function is working")
 
 	##################################################
 
 	return client_id
-
 
 def get_vision_sensor_image():
 	
@@ -267,10 +271,12 @@ def exit_remote_api_server():
 
 	##############	ADD YOUR CODE HERE	##############
 	
-	
-
+	#This function should wait for the last command sent to arrive at the CoppeliaSim server 
+    #before closing the connection #may be this fun needs an edit
+    _,time = sim.simxGetPingTime(client_id)
+    sim.simxFinish(client_id)
 	##################################################
-
+	
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
 # 
