@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[10]:
+
+
 '''
 *****************************************************************************************
 *
@@ -42,6 +48,10 @@ import time
 ##############################################################
 
 
+
+# In[11]:
+
+
 # Importing the sim module for Remote API connection with CoppeliaSim
 try:
 	import sim
@@ -71,6 +81,9 @@ client_id = -1
 
 
 ##############################################################
+
+
+# In[12]:
 
 
 def init_remote_api_server():
@@ -104,16 +117,20 @@ def init_remote_api_server():
 
 	##############	ADD YOUR CODE HERE	##############
 	sim.simxFinish(-1) #stop and previously running processes
-    IP = '127.0.0.1'
-    PORT = 19997
-    client_id = sim.simxStart(IP, PORT, True, True, 5000, 5)
+	ip = '127.0.0.1'
+	port = 19997
+	client_id = sim.simxStart(ip, port, True, True, 5000, 5)
 
-    if client_id!=-1:
-        print("client_id is not -1 and first function is working")
+    #if client_id!=-1:
+        #print("client_id is not -1 and first function is working")
 
 	##################################################
 
 	return client_id
+
+
+# In[45]:
+
 
 def get_vision_sensor_image():
 	
@@ -151,11 +168,28 @@ def get_vision_sensor_image():
 
 	##############	ADD YOUR CODE HERE	##############
 	
-	
+	_, sensor_handle = sim.simxGetObjectHandle(
+        client_id, 'Vision_sensor', sim.simx_opmode_blocking)
 
+    # print(sensor_handle, "sensor_handle")
+
+	return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
+        client_id, sensor_handle, 0, sim.simx_opmode_streaming)  # streamig may need change
+
+	rCode, pingTime = sim.simxGetPingTime(client_id)
+
+	return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
+        client_id, sensor_handle, 0, sim.simx_opmode_buffer)	
+	# print(image_resolution)
+    # print(return_code)
+    # print((vision_sensor_image))
 	##################################################
 
 	return vision_sensor_image, image_resolution, return_code
+
+
+# In[46]:
+
 
 
 def transform_vision_sensor_image(vision_sensor_image, image_resolution):
@@ -197,12 +231,26 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	transformed_image = None
 
 	##############	ADD YOUR CODE HERE	##############
-	
+	vision_sensor_np_array = np.array(vision_sensor_image, dtype=np.uint8)
+
+	vision_sensor_np_array.resize(
+        [image_resolution[0], image_resolution[1], 3])
+
+	transformed_image = cv2.cvtColor(vision_sensor_np_array, cv2.COLOR_BGR2RGB)
+
+	transformed_image = np.flip(transformed_image, 0)
+    
+    # print(type(transformed_image))
+    # print(transformed_image.shape)
 	
 
 	##################################################
 	
 	return transformed_image
+
+
+# In[47]:
+
 
 
 def send_data(maze_array):
@@ -235,12 +283,22 @@ def send_data(maze_array):
 	return_code = -1
 
 	##############	ADD YOUR CODE HERE	##############
+	emptyBuff=bytearray()
+	#converting maze array to 1D list of ints
+	maze_list=[]
+	for i in range(len(maze_array)):
+		maze_list+=maze_array[i][:]
+	#print(maze_list)
+    #sim_scripttype_customizationscript--6
+	return_code,outInts, outFloats, outStrings, outBuffer=sim.simxCallScriptFunction(client_id,'Base',6,'receiveData',maze_list,[],[],emptyBuff,sim.simx_opmode_blocking)
 	
-	
-
 	##################################################
 
 	return return_code
+
+
+# In[48]:
+
 
 
 def exit_remote_api_server():
@@ -273,10 +331,15 @@ def exit_remote_api_server():
 	
 	#This function should wait for the last command sent to arrive at the CoppeliaSim server 
     #before closing the connection #may be this fun needs an edit
-    _,time = sim.simxGetPingTime(client_id)
-    sim.simxFinish(client_id)
+	_,time = sim.simxGetPingTime(client_id)
+	sim.simxFinish(client_id)
 	##################################################
 	
+
+
+# In[52]:
+
+
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
 # 
@@ -436,7 +499,7 @@ if __name__ == "__main__":
 				try:
 					# Get image array and its resolution from Vision Sensor in ComppeliaSim scene
 					vision_sensor_image, image_resolution, return_code = get_vision_sensor_image()
-
+					
 					if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
 						print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
 						

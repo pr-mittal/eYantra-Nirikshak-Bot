@@ -24,14 +24,19 @@ import time
 
 print ('Program started')
 sim.simxFinish(-1) # just in case, close all opened connections
-clientID=sim.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to CoppeliaSim
+clientID=sim.simxStart('127.0.0.1',19997,True,True,5000,5) # Connect to CoppeliaSim
 emptyBuff=bytearray()
 if clientID!=-1:
+    print(clientID)
+    # return_code = sim.simxStartSimulation(clientID, sim.simx_opmode_oneshot)
     print ('Connected to remote API server')
+    sim.simxAddStatusbarMessage(clientID,'Hello CoppeliaSim!',sim.simx_opmode_oneshot)
+    print(1)
+    sim.simxGetPingTime(clientID)
     returnCode,outInts, outFloats, outStrings, outBuffer=sim.simxCallScriptFunction(clientID,'script',sim.sim_scripttype_childscript,'myFunction',[],[],[],emptyBuff,sim.simx_opmode_blocking)
     # Now send some data to CoppeliaSim in a non-blocking fashion:
     sim.simxAddStatusbarMessage(clientID,'Hello CoppeliaSim!',sim.simx_opmode_oneshot)
-
+    print(1)
     # Before closing the connection to CoppeliaSim, make sure that the last command sent out had time to arrive. You can guarantee this with (for example):
     sim.simxGetPingTime(clientID)
 
