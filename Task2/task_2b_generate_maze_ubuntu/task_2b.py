@@ -433,6 +433,7 @@ if __name__ == "__main__":
 	if type(input_img) is np.ndarray:
 
 		try:
+			
 			# get the resultant warped maze image after applying Perspective Transform
 			warped_img = task_1b.applyPerspectiveTransform(input_img)
 
@@ -627,6 +628,7 @@ if __name__ == "__main__":
 
 				try:
 					# get the resultant warped maze image after applying Perspective Transform
+					
 					warped_img = task_1b.applyPerspectiveTransform(input_img)
 
 					if type(warped_img) is np.ndarray:
