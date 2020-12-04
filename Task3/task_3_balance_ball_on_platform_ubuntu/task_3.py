@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
 '''
 *****************************************************************************************
 *
@@ -17,8 +23,8 @@
 *****************************************************************************************
 '''
 
-# Team ID:          [ Team-ID ]
-# Author List:      [ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Team ID:          NB_2182
+# Author List:      Priyank Sisodia,Aman Sharman, Yatharth Bhargava, Pranav Mittal
 # Filename:         task_3.py
 # Functions:        init_setup(rec_client_id), control_logic(center_x,center_y), change_setpoint(new_setpoint)
 #                   [ Comma separated list of functions in this file ]
@@ -49,6 +55,10 @@ except Exception:
 	sys.exit()
 
 
+# In[ ]:
+
+
+
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
 client_id = -1
@@ -65,9 +75,23 @@ vision_sensor_handle = 0
 # You can add your global variables here
 ##############################################################
 
-
-
+revolute_handle=[-1,-1,-1,-1]
+outMax=69
+outMin=-40
+kp=[0,0]
+ki=np.array([0,0])
+kd=np.array([0,0])
+lastTime=0
+ITerm=np.array([0,0])
+lastInput=np.array([0,0])
+SampleTime = 1; #1 sec
+Output=[0,0]
+Input=np.array([0,0])
 ##############################################################
+
+
+# In[1]:
+
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -75,98 +99,215 @@ vision_sensor_handle = 0
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
+def setAngles(Output):
+    global revolute_handle
+    
+    #setting output to joints/motors
+    returnCode=sim.simxSetJointPosition(client_id,revolute_handle[0],output[0],sim.simx_opmode_streaming)
+    returnCode=sim.simxSetJointPosition(client_id,revolute_handle[2],-output[0],sim.simx_opmode_streaming)
+    
+    returnCode=sim.simxSetJointPosition(client_id,revolute_handle[1],output[1],sim.simx_opmode_streaming)
+    returnCode=sim.simxSetJointPosition(client_id,revolute_handle[3],-output[1],sim.simx_opmode_streaming)
+    
+def getError(Input,set_point):
+    #gets the error of the ball based on the setpoint and coordinates of ball
+    error=np.array(set_point-Input)
+    return np.array(error)
+def coordinateTransform(xy):
+    #as our servos are capable of moving the ball along the diagonals, we have to covert the 
+    #performing coordinate transformation from x,y to diagonal axes
+    theta=np.pi/4
+    transformed=[np.cos(theta)*xy[0]+np.sin(theta)*xy[1],-np.sin(theta)*xy[0]+np.cos(theta)*xy[1]]
+    return np.array(transformed)
 
+def computePID(center_x,center_y,set_point):
+    #global variables
+    #revolute_handle,outMax,outMin,kp,ki,kd,lastTime,ITerm,lastInput,SampleTime,output=[0,0],client_id,set_point,vision_sensor_handle
+    global kp,ki,kd,Iterm,outMin,outMax,lastInput,SampleTime,lastTime,Input
+    #IMPORTANT: most the variables here are a list having two elements
+    
+    now = time.time()
+    timeChange = (now - lastTime)
+    if(timeChange>=SampleTime):
+        #Compute all the working error variables
+        Input=coordinateTransform([center_x,center_y])
+        error=getError(Input,coordinateTransform(set_point))
+        
+        #calclating integral term ,ki*error*delta t,here delta t already multiplied in ki 
+        ITerm+= (ki * error)
+        
+        #dealing with windup
+        for i in range(len(ITerm)):
+            if(ITerm[i]> outMax):
+                ITerm[i]= outMax
+            elif(ITerm[i]< outMin):
+                ITerm[i]= outMin
+        
+        #this is used to deal with derivative kick when setpoint is changed
+        dInput = (Input - lastInput)
 
+        #Compute PID Output, here kd has already been divide by sampleTime i.e. delta t
+        Output = kp * error + ITerm- kd * dInput
+        for i in range(len(Output)):
+            if(Output> outMax):
+                Output = outMax
+            elif(Output < outMin):
+                Output = outMin
+                
+        #Remember some variables for next time
+        lastInput = Input
+        lastTime = now
+    return Output
+def SetTunings(Kp,Ki,Kd):
+    #changing the values of kp,ki,kd
+    global kp,ki,kd,SampleTime
+    kp = Kp
+    ki = Ki * SampleTime
+    kd = Kd / SampleTime
 
-
-
+def SetSampleTime(NewSampleTime):
+    
+    global SampleTime,ki,kd
+    if (NewSampleTime > 0):
+        ratio  = NewSampleTime/ SampleTime
+        ki *= ratio;
+        kd /= ratio;
+        SampleTime = NewSampleTime
+        
+def SetOutputLimits(Min,Max):
+    global outMin,outMax
+    if(Min > Max):
+        return
+    outMin = Min
+    outMax = Max
+    for i in range(len(Output)):
+        if(Output > outMax):
+            Output = outMax
+        elif(Output < outMin) 
+            Output = outMin
+        
+    for i in range(len(Iterm)):
+        if(ITerm> outMax):
+            ITerm= outMax
+        elif(ITerm< outMin): 
+            ITerm= outMin
+        
+def Initialize():
+    lastInput = Input
+    ITerm = Output
+    for i in range(len(Iterm)):
+        if(ITerm> outMax):
+            ITerm= outMax
+        elif(ITerm< outMin):
+            ITerm= outMin
 ##############################################################
 
 
+# In[ ]:
+
+
+
+
 def init_setup(rec_client_id):
-	"""
-	Purpose:
-	---
-	This function should:
-	
-	1. Get all the required handles from the CoppeliaSim scene and store them in global variables.
-	2. Initialize the vision sensor in 'simx_opmode_streaming' operation mode (if required). 
-	   Teams are allowed to choose the appropriate the oeration mode depending on their code and logic.
+    """
+    Purpose:
+    ---
+    This function should:
+    
+    1. Get all the required handles from the CoppeliaSim scene and store them in global variables.
+    2. Initialize the vision sensor in 'simx_opmode_streaming' operation mode (if required). 
+       Teams are allowed to choose the appropriate the oeration mode depending on their code and logic.
 
-	Input Arguments:
-	---
-	`rec_client_id` 	:  [ integer ]
-		the client_id generated from start connection remote API in Task 2A, should be stored in a global variable
-	
-	Returns:
-	---
-	None
-	
-	Example call:
-	---
-	init_setup()
-	
-	"""
-	global client_id, vision_sensor_handle
+    Input Arguments:
+    ---
+    `rec_client_id` 	:  [ integer ]
+        the client_id generated from start connection remote API in Task 2A, should be stored in a global variable
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    init_setup()
+    
+    """
+    global client_id, vision_sensor_handle,revolute_handle
 
-	# since client_id is defined in task_2a.py file, it needs to be assigned here as well.
-	client_id = rec_client_id
+    # since client_id is defined in task_2a.py file, it needs to be assigned here as well.
+    client_id = rec_client_id
 
-	##############	ADD YOUR CODE HERE	##############
+    ##############	ADD YOUR CODE HERE	##############
+    #saving andles to global variables
+    returnCode,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1",sim.simx_opmode_blocking)
+    returnCode,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2",sim.simx_opmode_blocking)
+    returnCode,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_3",sim.simx_opmode_blocking)
+    returnCode,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_4",sim.simx_opmode_blocking)
+    _, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
 
-	
-	
-	##################################################
+    # print(sensor_handle, "sensor_handle")
+    #staring vision sensor image in sim.simx_opmode_streaming
+    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streamig may need change
+    rCode, pingTime = sim.simxGetPingTime(client_id)
+    ##################################################
+
+
+# In[ ]:
 
 
 def control_logic(center_x,center_y):
-	"""
-	Purpose:
-	---
-	This function should implement the control logic to balance the ball at a particular setpoint on the table.
+    """
+    Purpose:
+    ---
+    This function should implement the control logic to balance the ball at a particular setpoint on the table.
+    The orientation of the top table should "ONLY" be controlled by the servo motor as we would expect in a 
+    practical scenario.
 
-	The orientation of the top table should "ONLY" be controlled by the servo motor as we would expect in a 
-	practical scenario.
+    Hence "ONLY" the shaft of the servo motor or in other words the revolute joint between servo and servo fin 
+    should have 'motor enabled' and 'control loop enabled option' checked. Refer documentation for further understanding of 
+    these options.
 
-	Hence "ONLY" the shaft of the servo motor or in other words the revolute joint between servo and servo fin 
-	should have 'motor enabled' and 'control loop enabled option' checked. Refer documentation for further understanding of 
-	these options.
+    This function should use the necessary Legacy Python Remote APIs to control the revolute joints.
 
-	This function should use the necessary Legacy Python Remote APIs to control the revolute joints.
+    NOTE: In real life, a 180 degree servo motor can rotate between -90 to +90 degrees or -1.57 to 1.57 radians only. 
+          Hence the command to be sent to servo motor should be between this range only. When the top plate is parallel to
+          base plate, the revolute joint between servo and servo fin should be at 0 degrees orientation. Refer documentation
+          for further understanding.
 
-	NOTE: In real life, a 180 degree servo motor can rotate between -90 to +90 degrees or -1.57 to 1.57 radians only. 
-		  Hence the command to be sent to servo motor should be between this range only. When the top plate is parallel to
-		  base plate, the revolute joint between servo and servo fin should be at 0 degrees orientation. Refer documentation
-		  for further understanding.
+    NOTE: Since the simulation is dynamic in nature there should not by any bottlenecks in this code due to which the 
+          processing may take a lot of time. As a result 'control_logic' function should be called in every iteration of 
+          the while loop. Use global variables instead of reinitialising the varibles used in this function.
+    
+    Input Arguments:
+    ---
+    `center_x` 	:  [ int ]
+        the x centroid of the ball
 
-	NOTE: Since the simulation is dynamic in nature there should not by any bottlenecks in this code due to which the 
-		  processing may take a lot of time. As a result 'control_logic' function should be called in every iteration of 
-		  the while loop. Use global variables instead of reinitialising the varibles used in this function.
-	
-	Input Arguments:
-	---
-	`center_x` 	:  [ int ]
-		the x centroid of the ball
-	
-	`center_y` 	:  [ int ]
-		the y centroid of the ball
-	
-	Returns:
-	---
-	None
-	
-	Example call:
-	---
-	control_logic(center_x,center_y)
-	
-	"""
-	global setpoint, client_id
-	
-	##############	ADD YOUR CODE HERE	##############
-	
-	
+    `center_y` 	:  [ int ]
+        the y centroid of the ball
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    control_logic(center_x,center_y)
+    
+    """
+    global set_point, client_id
+    
+    ##############	ADD YOUR CODE HERE	##############
+    #ttaking handles from global variables
+    #the pid computes using the coordinates and setpoint and returns us the value
+    Output=computePID(center_x,center_y,set_point)
+    setAngles(Output)
+    ##################################################
 
-	##################################################
+
+# In[ ]:
+
+
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -458,3 +599,4 @@ if __name__ == "__main__":
 		traceback.print_exc(file=sys.stdout)
 		print()
 		sys.exit()
+

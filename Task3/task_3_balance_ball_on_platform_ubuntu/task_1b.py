@@ -70,7 +70,7 @@ def orderedPolyDp(corners):
 def getBorderCoordinates(imgMorph):
     #finding the coordinates of corners of maze border
     #finding the ouutermost square
-    contours, heirarchy = cv2.findContours(imgMorph,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    contours, _ = cv2.findContours(imgMorph,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
     #for c in contours:
     #print(len(contours))
     #getting the countour having max area

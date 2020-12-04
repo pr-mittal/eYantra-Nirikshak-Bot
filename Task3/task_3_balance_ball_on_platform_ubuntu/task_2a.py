@@ -146,7 +146,7 @@ def start_simulation():
     return return_code
 
 
-def get_vision_sensor_image():
+def get_vision_sensor_image(vision_sensor_handle):
     """
     Purpose:
     ---
@@ -181,16 +181,13 @@ def get_vision_sensor_image():
 
     ##############	ADD YOUR CODE HERE	##############
 
-    _, sensor_handle = sim.simxGetObjectHandle(
-        client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
+    #_, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
 
-    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
-        client_id, sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
+    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
 
     rCode, pingTime = sim.simxGetPingTime(client_id)
 
-    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
-        client_id, sensor_handle, 0, sim.simx_opmode_buffer)
+    #return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
 
     ##################################################
 
