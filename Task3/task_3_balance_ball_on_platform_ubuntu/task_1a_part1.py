@@ -51,7 +51,7 @@ def getContours(img,imgColor):
     #makes countours in the image and tells the color
     global shapes
     imgHsv=cv2.cvtColor(imgColor,cv2.COLOR_BGR2HSV)
-    contours, heirarchy =  cv2.findContours(img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    _,contours, heirarchy =  cv2.findContours(img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     #print((contours))
     lst = list(list())
     for cnt in contours:
@@ -265,7 +265,7 @@ def scan_image(wraped_img):
     shapes={}
 
     # img = cv2.imread(img_file_path) // NO image file path required
-
+    #print(wraped_img)
     img=wraped_img # this time img is in RGB format
     imgGray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) 
     ret,thresh = cv2.threshold(imgGray,120,255,cv2.THRESH_BINARY)

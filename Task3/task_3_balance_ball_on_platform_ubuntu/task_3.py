@@ -66,7 +66,7 @@ client_id = -1
 # Global list "setpoint" for storing target position of ball on the platform/top plate
 # The zeroth element stores the x pixel and 1st element stores the y pixel
 # NOTE: DO NOT change the value of this "setpoint" list
-set_point = [640,640]
+setpoint = [640,640]
 
 # Global variable "vision_sensor_handle" to store handle for Vision Sensor
 # NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
@@ -78,13 +78,13 @@ vision_sensor_handle = 0
 revolute_handle=[-1,-1,-1,-1]
 outMax=69
 outMin=-40
-kp=[0,0]
-ki=np.array([0,0])
-kd=np.array([0,0])
+kp=np.array([100,100])
+ki=np.array([1,1])#ki=ki*SampleTime
+kd=np.array([0,0])#kd=kd/SampleTime
 lastTime=0
 ITerm=np.array([0,0])
 lastInput=np.array([0,0])
-SampleTime = 1; #1 sec
+SampleTime = 0.1 #0.1 sec
 Output=[0,0]
 Input=np.array([0,0])
 ##############################################################
@@ -103,15 +103,15 @@ def setAngles(Output):
     global revolute_handle
     
     #setting output to joints/motors
-    returnCode=sim.simxSetJointPosition(client_id,revolute_handle[0],output[0],sim.simx_opmode_streaming)
-    returnCode=sim.simxSetJointPosition(client_id,revolute_handle[2],-output[0],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[0],Output[0],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[2],-Output[0],sim.simx_opmode_streaming)
     
-    returnCode=sim.simxSetJointPosition(client_id,revolute_handle[1],output[1],sim.simx_opmode_streaming)
-    returnCode=sim.simxSetJointPosition(client_id,revolute_handle[3],-output[1],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[1],Output[1],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[3],-Output[1],sim.simx_opmode_streaming)
     
-def getError(Input,set_point):
+def getError(Input,setpoint):
     #gets the error of the ball based on the setpoint and coordinates of ball
-    error=np.array(set_point-Input)
+    error=np.array(setpoint-Input)
     return np.array(error)
 def coordinateTransform(xy):
     #as our servos are capable of moving the ball along the diagonals, we have to covert the 
@@ -120,10 +120,10 @@ def coordinateTransform(xy):
     transformed=[np.cos(theta)*xy[0]+np.sin(theta)*xy[1],-np.sin(theta)*xy[0]+np.cos(theta)*xy[1]]
     return np.array(transformed)
 
-def computePID(center_x,center_y,set_point):
+def computePID(center_x,center_y,setpoint):
     #global variables
-    #revolute_handle,outMax,outMin,kp,ki,kd,lastTime,ITerm,lastInput,SampleTime,output=[0,0],client_id,set_point,vision_sensor_handle
-    global kp,ki,kd,Iterm,outMin,outMax,lastInput,SampleTime,lastTime,Input
+    #revolute_handle,outMax,outMin,kp,ki,kd,lastTime,ITerm,lastInput,SampleTime,output=[0,0],client_id,setpoint,vision_sensor_handle
+    global kp,ki,kd,ITerm,outMin,outMax,lastInput,SampleTime,lastTime,Input
     #IMPORTANT: most the variables here are a list having two elements
     
     now = time.time()
@@ -131,7 +131,7 @@ def computePID(center_x,center_y,set_point):
     if(timeChange>=SampleTime):
         #Compute all the working error variables
         Input=coordinateTransform([center_x,center_y])
-        error=getError(Input,coordinateTransform(set_point))
+        error=getError(Input,coordinateTransform(setpoint))
         
         #calclating integral term ,ki*error*delta t,here delta t already multiplied in ki 
         ITerm+= (ki * error)
@@ -170,8 +170,8 @@ def SetSampleTime(NewSampleTime):
     global SampleTime,ki,kd
     if (NewSampleTime > 0):
         ratio  = NewSampleTime/ SampleTime
-        ki *= ratio;
-        kd /= ratio;
+        ki *= ratio
+        kd /= ratio
         SampleTime = NewSampleTime
         
 def SetOutputLimits(Min,Max):
@@ -183,23 +183,23 @@ def SetOutputLimits(Min,Max):
     for i in range(len(Output)):
         if(Output > outMax):
             Output = outMax
-        elif(Output < outMin) 
+        elif(Output < outMin): 
             Output = outMin
         
-    for i in range(len(Iterm)):
+    for i in range(len(ITerm)):
         if(ITerm> outMax):
             ITerm= outMax
         elif(ITerm< outMin): 
-            ITerm= outMin
-        
+            ITerm= outMin    
 def Initialize():
-    lastInput = Input
-    ITerm = Output
-    for i in range(len(Iterm)):
-        if(ITerm> outMax):
-            ITerm= outMax
-        elif(ITerm< outMin):
-            ITerm= outMin
+	global lastInput,ITerm,Input,outMax,outMin
+	lastInput = Input
+	ITerm = Output
+	for i in range(len(ITerm)):
+	    if(ITerm> outMax):
+	        ITerm= outMax
+	    elif(ITerm< outMin):
+	        ITerm= outMin
 ##############################################################
 
 
@@ -239,16 +239,16 @@ def init_setup(rec_client_id):
 
     ##############	ADD YOUR CODE HERE	##############
     #saving andles to global variables
-    returnCode,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1",sim.simx_opmode_blocking)
-    returnCode,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2",sim.simx_opmode_blocking)
-    returnCode,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_3",sim.simx_opmode_blocking)
-    returnCode,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_4",sim.simx_opmode_blocking)
+    _,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1",sim.simx_opmode_blocking)
+    _,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2",sim.simx_opmode_blocking)
+    _,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_3",sim.simx_opmode_blocking)
+    _,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_4",sim.simx_opmode_blocking)
     _, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
 
     # print(sensor_handle, "sensor_handle")
     #staring vision sensor image in sim.simx_opmode_streaming
-    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streamig may need change
-    rCode, pingTime = sim.simxGetPingTime(client_id)
+    _, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streamig may need change
+    _,_ = sim.simxGetPingTime(client_id)
     ##################################################
 
 
@@ -295,12 +295,12 @@ def control_logic(center_x,center_y):
     control_logic(center_x,center_y)
     
     """
-    global set_point, client_id
+    global setpoint, client_id
     
     ##############	ADD YOUR CODE HERE	##############
     #ttaking handles from global variables
     #the pid computes using the coordinates and setpoint and returns us the value
-    Output=computePID(center_x,center_y,set_point)
+    Output=computePID(center_x,center_y,setpoint)
     setAngles(Output)
     ##################################################
 
