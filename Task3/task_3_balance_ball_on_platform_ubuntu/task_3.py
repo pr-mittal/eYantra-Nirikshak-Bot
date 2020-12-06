@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[11]:
 
 
 '''
@@ -55,7 +55,7 @@ except Exception:
 	sys.exit()
 
 
-# In[ ]:
+# In[12]:
 
 
 
@@ -78,20 +78,19 @@ vision_sensor_handle = 0
 revolute_handle=[-1,-1,-1,-1]
 outMax=69
 outMin=-40
-kp=np.array([100,100])
-ki=np.array([1,1])#ki=ki*SampleTime
-kd=np.array([0,0])#kd=kd/SampleTime
+kp=np.array([200,200],dtype='float64')
+ki=np.array([0,0],dtype='float64')#ki=ki*SampleTime
+kd=np.array([0,0],dtype='float64')#kd=kd/SampleTime
 lastTime=0
-ITerm=np.array([0,0])
-lastInput=np.array([0,0])
+ITerm=np.array([0,0],dtype='float64')
+lastInput=np.array([0,0],dtype='float64')
 SampleTime = 0.1 #0.1 sec
-Output=[0,0]
-Input=np.array([0,0])
+Output=np.array([0,0],dtype='float64')
+Input=np.array([0,0],dtype='float64')
 ##############################################################
 
 
-# In[1]:
-
+# In[13]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -103,22 +102,22 @@ def setAngles(Output):
     global revolute_handle
     
     #setting output to joints/motors
-    _=sim.simxSetJointPosition(client_id,revolute_handle[0],Output[0],sim.simx_opmode_streaming)
-    _=sim.simxSetJointPosition(client_id,revolute_handle[2],-Output[0],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[0],-Output[0],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[2],Output[0],sim.simx_opmode_streaming)
     
-    _=sim.simxSetJointPosition(client_id,revolute_handle[1],Output[1],sim.simx_opmode_streaming)
-    _=sim.simxSetJointPosition(client_id,revolute_handle[3],-Output[1],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[1],-Output[1],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[3],Output[1],sim.simx_opmode_streaming)
     
 def getError(Input,setpoint):
     #gets the error of the ball based on the setpoint and coordinates of ball
     error=np.array(setpoint-Input)
-    return np.array(error)
+    return np.array(error,dtype='float64')
 def coordinateTransform(xy):
     #as our servos are capable of moving the ball along the diagonals, we have to covert the 
     #performing coordinate transformation from x,y to diagonal axes
     theta=np.pi/4
     transformed=[np.cos(theta)*xy[0]+np.sin(theta)*xy[1],-np.sin(theta)*xy[0]+np.cos(theta)*xy[1]]
-    return np.array(transformed)
+    return np.array(transformed,dtype='float64')
 
 def computePID(center_x,center_y,setpoint):
     #global variables
@@ -132,7 +131,7 @@ def computePID(center_x,center_y,setpoint):
         #Compute all the working error variables
         Input=coordinateTransform([center_x,center_y])
         error=getError(Input,coordinateTransform(setpoint))
-        
+        print("Input=",Input," Error=",error)
         #calclating integral term ,ki*error*delta t,here delta t already multiplied in ki 
         ITerm+= (ki * error)
         
@@ -149,11 +148,11 @@ def computePID(center_x,center_y,setpoint):
         #Compute PID Output, here kd has already been divide by sampleTime i.e. delta t
         Output = kp * error + ITerm- kd * dInput
         for i in range(len(Output)):
-            if(Output> outMax):
-                Output = outMax
-            elif(Output < outMin):
-                Output = outMin
-                
+            if(Output[i]> outMax):
+                Output[i] = outMax
+            elif(Output[i] < outMin):
+                Output[i] = outMin
+        print("Output=",Output)      
         #Remember some variables for next time
         lastInput = Input
         lastTime = now
@@ -181,31 +180,29 @@ def SetOutputLimits(Min,Max):
     outMin = Min
     outMax = Max
     for i in range(len(Output)):
-        if(Output > outMax):
-            Output = outMax
-        elif(Output < outMin): 
-            Output = outMin
+        if(Output[i] > outMax):
+            Output[i] = outMax
+        elif(Output[i] < outMin): 
+            Output[i] = outMin
         
     for i in range(len(ITerm)):
-        if(ITerm> outMax):
-            ITerm= outMax
-        elif(ITerm< outMin): 
-            ITerm= outMin    
+        if(ITerm[i]> outMax):
+            ITerm[i]= outMax
+        elif(ITerm[i]< outMin): 
+            ITerm[i]= outMin    
 def Initialize():
 	global lastInput,ITerm,Input,outMax,outMin
 	lastInput = Input
 	ITerm = Output
 	for i in range(len(ITerm)):
-	    if(ITerm> outMax):
-	        ITerm= outMax
-	    elif(ITerm< outMin):
-	        ITerm= outMin
+	    if(ITerm[i]> outMax):
+	        ITerm[i]= outMax
+	    elif(ITerm[i]< outMin):
+	        ITerm[i]= outMin
 ##############################################################
 
 
-# In[ ]:
-
-
+# In[14]:
 
 
 def init_setup(rec_client_id):
@@ -252,7 +249,7 @@ def init_setup(rec_client_id):
     ##################################################
 
 
-# In[ ]:
+# In[15]:
 
 
 def control_logic(center_x,center_y):
@@ -300,12 +297,13 @@ def control_logic(center_x,center_y):
     ##############	ADD YOUR CODE HERE	##############
     #ttaking handles from global variables
     #the pid computes using the coordinates and setpoint and returns us the value
+    print("Centroid=",center_x," ",center_y," setpoint=",setpoint)
     Output=computePID(center_x,center_y,setpoint)
     setAngles(Output)
     ##################################################
 
 
-# In[ ]:
+# In[17]:
 
 
 

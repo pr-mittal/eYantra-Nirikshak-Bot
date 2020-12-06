@@ -51,7 +51,7 @@ def getContours(img,imgColor):
     #makes countours in the image and tells the color
     global shapes
     imgHsv=cv2.cvtColor(imgColor,cv2.COLOR_BGR2HSV)
-    _,contours, heirarchy =  cv2.findContours(img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours, heirarchy =  cv2.findContours(img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     #print((contours))
     lst = list(list())
     for cnt in contours:
@@ -61,7 +61,8 @@ def getContours(img,imgColor):
         #using moments
         #contour on image--#img   #countour #index #color #thickness
         #print(img.shape[0]*img.shape[1]-100000)
-        if area>500 and area<0.95*img.shape[0]*img.shape[1]: #to avoid the noise in the image, area>500 is applied
+        #if area>50 and area<0.95*img.shape[0]*img.shape[1]: #to avoid the noise in the image, area>500 is applied
+        if True:
             #print("farea =",area) #print area
             #cv2.drawContours(imgColor,approxCnt,-1,(255,0,0),3)#index =-1 means all the countours
             #print("fCorners =",len(approxCnt)) #this will print number of corneres in each cotour
