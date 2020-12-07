@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[11]:
+# In[1]:
 
 
 '''
@@ -42,6 +42,7 @@ import cv2
 import os, sys
 import traceback
 import time
+#import matplotlib.pyplot as plt
 ##############################################################
 
 # Importing the sim module for Remote API connection with CoppeliaSim
@@ -55,7 +56,7 @@ except Exception:
 	sys.exit()
 
 
-# In[12]:
+# In[11]:
 
 
 
@@ -78,19 +79,19 @@ vision_sensor_handle = 0
 revolute_handle=[-1,-1,-1,-1]
 outMax=69
 outMin=-40
-kp=np.array([200,200],dtype='float64')
+kp=np.array([0.1,1],dtype='float64')
 ki=np.array([0,0],dtype='float64')#ki=ki*SampleTime
 kd=np.array([0,0],dtype='float64')#kd=kd/SampleTime
 lastTime=0
 ITerm=np.array([0,0],dtype='float64')
 lastInput=np.array([0,0],dtype='float64')
-SampleTime = 0.1 #0.1 sec
+SampleTime = 0.001 #0.001 sec
 Output=np.array([0,0],dtype='float64')
 Input=np.array([0,0],dtype='float64')
 ##############################################################
 
 
-# In[13]:
+# In[24]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -102,11 +103,13 @@ def setAngles(Output):
     global revolute_handle
     
     #setting output to joints/motors
-    _=sim.simxSetJointPosition(client_id,revolute_handle[0],-Output[0],sim.simx_opmode_streaming)
-    _=sim.simxSetJointPosition(client_id,revolute_handle[2],Output[0],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[2],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
     
-    _=sim.simxSetJointPosition(client_id,revolute_handle[1],-Output[1],sim.simx_opmode_streaming)
-    _=sim.simxSetJointPosition(client_id,revolute_handle[3],Output[1],sim.simx_opmode_streaming)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[1],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
+    _=sim.simxSetJointPosition(client_id,revolute_handle[3],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
+    returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[0],sim.simx_opmode_streaming)
+    print(position*180/np.pi)
     
 def getError(Input,setpoint):
     #gets the error of the ball based on the setpoint and coordinates of ball
@@ -202,7 +205,7 @@ def Initialize():
 ##############################################################
 
 
-# In[14]:
+# In[19]:
 
 
 def init_setup(rec_client_id):
@@ -246,6 +249,7 @@ def init_setup(rec_client_id):
     #staring vision sensor image in sim.simx_opmode_streaming
     _, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streamig may need change
     _,_ = sim.simxGetPingTime(client_id)
+    #print(vision_sensor_handle,revolute_handle)
     ##################################################
 
 
@@ -297,13 +301,13 @@ def control_logic(center_x,center_y):
     ##############	ADD YOUR CODE HERE	##############
     #ttaking handles from global variables
     #the pid computes using the coordinates and setpoint and returns us the value
-    print("Centroid=",center_x," ",center_y," setpoint=",setpoint)
+    #print("Centroid=",center_x," ",center_y," setpoint=",setpoint)
     Output=computePID(center_x,center_y,setpoint)
     setAngles(Output)
     ##################################################
 
 
-# In[17]:
+# In[23]:
 
 
 
@@ -493,15 +497,13 @@ if __name__ == "__main__":
 								# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
 								try:
 									shapes = task_1a_part1.scan_image(warped_img)
-
+									
 									if (type(shapes) is dict and shapes!={}):
 										print('\nShapes detected by Vision Sensor are: ')
 										print(shapes)
-										
 										# Storing the detected x and y centroid in center_x and center_y variable repectively
 										center_x = shapes['Circle'][1]
 										center_y = shapes['Circle'][2]
-
 									elif(type(shapes) is not dict):
 										print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
 										print('Stop the CoppeliaSim simulation manually.')

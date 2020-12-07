@@ -1,3 +1,5 @@
+
+
 '''
 *****************************************************************************************
 *
@@ -51,8 +53,8 @@ def getContours(img,imgColor):
     #makes countours in the image and tells the color
     global shapes
     imgHsv=cv2.cvtColor(imgColor,cv2.COLOR_BGR2HSV)
-    _,contours, heirarchy =  cv2.findContours(img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    #print((contours))
+    contours, heirarchy =  cv2.findContours(img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    # print((contours))
     lst = list(list())
     for cnt in contours:
         area = cv2.contourArea(cnt)
@@ -63,10 +65,17 @@ def getContours(img,imgColor):
         #print(img.shape[0]*img.shape[1]-100000)
         if area>500 and area<0.95*img.shape[0]*img.shape[1]: #to avoid the noise in the image, area>500 is applied
             #print("farea =",area) #print area
-            #cv2.drawContours(imgColor,approxCnt,-1,(255,0,0),3)#index =-1 means all the countours
+            cv2.drawContours(imgColor,approxCnt,-1,(255,0,0),6)#index =-1 means all the countours
+            
+            # cv2.imshow("img",imgColor)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
+
             #print("fCorners =",len(approxCnt)) #this will print number of corneres in each cotour
 
             n_corners = len(approxCnt)
+
+            # print(n_corners) #corners will used to classify shapes
             
             #now we will draw a rounded box around the detected object(or shape)
             #x, y, w, h = cv2.boundingRect(approxCnt) #this function takes the corners cordinates of shape and returns the x,y,width,hight of the bounding box(x,y are top left corner cordinate)
@@ -75,31 +84,43 @@ def getContours(img,imgColor):
             #=============================================================================================
             #for detection of shape
             #Circle/ Triangle/ Trapezium/ Rhombus/ Square/ Quadrilateral/ Parallelogram/ Pentagon/ Hexagon
-            if n_corners>6:
-                obj="Circle"
-            elif n_corners ==3:
-                obj = "Triangle"    
-            elif n_corners ==5:
-                obj = "Pentagon"
-            elif n_corners ==6:
-                obj = "Hexagon"
-            elif n_corners ==4:
-                obj=getShape4(approxCnt)
             
-            #print("fshape =",obj) #print shape
-            #cv2.putText(img,obj,(x+(w//2)-60,y+(h//2)-5),cv2.FONT_HERSHEY_COMPLEX,1.2,(0,0,0),2)
-            #for centroid
+
+            ##############################################################################################
+            # As said by intructors on piazza the object shape will be spherical i.e. circular in 2D only
+            # no other shapes, Therefore removing the conditions of all other shapes
+
+            # IMPORTANT
+            # Since we know now the object(ball) will definitely  spherical i.e circle in vision sensor image
+            # we are removing the conditions for  other shapes
+
+            ##############################################################################################
+
+            # if n_corners>6:
+            #     obj="Circle"
+            # elif n_corners ==3:
+            #     obj = "Triangle"    
+            # elif n_corners ==5:
+            #     obj = "Pentagon"
+            # elif n_corners ==6:
+            #     obj = "Hexagon"
+            # elif n_corners ==4:
+            #     obj=getShape4(approxCnt)
+
+            obj = "Circle"             
 
             M = cv2.moments(approxCnt)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            
-            #print(f"centroid = ",(cX,cY)) #print centroid
-            #cv2.circle(img, (cX, cY), 7, (255, 255, 255), -1)
-            #print(imgT[cY,cX])
+
+            # point = cv2.circle(img, (cX,cY), radius=2, color=255, thickness=3)
+            # cv2.imshow("point",point)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
+
             ##color detection
             h = imgHsv[cY,cX][0]
-            #print(h)
+
             if (h<=25 and h>=0 )or(h<=180 and h>=175) :
                 color ="red"
             elif h<=70 and h>=35 :
@@ -108,28 +129,29 @@ def getContours(img,imgColor):
                 color ="blue"
             else:
                 color ="unknown"
-            #print(img[cY,cX])
-            #print("Color="+color+" object="+obj)
-            #print("==================================")
-            identifier = -1
-            if obj=="Circle":
-                identifier = 0
-            elif obj=="Triangle":
-                identifier = 1 
-            elif obj=="Trapezium":
-                identifier = 2
-            elif obj=="Rhombus":
-                identifier = 3
-            elif obj=="Sqaure":
-                identifier = 4
-            elif obj=="Quadrilateral":
-                identifier = 5
-            elif obj=="Parallelogram":
-                identifier = 6
-            elif obj=="Pentagon":
-                identifier = 7
-            elif obj=="Hexagon":
-                identifier = 8
+
+
+            identifier = 0
+            
+            # identifier = -1
+            # if obj=="Circle":
+            #     identifier = 0
+            # elif obj=="Triangle":
+            #     identifier = 1 
+            # elif obj=="Trapezium":
+            #     identifier = 2
+            # elif obj=="Rhombus":
+            #     identifier = 3
+            # elif obj=="Sqaure":
+            #     identifier = 4
+            # elif obj=="Quadrilateral":
+            #     identifier = 5
+            # elif obj=="Parallelogram":
+            #     identifier = 6
+            # elif obj=="Pentagon":
+            #     identifier = 7
+            # elif obj=="Hexagon":
+            #     identifier = 8
 
             # Storing all information of a shape in a List 
             # and then will sort then according to the 
@@ -142,22 +164,18 @@ def getContours(img,imgColor):
     # #Circle/ Triangle/ Trapezium/ Rhombus/ Square/ Quadrilateral/ Parallelogram/ Pentagon/ Hexagon
 
     counter = np.zeros(9,int)
-    #storing the number of each idedifier found in the image in an array
+
     for item in lst:
         counter[item[5]]+=1
 
     for item in lst:
         if counter[item[5]]==1:
-            #if one shape of that kind if found in image
-            #type of output is {obj:[color,cX,cY]}
             shapes[lst[0][0]]=([lst[0][1],lst[0][3],lst[0][4]])
         elif counter[item[5]]==0:
             continue
         elif counter[item[5]]>=1:
-            #if more that one object of same shape are found in the image
             if item[0] not in shapes:
                 shapes[item[0]] = list(list())
-            #{obj:[[color,cX,cY],[color,cX,cY]]},list of list
             shapes[item[0]].extend([[item[1],item[3],item[4]]])
 
     return shapes
@@ -265,10 +283,10 @@ def scan_image(wraped_img):
     shapes={}
 
     # img = cv2.imread(img_file_path) // NO image file path required
-    #print(wraped_img)
+
     img=wraped_img # this time img is in RGB format
     imgGray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) 
-    ret,thresh = cv2.threshold(imgGray,120,255,cv2.THRESH_BINARY)
+    ret,thresh = cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     shapes=getContours(thresh,img)
     
     ##################################################

@@ -219,6 +219,7 @@ def applyPerspectiveTransform(input_img):
     #plt.plot(hist);
     #fig.add_subplot(rows,cols,3)
     #plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
+    warped_img = cv2.resize(warped_img, (1280, 1280))
     ##################################################
 
     return warped_img
