@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[20]:
+
+
 '''
 *****************************************************************************************
 *
@@ -37,6 +43,7 @@ import cv2
 import os
 import sys
 import traceback
+#import matplotlib.pyplot as plt
 ##############################################################
 
 
@@ -54,6 +61,10 @@ except Exception:
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
 client_id = -1
+
+
+# In[16]:
+
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -181,20 +192,24 @@ def get_vision_sensor_image():
 
     ##############	ADD YOUR CODE HERE	##############
 
-    _, sensor_handle = sim.simxGetObjectHandle(
-        client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
+    _, sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
 
-    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
-        client_id, sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
+    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
 
     rCode, pingTime = sim.simxGetPingTime(client_id)
 
     return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
         client_id, sensor_handle, 0, sim.simx_opmode_buffer)
 
+    
     ##################################################
 
     return vision_sensor_image, image_resolution, return_code
+
+
+# In[17]:
+
+
 
 
 def transform_vision_sensor_image(vision_sensor_image, image_resolution):
@@ -239,10 +254,15 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
     transformed_image = cv2.cvtColor(vision_sensor_np_array, cv2.COLOR_BGR2RGB)
 
     transformed_image = np.flip(transformed_image, 0)
-    
+    #plt.imshow(transformed_image)
     ##################################################
 
     return transformed_image
+
+
+# In[18]:
+
+
 
 
 def stop_simulation():
@@ -310,6 +330,10 @@ def exit_remote_api_server():
     rCode,pingTime= sim.simxGetPingTime(client_id)
     sim.simxFinish(client_id)
     ##################################################
+
+
+# In[19]:
+
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -446,18 +470,19 @@ if __name__ == "__main__":
                                     print(
                                         '\nShapes detected by Vision Sensor are: ')
                                     print(shapes)
-
+                                    
                                     inp_char = input(
                                         '\nEnter \'q\' or \'Q\' to quit the program: ')
-
+                                    
                                     if (len(inp_char) == 1) and ((inp_char == 'q') or (inp_char == 'Q')):
                                         print(
                                             '\nQuitting the program and stopping the simulation by calling stop_simulation and exit_remote_api_server functions.')
 
                                         # Ending the Simulation
                                         try:
+                                        
                                             return_code = stop_simulation()
-
+                                            
                                             if (return_code == sim.simx_return_novalue_flag):
                                                 print(
                                                     '\nSimulation stopped correctly.')

@@ -26,6 +26,7 @@
 #                   generateVerticalWalls, deleteWalls, createMaze, sysCall_init, sysCall_beforeSimulation
 #                   sysCall_afterSimulation, sysCall_cleanup,setWallLocation,deleteWall
 # 					[ Comma separated list of functions in this file ]
+#                   setWallLocation,getObjectCoordinates,getObjectSize,getWallZValue
 # Global variables:	
 #                    maze_array
 # 					[ List of global variables defined in this file ]
@@ -64,11 +65,35 @@ function setWallLocation(pos,ori,name,parent)
 end
 function deleteWall(name)
     --delete the wall element of that name if it exists
-    handle=sim.getObjectHandle(name)
+    local handle=sim.getObjectHandle(name)
     if(handle~=-1)
     then
         sim.removeObject(sim.getObjectHandle(name))
     end
+end
+function getObjectCoordinates(name)
+    local handle=sim.getObjectHandle(name)
+    --gets the border coodrdinates of the base to be used to make walls relative to the position of base 
+    return sim.getObjectPosition(handle,-1)
+end
+function getObjectSize(name)
+    --gets the object size
+    local handle=sim.getObjectHandle(name)
+    --returns the geometric shape/size of according to handle
+    --number result,number pureType,table_4 dimensions=sim.getShapeGeomInfo(number shapeHandle)
+    result,pureType,dimensions=sim.getShapeGeomInfo(handle)
+    --dimensions[1]: X-size or diameter of the pure shape. Undefined if the shape is a compound shape or not pure.
+    --dimensions[2]: Y-size of the pure shape. Undefined if the shape is a compound shape or not pure.
+    --dimensions[3]: Z-size or height of the pure shape. Undefined if the shape is a compound shape or not pure.
+    --dimensions[4]: Inside scaling. Undefined if the shape is a compound shape or not pure.
+    return dimensions
+end
+function getWallZValue()
+    --gets the z value calculated according to the base
+    --dimensions of wall {0.09, 0.01, 0.1}
+    local dimensions=getObjectSize("Base")
+    local z=dimensions[3]
+    return z/2+0.1/2
 end
 --[[
 **************************************************************
@@ -284,14 +309,18 @@ function generateHorizontalWalls()
     10x1 10x2 ........... 10x10
     11x1 11x2 ........... 11x10
     ]]--
-    wall=10
-    x_gap=0.1
-    y_gap=0.1
+    local base=getObjectCoordinates("Base")
+    local wall=10
+    local x_gap=0.1
+    local y_gap=0.1
+    local z_value=getWallZValue()
     --pos={0.05-0.1*5,0.01*5,0.08}
-    pos={x_gap/2-x_gap*wall/2,y_gap*wall/2,0.08}
-    ori={0,0,0}
+    --starting position is the top left corner
+    --format = midpoint of x/y_gap +/- measure of distance to the edge of the base + coordinate of base
+    local pos={x_gap/2-x_gap*wall/2+base[1],y_gap*wall/2+base[2],z_value+base[3]}
+    local ori={0,0,0}
     
-    parent=sim.getObjectHandle("Base")
+    local parent=sim.getObjectHandle("Base")
     for i=1,wall+1,1
     do
         for j=1,wall,1
@@ -347,14 +376,17 @@ function generateVerticalWalls()
     .
     10x1 10x2 ........... 10x10 10x11
     ]]--
-    wall=10
-    x_gap=0.1
-    y_gap=0.1
+    local base=getObjectCoordinates("Base")
+    local wall=10
+    local x_gap=0.1
+    local y_gap=0.1
+    local z_value=getWallZValue()
     --pos={-0.1*5,-0.05+0.1*5,0.08}
-    pos={-x_gap*wall/2,-y_gap/2+y_gap*wall/2,0.08}
-    ori={0,0,math.pi/2}
+    --format = midpoint of x/y_gap +/- measure of distance to the edge of the base + coordinate of base
+    local pos={-x_gap*wall/2+base[1],-y_gap/2+y_gap*wall/2+base[2],z_value+base[3]}
+    local ori={0,0,math.pi/2}
     
-    parent=sim.getObjectHandle("Base")
+    local parent=sim.getObjectHandle("Base")
     for i=1,wall,1
     do
         for j=1,wall+1,1
@@ -405,7 +437,7 @@ function deleteWalls()
     --"V_WallSegment_"..i.."x"..j[1-10,1-11]
     --"H_WallSegment_"..i.."x"..j[1-11,1-10]
     --deleting vertical walls
-    wall=10
+    local wall=10
     --deleting all wall except i==j
     --removing runtime error on objectHandle not found
     local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
@@ -510,13 +542,13 @@ function createMaze()
               {13, 9, 10, 10, 8, 12, 9, 10, 10, 12}}
     ]]--
     --print(mazearray)
-    if(maze_array==nil)
+    if(#maze_array==0)
     then
         return
     end
     --west=1,north=2,east=4,south=8
     
-    wall=10
+    local wall=10
     --checking value of mazearray for alternate cells,no wall are common
     --deleteing accordingly,as no repeated deletion of walls can be allowed
     
@@ -524,14 +556,14 @@ function createMaze()
     do
         for j=i%2+1,wall,2
         do
-            roi=maze_array[i][j]
-            west=roi%2
+            local roi=maze_array[i][j]
+            local west=roi%2
             roi=math.floor(roi/2)
-            north=roi%2
+            local north=roi%2
             roi=math.floor(roi/2)
-            east=roi%2
+            local east=roi%2
             roi=math.floor(roi/2)
-            south=roi%2
+            local south=roi%2
             --circumsiding wall for ixj roi ith row,jth col
             --west=ixj, north=ixj,south=i+1xj,east=ixj+1
             if(west==0)
