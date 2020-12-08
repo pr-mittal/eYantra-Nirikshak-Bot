@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[5]:
 
 
 '''
@@ -40,11 +40,11 @@
 import numpy as np
 import cv2
 import csv
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 ##############################################################
 
 
-# In[2]:
+# In[48]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -54,24 +54,34 @@ import csv
 ##############################################################
 def orderedPolyDp(corners):
     #ordering all the corners(output of aproxpoly give unordered cordinates of shape)
+
     rect = np.zeros((4, 2), dtype="float32")
+
     # the top-left point will have the smallest sum, whereas
     # the bottom-right point will have the largest sum
+
     s = corners.sum(axis=2)
-    #print(s)
+
     rect[0] = corners[np.argmin(s)]
     rect[2] = corners[np.argmax(s)]
+
+    #print(s)
     #print(rect[0],rect[2])
+
     # now, compute the difference between the points, the
     # top-right point will have the smallest difference,
     # whereas the bottom-left will have the largest difference
+    
     diff = np.diff(corners, axis=2)
     #print(diff)
+
     rect[1] = corners[np.argmin(diff)]
     rect[3] = corners[np.argmax(diff)]
+
     #small fault here ,if diff between both is same ???????????????????
     #order = topleft,topright,bottomright,bottomleft
     #print(f"final cordinates:",rect)
+
     return rect
 def getBorderCoordinates(imgMorph):
     #finding the coordinates of corners of maze border
@@ -80,11 +90,12 @@ def getBorderCoordinates(imgMorph):
     #for c in contours:
     #print(len(contours))
     #getting the countour having max area
+    row,col=imgMorph.shape
     maxCnt=contours[0]
     maxArea=0
     for cnt in contours:
         area=cv2.contourArea(cnt)
-        if(area>maxArea):
+        if((area>maxArea) and (area<row*col*0.95)):
             maxArea=area
             maxCnt=cnt
     perimeter = cv2.arcLength(maxCnt,True)
@@ -97,9 +108,11 @@ def getBorderCoordinates(imgMorph):
 def threshInputImage(img):
     #thresholding image overall by increasing contrast and features
     imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    imgGray = clahe.apply(imgGray)
-    imgBlur = cv2.GaussianBlur(imgGray,(7,7),1)
+    imgGray = cv2.GaussianBlur(imgGray,(7,7),1)
+    
+    #clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    #imgGray = clahe.apply(imgBlur)
+    
     #fig=plt.figure(figsize=(8,8))
     #fig.add_subplot(1,2,1)
     #hist, bins = np.histogram(imgGray.ravel(),256,[0,256]) 
@@ -109,15 +122,16 @@ def threshInputImage(img):
     #plt.plot(hist);
     #increase contrast and get a suitable threshold value
     #ret,imgThresh = cv2.threshold(imgBlur,100,255,cv2.THRESH_BINARY)
-    ret,imgThresh=cv2.threshold(imgBlur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    return imgThresh
-def morphInputImage(imgThresh):
-    #thresholding specifically to get lines and features of maze
+    ret,imgThresh=cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    
+    #Appplying morphological tranformation for better detection of maze and table borders
     kernel = np.ones((5, 5), np.uint8)
     #imgMorph=cv2.erode(imgThresh,kernel,iterations=2)
     #imgBlank = np.zeros_like(img)
     imgCanny = cv2.Canny(imgThresh,80,80)
+    #plt.imshow(imgCanny)
     imgMorph=cv2.dilate(imgCanny,kernel,iterations=2)
+    
     return imgMorph
 def checkWall(roi):
     contours, _ = cv2.findContours(roi,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
@@ -139,7 +153,7 @@ def checkWall(roi):
 ##############################################################
 
 
-# In[3]:
+# In[51]:
 
 
 def applyPerspectiveTransform(input_img):
@@ -176,10 +190,11 @@ def applyPerspectiveTransform(input_img):
     #cols=2
     #fig=plt.figure(figsize=(8,8))
     #fig.add_subplot(rows,cols,1)
-    imgMorph=morphInputImage(threshInputImage(img))
+    imgThresh=threshInputImage(img)
+    #imgThresh=threshInputImage(img)
     #plt.imshow(cv2.cvtColor(imgCanny,cv2.COLOR_BGR2RGB))
     #plt.imshow(cv2.cvtColor(imgMorph,cv2.COLOR_BGR2RGB))
-    corners=getBorderCoordinates(imgMorph)
+    corners=getBorderCoordinates(imgThresh)
     rect=orderedPolyDp(corners)
     (tl, tr, br, bl) = rect
     #applying perspective transform
@@ -219,14 +234,16 @@ def applyPerspectiveTransform(input_img):
     #plt.plot(hist);
     #fig.add_subplot(rows,cols,3)
     #plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
+    warped_img = cv2.resize(warped_img, (1280, 1280))
     ##################################################
 
     return warped_img
 #path="test_cases/ball.jpeg"
+#path="test_cases/maze01.jpg"
 #applyPerspectiveTransform(cv2.imread(path))
 
 
-# In[4]:
+# In[21]:
 
 
 def detectMaze(warped_img):
@@ -263,7 +280,7 @@ def detectMaze(warped_img):
     #resultBitmap = cv2.resize(resultBitmap,(500,500))
     #resultbgr = cv2.cvtColor(result,cv2.COLOR_GRAY2BGR)
     #resultResize = cv2.resize(resultbgr,(500,500))
-    resultBitmap=morphInputImage(threshInputImage(warped_img.copy()))
+    resultBitmap=threshInputImage(warped_img.copy())
     h,w=resultBitmap.shape
     #print(w,h)
     #maxe of 10 x 10

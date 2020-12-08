@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[8]:
+# In[2]:
 
 
 '''
@@ -56,7 +56,7 @@ except Exception:
 	sys.exit()
 
 
-# In[14]:
+# In[34]:
 
 
 
@@ -79,19 +79,19 @@ vision_sensor_handle = 0
 revolute_handle=[-1,-1,-1,-1]
 outMax=69
 outMin=-40
-kp=np.array([0.1,0.1],dtype='float64')
+kp=np.array([0.3,0.3],dtype='float64')
 ki=np.array([0,0],dtype='float64')#ki=ki*SampleTime
-kd=np.array([100,100],dtype='float64')#kd=kd/SampleTime
+kd=np.array([0,0],dtype='float64')#kd=kd/SampleTime
 lastTime=0
 ITerm=np.array([0,0],dtype='float64')
 lastInput=np.array([0,0],dtype='float64')
-SampleTime = 1 #1 sec
+SampleTime = 0.01 #1 sec
 Output=np.array([0,0],dtype='float64')
 Input=np.array([0,0],dtype='float64')
 ##############################################################
 
 
-# In[15]:
+# In[1]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -108,62 +108,10 @@ def setAngles(Output):
     
     _=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
     _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
-    returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[0],sim.simx_opmode_streaming)
-    print(position*180/np.pi)
+    #returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[0],sim.simx_opmode_streaming)
+    #print(position*180/np.pi)
     #simxSynchronousTrigger(client_id)
-    
-def getError(Input,setpoint):
-    #gets the error of the ball based on the setpoint and coordinates of ball
-    error=np.array(setpoint-Input)
-    return np.array(error,dtype='float64')
-def coordinateTransform(xy):
-    #as our servos are capable of moving the ball along the diagonals, we have to covert the 
-    #performing coordinate transformation from x,y to diagonal axes
-    theta=np.pi/4
-    transformed=[np.cos(theta)*xy[0]+np.sin(theta)*xy[1],-np.sin(theta)*xy[0]+np.cos(theta)*xy[1]]
-    return np.array(transformed,dtype='float64')
 
-def computePID(center_x,center_y,setpoint):
-    #global variables
-    #revolute_handle,outMax,outMin,kp,ki,kd,lastTime,ITerm,lastInput,SampleTime,output=[0,0],client_id,setpoint,vision_sensor_handle
-    global kp,ki,kd,ITerm,outMin,outMax,lastInput,SampleTime,lastTime,Input,Output
-    #IMPORTANT: most the variables here are a list having two elements
-    
-    now = time.time()
-    
-    timeChange = (now - lastTime)
-    #print(timeChange)
-    if(timeChange>=SampleTime):
-        #Compute all the working error variables
-        Input=coordinateTransform([center_x,center_y])
-        error=getError(Input,coordinateTransform(setpoint))
-        print("Input=",Input," Error=",error)
-        #calclating integral term ,ki*error*delta t,here delta t already multiplied in ki 
-        ITerm+= (ki * error)
-        
-        #dealing with windup
-        for i in range(len(ITerm)):
-            if(ITerm[i]> outMax):
-                ITerm[i]= outMax
-            elif(ITerm[i]< outMin):
-                ITerm[i]= outMin
-        
-        #this is used to deal with derivative kick when setpoint is changed
-        dInput = (Input - lastInput)
-
-        #Compute PID Output, here kd has already been divide by sampleTime i.e. delta t
-        Output = kp * error + ITerm- kd * dInput
-        for i in range(len(Output)):
-            if(Output[i]> outMax):
-                Output[i] = outMax
-            elif(Output[i] < outMin):
-                Output[i] = outMin
-        print("Output=",Output)      
-        #Remember some variables for next time
-        lastInput = Input
-        lastTime = now
-        setAngles(Output)
-    #return Output
 def SetTunings(Kp,Ki,Kd):
     #changing the values of kp,ki,kd
     global kp,ki,kd,SampleTime
@@ -209,7 +157,7 @@ def Initialize():
 ##############################################################
 
 
-# In[16]:
+# In[5]:
 
 
 def init_setup(rec_client_id):
@@ -259,7 +207,7 @@ def init_setup(rec_client_id):
     ##################################################
 
 
-# In[12]:
+# In[6]:
 
 
 def control_logic(center_x,center_y):
@@ -308,12 +256,56 @@ def control_logic(center_x,center_y):
     #ttaking handles from global variables
     #the pid computes using the coordinates and setpoint and returns us the value
     #print("Centroid=",center_x," ",center_y," setpoint=",setpoint)
-    computePID(center_x,center_y,setpoint)
     
+    #global variables
+    #revolute_handle,outMax,outMin,kp,ki,kd,lastTime,ITerm,lastInput,SampleTime,output=[0,0],client_id,setpoint,vision_sensor_handle
+    global kp,ki,kd,ITerm,outMin,outMax,lastInput,SampleTime,lastTime,Input,Output
+    #IMPORTANT: most the variables here are a list having two elements
+    
+    now = time.time()
+    
+    timeChange = (now - lastTime)
+    #print(timeChange)
+    if(timeChange>=SampleTime):
+        #Compute all the working error variables
+        #transform of coordinates
+        #coord=[center_x,center_y]
+        #Input=coordinateTransform([center_x,center_y])
+        Input=[np.cos(np.pi/4)*center_x+np.sin(np.pi/4)*center_y,-np.sin(np.pi/4)*center_x+np.cos(np.pi/4)*center_y]
+        #calculation of error
+        #error=getError(Input,coordinateTransform(setpoint))
+        error=np.array(Input-setpoint,dtype="float64")
+        print("Input=",Input," Error=",error)
+        #calclating integral term ,ki*error*delta t,here delta t already multiplied in ki 
+        ITerm+= (ki * error)
+        
+        #dealing with windup
+        for i in range(len(ITerm)):
+            if(ITerm[i]> outMax):
+                ITerm[i]= outMax
+            elif(ITerm[i]< outMin):
+                ITerm[i]= outMin
+        
+        #this is used to deal with derivative kick when setpoint is changed
+        dInput = (Input - lastInput)
+
+        #Compute PID Output, here kd has already been divide by sampleTime i.e. delta t
+        Output = kp * error + ITerm- kd * dInput
+        for i in range(len(Output)):
+            if(Output[i]> outMax):
+                Output[i] = outMax
+            elif(Output[i] < outMin):
+                Output[i] = outMin
+        print("Output=",Output)      
+        #Remember some variables for next time
+        lastInput = Input
+        lastTime = now
+        setAngles(Output)
+    #return Output    
     ##################################################
 
 
-# In[18]:
+# In[36]:
 
 
 
