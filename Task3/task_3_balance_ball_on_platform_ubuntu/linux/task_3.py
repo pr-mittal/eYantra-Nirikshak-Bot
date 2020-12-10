@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[13]:
 
 
 '''
@@ -56,7 +56,7 @@ except Exception:
 	sys.exit()
 
 
-# In[34]:
+# In[14]:
 
 
 
@@ -79,19 +79,18 @@ vision_sensor_handle = 0
 revolute_handle=[-1,-1,-1,-1]
 outMax=69
 outMin=-40
-kp=np.array([0.3,0.3],dtype='float64')
+kp=np.array([0.03,0.03],dtype='float64')
 ki=np.array([0,0],dtype='float64')#ki=ki*SampleTime
 kd=np.array([0,0],dtype='float64')#kd=kd/SampleTime
 lastTime=0
 ITerm=np.array([0,0],dtype='float64')
 lastInput=np.array([0,0],dtype='float64')
 SampleTime = 0.01 #1 sec
-Output=np.array([0,0],dtype='float64')
 Input=np.array([0,0],dtype='float64')
 ##############################################################
 
 
-# In[1]:
+# In[8]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -102,16 +101,23 @@ Input=np.array([0,0],dtype='float64')
 def setAngles(Output):
     global revolute_handle,client_id
     
+    print(Output)
     #setting output to joints/motors
+    #This can be useful if you need to send several values to CoppeliaSim that should be received and evaluated at the same time. 
+    _=sim.simxPauseCommunication(client_id,True)
+    
     _=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
     _=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
     
     _=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
     _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
+    
+    _=sim.simxPauseCommunication(client_id,False)
     #returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[0],sim.simx_opmode_streaming)
     #print(position*180/np.pi)
     #simxSynchronousTrigger(client_id)
-
+    
+    
 def SetTunings(Kp,Ki,Kd):
     #changing the values of kp,ki,kd
     global kp,ki,kd,SampleTime
@@ -134,11 +140,11 @@ def SetOutputLimits(Min,Max):
         return
     outMin = Min
     outMax = Max
-    for i in range(len(Output)):
-        if(Output[i] > outMax):
-            Output[i] = outMax
-        elif(Output[i] < outMin): 
-            Output[i] = outMin
+    #for i in range(len(Output)):
+    #    if(Output[i] > outMax):
+    #        Output[i] = outMax
+    #    elif(Output[i] < outMin): 
+    #        Output[i] = outMin
         
     for i in range(len(ITerm)):
         if(ITerm[i]> outMax):
@@ -157,7 +163,7 @@ def Initialize():
 ##############################################################
 
 
-# In[5]:
+# In[4]:
 
 
 def init_setup(rec_client_id):
@@ -198,7 +204,9 @@ def init_setup(rec_client_id):
     _,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_3",sim.simx_opmode_blocking)
     _,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_4",sim.simx_opmode_blocking)
     _, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
-
+    
+    #setting all angles target pposition to [0,0]
+    setAngles([0,0])
     # print(sensor_handle, "sensor_handle")
     #staring vision sensor image in sim.simx_opmode_streaming
     _, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streamig may need change
@@ -207,7 +215,7 @@ def init_setup(rec_client_id):
     ##################################################
 
 
-# In[6]:
+# In[17]:
 
 
 def control_logic(center_x,center_y):
@@ -259,44 +267,45 @@ def control_logic(center_x,center_y):
     
     #global variables
     #revolute_handle,outMax,outMin,kp,ki,kd,lastTime,ITerm,lastInput,SampleTime,output=[0,0],client_id,setpoint,vision_sensor_handle
-    global kp,ki,kd,ITerm,outMin,outMax,lastInput,SampleTime,lastTime,Input,Output
+    global kp,ki,kd,ITerm,outMin,outMax,lastInput,SampleTime,lastTime,Input
     #IMPORTANT: most the variables here are a list having two elements
-    
+    Output=np.array([0,0],dtype="int8")
     now = time.time()
-    
-    timeChange = (now - lastTime)
+    #print(now)
+    timeChange=now-lastTime
+    #npArray=lambda x:np.array(x,dtype="uint8")
     #print(timeChange)
     if(timeChange>=SampleTime):
         #Compute all the working error variables
         #transform of coordinates
         #coord=[center_x,center_y]
         #Input=coordinateTransform([center_x,center_y])
-        Input=[np.cos(np.pi/4)*center_x+np.sin(np.pi/4)*center_y,-np.sin(np.pi/4)*center_x+np.cos(np.pi/4)*center_y]
+        Input=np.array([np.cos(np.pi/4)*center_x+np.sin(np.pi/4)*center_y,-np.sin(np.pi/4)*center_x+np.cos(np.pi/4)*center_y],dtype="int16")
         #calculation of error
         #error=getError(Input,coordinateTransform(setpoint))
-        error=np.array(Input-setpoint,dtype="float64")
+        setpoint=np.array(setpoint,dtype="int16")
+        error=setpoint-Input
         print("Input=",Input," Error=",error)
         #calclating integral term ,ki*error*delta t,here delta t already multiplied in ki 
         ITerm+= (ki * error)
         
-        #dealing with windup
-        for i in range(len(ITerm)):
+        #this is used to deal with derivative kick when setpoint is changed
+        dInput = (Input - lastInput)
+
+        for i in range(2):
+            #dealing with windup
             if(ITerm[i]> outMax):
                 ITerm[i]= outMax
             elif(ITerm[i]< outMin):
                 ITerm[i]= outMin
-        
-        #this is used to deal with derivative kick when setpoint is changed
-        dInput = (Input - lastInput)
-
-        #Compute PID Output, here kd has already been divide by sampleTime i.e. delta t
-        Output = kp * error + ITerm- kd * dInput
-        for i in range(len(Output)):
+            #Compute PID Output, here kd has already been divide by sampleTime i.e. delta t
+            Output[i] = (int)(kp[i] * error[i] + ITerm[i]- kd[i] * dInput[i])
+            #print(kp[i] * error[i] + ITerm[i]- kd[i] * dInput[i])
             if(Output[i]> outMax):
                 Output[i] = outMax
             elif(Output[i] < outMin):
                 Output[i] = outMin
-        print("Output=",Output)      
+        #print("Output=",Output)      
         #Remember some variables for next time
         lastInput = Input
         lastTime = now
@@ -305,7 +314,7 @@ def control_logic(center_x,center_y):
     ##################################################
 
 
-# In[36]:
+# In[22]:
 
 
 
@@ -397,17 +406,17 @@ if __name__ == "__main__":
 	# Initiate the Remote API connection with CoppeliaSim server
 	print('\nConnection to CoppeliaSim Remote API Server initiated.')
 	print('Trying to connect to Remote API Server...')
-
+	print("Start=",time.time())
 	try:
 		client_id = task_2a.init_remote_api_server()
-
+		print("init_remote_api_server()=",time.time())
 		if (client_id != -1):
 			print('\nConnected successfully to Remote API Server in CoppeliaSim!')
 
 			# Starting the Simulation
 			try:
 				return_code = task_2a.start_simulation()
-
+				print("start_simulation()=",time.time())
 				if (return_code == sim.simx_return_novalue_flag):
 					print('\nSimulation started correctly in CoppeliaSim.')
 					
@@ -458,30 +467,33 @@ if __name__ == "__main__":
 
 	# Storing time when the simulation started in variable init_simulation_time
 	return_code_signal,init_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-
+	print("simxGetStringSignal()=",time.time())
 	if(return_code_signal==0):
 		init_simulation_time=float(init_simulation_time_string)
 
 	# Running the coppeliasim simulation for 15 seconds
 	while(curr_simulation_time - init_simulation_time <=15):
-		
+		x=time.time()
+		print("Starting Coppeliasim Loop, time=",x)
 		return_code_signal,curr_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-		
+		print("simxGetStringSignal()=",time.time()-x)
+		x=time.time()
 		if(return_code_signal == 0):
 			curr_simulation_time=float(curr_simulation_time_string)
 		
 		try:
 			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
-
+			print("get_vision_sensor_image()=",time.time()-x)
+			x=time.time()
 			if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
 				# print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
 
 				# Get the transformed vision sensor image captured in correct format
 				try:
 					transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image, image_resolution)
-
+					print("transform_vision_sensor_image()=",time.time()-x)
+					x=time.time()
 					if (type(transformed_image) is np.ndarray):
-
 						# cv2.imshow('transformed image', transformed_image)
 						# cv2.waitKey(0)
 						# cv2.destroyAllWindows()
@@ -491,11 +503,13 @@ if __name__ == "__main__":
 							warped_img = task_1b.applyPerspectiveTransform(transformed_image)
 							
 							if (type(warped_img) is np.ndarray):
-								
+								print("applyPerspectiveTransform()=",time.time()-x)
+								x=time.time()
 								# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
 								try:
 									shapes = task_1a_part1.scan_image(warped_img)
-									
+									print("scan_image()=",time.time()-x)
+									x=time.time()
 									if (type(shapes) is dict and shapes!={}):
 										print('\nShapes detected by Vision Sensor are: ')
 										print(shapes)

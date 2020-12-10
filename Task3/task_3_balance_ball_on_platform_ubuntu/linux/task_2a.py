@@ -24,7 +24,7 @@
 # 					stop_simulation, exit_remote_api_server
 #                   [ Comma separated list of functions in this file ]
 # Global variables: client_id
-# 					[ List of global variables defined in this file ]
+# 					[ List of global variables defined in this file ]   flag
 
 
 ####################### IMPORT MODULES #######################
@@ -54,7 +54,7 @@ except Exception:
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
 client_id = -1
-
+flag=False
 
 ################# ADD UTILITY FUNCTIONS HERE #################
 ## You can define any utility functions for your code.      ##
@@ -180,14 +180,16 @@ def get_vision_sensor_image(vision_sensor_handle):
     return_code = 0
 
     ##############	ADD YOUR CODE HERE	##############
-
+    global flag
     #_, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
-
-    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
-
+    if(flag==False):
+        return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
+        flag=True
+    else:
+        return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
     rCode, pingTime = sim.simxGetPingTime(client_id)
 
-    #return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
+    
 
     ##################################################
 
