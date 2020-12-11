@@ -220,7 +220,7 @@ def init_setup(rec_client_id):
     ##################################################
 
 
-# In[17]:
+# In[1]:
 
 
 def control_logic(center_x,center_y):
@@ -294,12 +294,12 @@ def control_logic(center_x,center_y):
         #Input=coordinateTransform([center_x,center_y])
         #calculation of error
         #error=getError(Input,coordinateTransform(setpoint))
-        setpoint=np.array(setpoint,dtype="float64")
-        error=setpoint-np.array([center_x,center_y],dtype="float64")
         #matrix multiplication of error and coordinate transformation matrix
         transform=np.array([[np.cos(np.pi/4),-np.sin(np.pi/4)],[np.sin(np.pi/4),np.cos(np.pi/4)]],dtype="float64")
-        error=np.dot(error,transform)
-        print("Error=",error)
+        setpoint=np.array(setpoint,dtype="float64")
+        Input=np.dot([center_x,center_y],transform)
+        error=np.dot(setpoint,transform)-Input
+        print("Error=",error," Input=",Input)
         #calclating integral term ,ki*error*delta t,here delta t already multiplied in ki 
         ITerm+= (ki * error)
         
