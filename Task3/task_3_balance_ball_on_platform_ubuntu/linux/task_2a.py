@@ -185,9 +185,10 @@ def get_vision_sensor_image(vision_sensor_handle):
     if(flag==False):
         return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
         flag=True
+        rCode, pingTime = sim.simxGetPingTime(client_id)
     else:
         return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
-    rCode, pingTime = sim.simxGetPingTime(client_id)
+    
 
     
 
