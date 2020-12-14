@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[12]:
+# In[2]:
 
 
 '''
@@ -56,7 +56,7 @@ except Exception:
 	sys.exit()
 
 
-# In[13]:
+# In[3]:
 
 
 
@@ -77,12 +77,11 @@ vision_sensor_handle = 0
 ##############################################################
 
 revolute_handle=[-1,-1,-1,-1]
-outMax=40
-outMin=-40
-kp=np.array([0.3,0.3],dtype='float64')
-ki=np.array([0,0],dtype='float64')#ki=ki*SampleTime
-kd=np.array([0,0],dtype='float64')#kd=kd/SampleTime
-lastTime=0
+outMax=69
+outMin=-69
+kp=np.array([0.025,0.025],dtype='float64')
+ki=np.array([0.005,0.005],dtype='float64')#ki=ki*SampleTime
+kd=np.array([0.130,0.130],dtype='float64')#kd=kd/SampleTimelastTime=0
 ITerm=np.array([0,0],dtype='float64')
 lastInput=np.array([0,0],dtype='float64')
 SampleTime = 0.01 #0.01 sec
@@ -90,7 +89,7 @@ Input=np.array([0,0],dtype='float64')
 ##############################################################
 
 
-# In[20]:
+# In[4]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -163,7 +162,7 @@ def Initialize():
 ##############################################################
 
 
-# In[4]:
+# In[5]:
 
 
 def init_setup(rec_client_id):
@@ -220,7 +219,7 @@ def init_setup(rec_client_id):
     ##################################################
 
 
-# In[1]:
+# In[6]:
 
 
 def control_logic(center_x,center_y):
@@ -313,7 +312,7 @@ def control_logic(center_x,center_y):
             elif(ITerm[i]< outMin):
                 ITerm[i]= outMin
             #Compute PID Output, here kd has already been divide by sampleTime i.e. delta t
-            Output[i] = (int)(kp[i] * error[i] + ITerm[i]- kd[i] * dInput[i])
+            Output[i] = (float)(kp[i] * error[i] + ITerm[i]- kd[i] * dInput[i])
             #print(kp[i] * error[i] + ITerm[i]- kd[i] * dInput[i])
             if(Output[i]> outMax):
                 Output[i] = outMax

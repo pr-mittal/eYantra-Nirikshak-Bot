@@ -186,6 +186,18 @@ def get_vision_sensor_image(vision_sensor_handle):
         return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
         flag=True
         rCode, pingTime = sim.simxGetPingTime(client_id)
+        #stabilising when the simualtion is started
+        revolute_handle=[-1,-1,-1,-1]
+        _,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1",sim.simx_opmode_blocking)
+        _,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2",sim.simx_opmode_blocking)
+        _,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_3",sim.simx_opmode_blocking)
+        _,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_4",sim.simx_opmode_blocking)
+
+        _=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],0,sim.simx_opmode_oneshot)
+        _=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],0,sim.simx_opmode_oneshot)
+
+        _=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],0,sim.simx_opmode_oneshot)
+        _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],0,sim.simx_opmode_oneshot)
     else:
         return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
     
