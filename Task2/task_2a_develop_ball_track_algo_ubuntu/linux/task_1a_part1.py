@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[6]:
+
+
 
 
 '''
@@ -39,9 +45,14 @@ import os
 #import matplotlib.pyplot as plt
 ##############################################################
 
+
+# In[7]:
+
+
+
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
 shapes = {}
-
+calibrate=np.load("calibrate.npy")
 ################# ADD UTILITY FUNCTIONS HERE #################
 ## You can define any utility functions for your code.      ##
 ## Please add proper comments to ensure that your code is   ##
@@ -112,7 +123,7 @@ def getContours(img,imgColor):
             M = cv2.moments(approxCnt)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-
+            cX,cY=calibrateCentroid(cX,cY)
             # point = cv2.circle(img, (cX,cY), radius=2, color=255, thickness=3)
             # cv2.imshow("point",point)
             # cv2.waitKey(0)
@@ -179,6 +190,33 @@ def getContours(img,imgColor):
             shapes[item[0]].extend([[item[1],item[3],item[4]]])
 
     return shapes
+
+
+# In[8]:
+
+
+def calibrateCentroid(cX,cY):
+    #storing of sgnX is grater than or less that zero
+    #1 implies greater than zero and vice versa
+    sgnX=-1
+    sgnY=-1
+    eX=(cX-640)
+    eY=(cY-640)
+    if(eX<0):
+        sgnX=1
+    if(eY<0):
+        sgnY=1
+    #finding error in calibrate matrix
+    for c in calibrate:
+        #max gap between any two points is 66 ,we need to find the closest match
+        if(abs(abs(eX)-c[0][0])<33)and(abs(abs(eY)-c[0][1])<33):
+            cX=cX+sgnX*c[1][0]
+            cY=cY+sgnY*c[1][1]
+            #print("Match= ",c)
+    #print(calibrate)
+    #print("End Calibrate")
+    
+    return cX,cY
 
 def getShape4(cnt):
     #print(cnt)
@@ -253,6 +291,9 @@ def isParallel(v1,v2):
 ##############################################################
 
 
+# In[9]:
+
+
 def scan_image(wraped_img):
 
     """
@@ -292,6 +333,15 @@ def scan_image(wraped_img):
     ##################################################
     
     return shapes
+
+#path=os.getcwd()+"/Samples/Sample5.png";
+#print(path)
+#shapes = scan_image(path);
+
+
+# In[10]:
+
+
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
