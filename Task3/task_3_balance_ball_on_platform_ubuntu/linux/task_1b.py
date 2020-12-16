@@ -281,6 +281,7 @@ def detectMaze(warped_img):
     #resultbgr = cv2.cvtColor(result,cv2.COLOR_GRAY2BGR)
     #resultResize = cv2.resize(resultbgr,(500,500))
     resultBitmap=threshInputImage(warped_img.copy())
+    #resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=2)
     h,w=resultBitmap.shape
     #print(w,h)
     #maxe of 10 x 10

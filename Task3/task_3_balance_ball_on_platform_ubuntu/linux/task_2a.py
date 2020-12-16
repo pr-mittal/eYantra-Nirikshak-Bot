@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
 '''
 *****************************************************************************************
 *
@@ -54,16 +60,80 @@ except Exception:
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
 client_id = -1
+calibrate=[]
 flag=False
+vision_sensor_handle=-1
+
+
+# In[2]:
+
 
 ################# ADD UTILITY FUNCTIONS HERE #################
 ## You can define any utility functions for your code.      ##
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
+def getShape():
+    vision_sensor_image, image_resolution, return_code=get_vision_sensor_image()
+    _, _ = sim.simxGetPingTime(client_id)
+    
+    transformed_image=transform_vision_sensor_image(vision_sensor_image, image_resolution)
+    wraped_img = task_1b.applyPerspectiveTransform(transformed_image)
+    shapes=task_1a_part1.scan_image(wraped_img)
+    return shapes
 
+def calibrateCameraMatrix():
+    #error due to single eyed vision is removed,by comparing real time ball positions and vision sensor image
+    global client_id,calibrate
+    #np.save("calibrate",calibrate)
+    #calibrate=np.load("calibrate.npy")
+    #print(calibrate)
+    
+    #if ball is present get its handle
+    _,ball=sim.simxGetObjectHandle(client_id,"ball_1",sim.simx_opmode_blocking)
+    
+    _,topPlate=sim.simxGetObjectHandle(client_id,"top_plate_respondable_1",sim.simx_opmode_blocking)
+    #print("Top plate Handle=",topPlate)
+    #_,topPos=sim.simxGetObjectPosition(client_id,topPlate,-1,sim.simx_opmode_oneshot)
+    #1.0000e-02-height of top plate,1.000 is height and width of plate
+    #4.0000e-02-diameter of ball
+    #print("TOP POS=",topPos)
+    num=10
+    for i in range(num):
+        for j in range(num):    
+            _=sim.simxSetObjectPosition(client_id,ball,topPlate,[0.5*j/num,-0.5*i/num,0.01/2+0.04/2],sim.simx_opmode_blocking)
+
+            import task_1a_part1
+            import task_1b
+            try:
+                shapes=getShape()
+                if((len(shapes)==0) or (len(shapes['Circle'])==0)):
+                    continue
+                cX=shapes['Circle'][1]
+                cY=shapes['Circle'][2]
+
+                rtrnCode,pos=sim.simxGetObjectPosition(client_id,ball,sim.sim_handle_parent,sim.simx_opmode_blocking)
+                #print("Calirate,Ball=",ball,"position=",pos," centroid=",cX,cY," rtrnCode=",rtrnCode)
+                #print("Calirate,centroid=",cX,cY,"Ball Pos=",-640*pos[0]/0.5+640,640*pos[1]/0.5+640)
+                eX=(int)(-640*pos[0]/0.5+640)-cX
+                eY=(int)(640*pos[1]/0.5+640)-cY
+                calibrate+=[[[abs(cX-640),abs(cY-640)],[abs(eX),abs(eY)]]]
+
+            except Exception:
+                print('\n[ERROR] Your calibrateCamera() function in task_2a.py throwed an Exception, kindly debug your code!')
+                print('Stop the CoppeliaSim simulation manually.\n')
+                traceback.print_exc(file=sys.stdout)
+                print()
+                #sys.exit()
+    #print(calibrate)
+    np.save("calibrate",calibrate)
+    #calibrate=np.load("calibrate.npy")
+    
 
 ##############################################################
+
+
+# In[3]:
 
 
 def init_remote_api_server():
@@ -145,8 +215,8 @@ def start_simulation():
 
     return return_code
 
-
 def get_vision_sensor_image(vision_sensor_handle):
+# def get_vision_sensor_image():
     """
     Purpose:
     ---
@@ -174,18 +244,27 @@ def get_vision_sensor_image(vision_sensor_handle):
     """
 
     global client_id
+    
 
     vision_sensor_image = []
     image_resolution = []
     return_code = 0
 
     ##############	ADD YOUR CODE HERE	##############
-    global flag
-    #_, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
+
+    global flag,vision_sensor_handle
+    #vision_sensor_handle=sensor_handle
+    #print(flag)
+    # _, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
     if(flag==False):
+        #_, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
+    
         return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
         flag=True
         rCode, pingTime = sim.simxGetPingTime(client_id)
+        #calibrateCameraMatrix()
+        
+        #return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
         #stabilising when the simualtion is started
         revolute_handle=[-1,-1,-1,-1]
         _,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1",sim.simx_opmode_blocking)
@@ -200,13 +279,30 @@ def get_vision_sensor_image(vision_sensor_handle):
         _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],0,sim.simx_opmode_oneshot)
     else:
         return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
-    
+        
+#------------------------------------------------------------------------------------------------------------------#
+    # _, sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
 
-    
+    # return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
 
+    # rCode, pingTime = sim.simxGetPingTime(client_id)
+
+    # return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
+    #    client_id, sensor_handle, 0, sim.simx_opmode_buffer)
+
+    #print(sensor_handle,return_code,image_resolution,len(vision_sensor_image),flag)
+    #print(vision_sensor_handle,return_code,image_resolution,len(vision_sensor_image),flag)
+    
+    #_,ball=sim.simxGetObjectHandle(client_id,"ball_1",sim.simx_opmode_blocking)
+    #_,topPlate=sim.simxGetObjectHandle(client_id,"top_plate_respondable_1",sim.simx_opmode_blocking)
+    #rtrnCode,pos=sim.simxGetObjectPosition(client_id,ball,sim.sim_handle_parent,sim.simx_opmode_blocking)
+    #print("Calirate Ball Pos=",-640*pos[0]/0.5+640,640*pos[1]/0.5+640)
     ##################################################
 
     return vision_sensor_image, image_resolution, return_code
+
+
+# In[4]:
 
 
 def transform_vision_sensor_image(vision_sensor_image, image_resolution):
@@ -255,6 +351,9 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
     ##################################################
 
     return transformed_image
+
+
+# In[5]:
 
 
 def stop_simulation():
@@ -322,6 +421,10 @@ def exit_remote_api_server():
     rCode,pingTime= sim.simxGetPingTime(client_id)
     sim.simxFinish(client_id)
     ##################################################
+
+
+# In[ ]:
+
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -432,7 +535,7 @@ if __name__ == "__main__":
     # Get image array and its resolution from Vision Sensor in ComppeliaSim scene
     try:
         vision_sensor_image, image_resolution, return_code = get_vision_sensor_image()
-
+        
         if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
             print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
 
