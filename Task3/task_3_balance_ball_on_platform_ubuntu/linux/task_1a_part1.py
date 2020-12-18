@@ -52,7 +52,7 @@ import os
 
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
 shapes = {}
-calibrate=np.load("calibrate.npy")
+#calibrate=np.load("calibrate.npy")
 ################# ADD UTILITY FUNCTIONS HERE #################
 ## You can define any utility functions for your code.      ##
 ## Please add proper comments to ensure that your code is   ##
@@ -123,7 +123,7 @@ def getContours(img,imgColor):
             M = cv2.moments(approxCnt)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            cX,cY=calibrateCentroid(cX,cY)
+            #cX,cY=calibrateCentroid(cX,cY)
             # point = cv2.circle(img, (cX,cY), radius=2, color=255, thickness=3)
             # cv2.imshow("point",point)
             # cv2.waitKey(0)
