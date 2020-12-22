@@ -1,0 +1,102 @@
+{
+    "maze00": {
+        "start_coord": [
+            0,
+            4
+        ],
+        "end_coord": [
+            9,
+            5
+        ]
+    },
+    "maze01": {
+        "start_coord": [
+            5,
+            0
+        ],
+        "end_coord": [
+            4,
+            9
+        ]
+    },
+    "maze02": {
+        "start_coord": [
+            1,
+            1
+        ],
+        "end_coord": [
+            8,
+            8
+        ]
+    },
+    "maze03": {
+        "start_coord": [
+            1,
+            8
+        ],
+        "end_coord": [
+            8,
+            1
+        ]
+    },
+    "maze04": {
+        "start_coord": [
+            0,
+            3
+        ],
+        "end_coord": [
+            9,
+            6
+        ]
+    },
+    "maze05": {
+        "start_coord": [
+            9,
+            5
+        ],
+        "end_coord": [
+            0,
+            4
+        ]
+    },
+    "maze06": {
+        "start_coord": [
+            4,
+            9
+        ],
+        "end_coord": [
+            5,
+            0
+        ]
+    },
+    "maze07": {
+        "start_coord": [
+            9,
+            9
+        ],
+        "end_coord": [
+            0,
+            0
+        ]
+    },
+    "maze08": {
+        "start_coord": [
+            9,
+            0
+        ],
+        "end_coord": [
+            0,
+            9
+        ]
+    },
+    "maze09": {
+        "start_coord": [
+            0,
+            0
+        ],
+        "end_coord": [
+            9,
+            9
+        ]
+    }
+}
