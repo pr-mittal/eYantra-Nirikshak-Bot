@@ -71,7 +71,7 @@ vision_sensor_handle = 0
 revolute_handle=[-1,-1,-1,-1,-1,-1,-1,-1]
 outMax=90
 outMin=-90
-kp=np.array([0.055,0.055],dtype='float64')
+kp=np.array([0.047,0.047],dtype='float64')
 ki=np.array([0.002,0.002],dtype='float64')#ki=ki*SampleTime
 kd=np.array([0.197,0.197],dtype='float64')#kd=kd/SampleTime
 lastTime=0
@@ -348,7 +348,7 @@ def control_logic(center_x,center_y):
 
 		# print(timeChange)
 		# here summation means the summation of all previous error
-
+		# we are adding the ITerm only when the ball is close to setpoint
 		if(error[0]*error[0]+error[1]*error[1]<2000):
 			ITerm= ki*(summation)
 			summation+=error
@@ -399,20 +399,20 @@ def change_setpoint(new_setpoint):
 #		Inputs:	None
 #	   Outputs:	None
 #	   Purpose:	This part of the code is only for testing your solution. The function does the following:
-						# - imports 'task_1b' file as module
-						# - imports 'task_1a_part1' file as module
+# - imports 'task_1b' file as module
+# - imports 'task_1a_part1' file as module
 #						- imports 'task_2a' file as module
-						# - calls init_remote_api_server() function in 'task_2a' to connect with CoppeliaSim Remote API server
-						# - then calls start_simulation() function in 'task_2a' to start the simulation
-#						- then calls init_setup() function to store the required handles in respective global variables and complete initializations if required
-						# - then calls get_vision_sensor_image() function in 'task_2a' to capture an image from the Vision Sensor in CoppeliaSim scene
-						# - If the return code is 'simx_return_ok':
-									# - then calls transform_vision_sensor_image() function in 'task_2a' to transform the captured image
-						  			#   to a format compatible with OpenCV. 
-#			 						- then the transformed image is given as input and Perspective Transform is applied
-#			 						  by calling applyPerspectiveTransform function	from 'task_1b'
-#			 						- then the output of warped_img is given to 'scan_image' function from 'task_1a_part1'
-#			 			- then calls control_logic() function to command the servo motors
+# - calls init_remote_api_server() function in 'task_2a' to connect with CoppeliaSim Remote API server
+# - then calls start_simulation() function in 'task_2a' to start the simulation
+#- then calls init_setup() function to store the required handles in respective global variables and complete initializations if required
+# - then calls get_vision_sensor_image() function in 'task_2a' to capture an image from the Vision Sensor in CoppeliaSim scene
+# - If the return code is 'simx_return_ok':
+# - then calls transform_vision_sensor_image() function in 'task_2a' to transform the captured image
+#   to a format compatible with OpenCV. 
+# - then the transformed image is given as input and Perspective Transform is applied
+# by calling applyPerspectiveTransform function	from 'task_1b'
+# - then the output of warped_img is given to 'scan_image' function from 'task_1a_part1'
+# - then calls control_logic() function to command the servo motors
 
 # NOTE: Write your solution ONLY in the space provided in the above functions. Main function should not be edited.
 
