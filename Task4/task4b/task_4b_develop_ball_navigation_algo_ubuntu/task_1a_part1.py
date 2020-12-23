@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[6]:
-
-
+# In[1]:
 
 
 '''
@@ -42,12 +40,11 @@
 import cv2
 import numpy as np
 import os
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 ##############################################################
 
 
-# In[7]:
-
+# In[2]:
 
 
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
@@ -60,10 +57,14 @@ shapes = {}
 ##############################################################
 #------------------------------------------------------------------------------------------------------
 #function to get contours
-def getContours(img,imgColor):
+def getContours(imgColor):
     #makes countours in the image and tells the color
     global shapes
     imgHsv=cv2.cvtColor(imgColor,cv2.COLOR_BGR2HSV)
+    
+    #remove the maze from the image , we extract only the colored part of the image
+    img=colorMask(imgHsv)
+    
     contours, heirarchy =  cv2.findContours(img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     # print((contours))
     lst = list(list())
@@ -74,9 +75,10 @@ def getContours(img,imgColor):
         #using moments
         #contour on image--#img   #countour #index #color #thickness
         #print(img.shape[0]*img.shape[1]-100000)
-        if area>500 and area<0.95*img.shape[0]*img.shape[1]: #to avoid the noise in the image, area>500 is applied
+        #print("Area =",area," Image Area=",0.50*img.shape[0]*img.shape[1])
+        if area>500 and area<0.50*img.shape[0]*img.shape[1]: #to avoid the noise in the image, area>500 is applied
             #print("farea =",area) #print area
-            cv2.drawContours(imgColor,approxCnt,-1,(255,0,0),6)#index =-1 means all the countours
+            #cv2.drawContours(imgColor,approxCnt,-1,(255,0,0),6)#index =-1 means all the countours
             
             # cv2.imshow("img",imgColor)
             # cv2.waitKey(0)
@@ -107,16 +109,16 @@ def getContours(img,imgColor):
 
             ##############################################################################################
 
-            # if n_corners>6:
-            #     obj="Circle"
-            # elif n_corners ==3:
-            #     obj = "Triangle"    
-            # elif n_corners ==5:
-            #     obj = "Pentagon"
-            # elif n_corners ==6:
-            #     obj = "Hexagon"
-            # elif n_corners ==4:
-            #     obj=getShape4(approxCnt)
+            #if n_corners>6:
+            #    obj="Circle"
+            #elif n_corners ==3:
+            #    obj = "Triangle"    
+            #elif n_corners ==5:
+            #    obj = "Pentagon"
+            #elif n_corners ==6:
+            #    obj = "Hexagon"
+            #elif n_corners ==4:
+            #    obj=getShape4(approxCnt)
 
             obj = "Circle"             
 
@@ -173,7 +175,7 @@ def getContours(img,imgColor):
     lst.sort(key = lambda lst: lst[1]) 
     # [ obj, color, area, cX, cY, identifier ]
     # #Circle/ Triangle/ Trapezium/ Rhombus/ Square/ Quadrilateral/ Parallelogram/ Pentagon/ Hexagon
-
+    #plt.imshow(cv2.cvtColor(imgColor,cv2.COLOR_BGR2RGB))
     counter = np.zeros(9,int)
 
     for item in lst:
@@ -192,7 +194,20 @@ def getContours(img,imgColor):
     return shapes
 
 
-# In[8]:
+# In[7]:
+
+
+def colorMask(imgHsv):
+    #if saturation value is small enough,changing hv give black and white part
+    upr_hsv=(180,70,255)
+    lwr_hsv=(0,0,0)
+    mask=cv2.inRange(imgHsv,lwr_hsv,upr_hsv)#only colored circles are black
+    mask=cv2.bitwise_not(mask,mask=None)
+    #plt.imshow(cv2.cvtColor(mask,cv2.COLOR_BGR2RGB))
+    return mask
+
+
+# In[4]:
 
 
 def calibrateCentroid(cX,cY):
@@ -291,7 +306,7 @@ def isParallel(v1,v2):
 ##############################################################
 
 
-# In[9]:
+# In[8]:
 
 
 def scan_image(wraped_img):
@@ -323,25 +338,25 @@ def scan_image(wraped_img):
     ##############	ADD YOUR CODE HERE	##############
     shapes={}
 
-    # img = cv2.imread(img_file_path) // NO image file path required
+    #img = cv2.imread(img_file_path) // NO image file path required
 
     img=wraped_img # this time img is in RGB format
-    imgGray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) 
-    ret,thresh = cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    shapes=getContours(thresh,img)
-    
+    #plt.imshow(cv2.cvtColor(img,cv2.COLOR_BGR2RGB))
+    #imgGray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) 
+    #ret,thresh = cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    shapes=getContours(img)
+    #print(shapes)
     ##################################################
     
     return shapes
 
-#path=os.getcwd()+"/Samples/Sample5.png";
+path=os.getcwd()+"/generated_images/ball.jpeg"
+#path=os.getcwd()+"/generated_images/result_maze00.jpg"
 #print(path)
-#shapes = scan_image(path);
+shapes = scan_image(cv2.imread(path));
 
 
-# In[10]:
-
-
+# In[43]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

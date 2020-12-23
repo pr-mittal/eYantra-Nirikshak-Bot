@@ -19,7 +19,7 @@
 
 
 --[[
-# Team ID:			[ Team-ID ]
+# Team ID:			2182
 # Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
 # Filename:			task_4b_lua
 # Functions:        createWall, receiveData, generateHorizontalWalls, 
@@ -59,7 +59,8 @@ function setWallLocation(pos,ori,name,parent)
     sim.setObjectPosition(wallObjectHandle,-1,pos)
     --print(name)
     sim.setObjectName(wallObjectHandle,name)
-    sim.setObjectParent(wallObjectHandle,parent,true)
+    
+    --sim.setObjectParent(wallObjectHandle,parent,true)
 end
 function deleteWall(name)
     --delete the wall element of that name if it exists
@@ -89,7 +90,7 @@ end
 function getWallZValue()
     --gets the z value calculated according to the base
     --dimensions of wall {0.09, 0.01, 0.1}
-    local dimensions=getObjectSize("Base")
+    local dimensions=getObjectSize("top_plate_respondable_1")
     local z=dimensions[3]
     return z/2+0.1/2
 end
@@ -225,7 +226,8 @@ function generateHorizontalWalls()
     10x1 10x2 ........... 10x10
     11x1 11x2 ........... 11x10
     ]]--
-    local base=getObjectCoordinates("Base")
+    local base=getObjectCoordinates("top_plate_respondable_1")
+    
     local wall=10
     local x_gap=0.1
     local y_gap=0.1
@@ -236,7 +238,8 @@ function generateHorizontalWalls()
     local pos={x_gap/2-x_gap*wall/2+base[1],y_gap*wall/2+base[2],z_value+base[3]}
     local ori={0,0,0}
     
-    local parent=sim.getObjectHandle("Base")
+    --local parent=sim.getObjectHandle("Base")
+    local parent=-1
     for i=1,wall+1,1
     do
         for j=1,wall,1
@@ -290,7 +293,7 @@ function generateVerticalWalls()
     .
     10x1 10x2 ........... 10x10 10x11
     ]]--
-    local base=getObjectCoordinates("Base")
+    local base=getObjectCoordinates("top_plate_respondable_1")
     local wall=10
     local x_gap=0.1
     local y_gap=0.1
@@ -300,7 +303,9 @@ function generateVerticalWalls()
     local pos={-x_gap*wall/2+base[1],-y_gap/2+y_gap*wall/2+base[2],z_value+base[3]}
     local ori={0,0,math.pi/2}
     
-    local parent=sim.getObjectHandle("Base")
+    --local parent=sim.getObjectHandle("Base")
+    local parent=-1
+    
     for i=1,wall,1
     do
         for j=1,wall+1,1
@@ -560,7 +565,10 @@ function groupWalls()
         end
     end
     shapeHandle=sim.groupShapes(handles,false)
-    result=sim.setObjectName(shapeHandle,"walls_1")
+    wallGrp=sim.setObjectName(shapeHandle,"walls_1")
+    
+    --set walls_1 as child of force_sensor_tp_1
+    sim.setObjectParent(wallGrp,sim.getObjectHandle("force_sensor_tp_1"),true)
     
     --reseting runtime error on objectHandle not found
     sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
@@ -592,9 +600,10 @@ function addToCollection()
 	--*******************************************************
 	--               ADD YOUR CODE HERE
     --number result=sim.addObjectToCollection(number collectionHandle,number objectHandle,number what,number options)
+    --sim.handle_tree,sim.handle_single
     wallGrp=sim.getObjectHandle("walls_1")
     collHandle=sim.getCollectionHandle("colliding_objects")
-    result=sim.addObjectToCollection(collHandle,wallGrp,sim.sim_handle_single,1)
+    result=sim.addObjectToCollection(collHandle,wallGrp,sim.sim_handle_tree,1)
     
 	--*******************************************************
 end
