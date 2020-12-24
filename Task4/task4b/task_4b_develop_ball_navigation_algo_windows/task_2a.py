@@ -252,7 +252,7 @@ def get_vision_sensor_image(vision_sensor_handle):
 
     ##############	ADD YOUR CODE HERE	##############
 
-    global flag,vision_sensor_handle
+    #global flag,vision_sensor_handle
     #vision_sensor_handle=sensor_handle
     #print(flag)
     # _, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)

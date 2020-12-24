@@ -253,7 +253,7 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 
 
 
-def send_data(maze_array):
+def send_data(clientid,maze_array):
 	
 	"""
 	Purpose:
@@ -279,6 +279,7 @@ def send_data(maze_array):
 	"""
 
 	global client_id
+	client_id=clientid
 
 	return_code = -1
 
@@ -290,7 +291,7 @@ def send_data(maze_array):
 		maze_list+=maze_array[i][:]
 	#print(maze_list)
     #sim_scripttype_customizationscript--6
-	return_code,outInts, outFloats, outStrings, outBuffer=sim.simxCallScriptFunction(client_id,'Base',6,'receiveData',maze_list,[],[],emptyBuff,sim.simx_opmode_blocking)
+	return_code,outInts, outFloats, outStrings, outBuffer=sim.simxCallScriptFunction(client_id,'top_plate_respondable_1',6,'receiveData',maze_list,[],[],emptyBuff,sim.simx_opmode_blocking)
 	
 	##################################################
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 '''
@@ -44,7 +44,7 @@ import matplotlib.pyplot as plt
 ##############################################################
 
 
-# In[2]:
+# In[3]:
 
 
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
@@ -194,7 +194,7 @@ def getContours(imgColor):
     return shapes
 
 
-# In[7]:
+# In[4]:
 
 
 def colorMask(imgHsv):
@@ -207,7 +207,7 @@ def colorMask(imgHsv):
     return mask
 
 
-# In[4]:
+# In[5]:
 
 
 def calibrateCentroid(cX,cY):
@@ -306,7 +306,7 @@ def isParallel(v1,v2):
 ##############################################################
 
 
-# In[8]:
+# In[6]:
 
 
 def scan_image(wraped_img):
@@ -350,10 +350,10 @@ def scan_image(wraped_img):
     
     return shapes
 
-path=os.getcwd()+"/generated_images/ball.jpeg"
+#path=os.getcwd()+"/generated_images/ball.jpeg"
 #path=os.getcwd()+"/generated_images/result_maze00.jpg"
 #print(path)
-shapes = scan_image(cv2.imread(path));
+#shapes = scan_image(cv2.imread(path));
 
 
 # In[43]:
