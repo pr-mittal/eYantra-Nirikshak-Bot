@@ -473,7 +473,7 @@ def send_data_to_draw_path(rec_client_id, path):
 	##################################################
 
 
-# In[11]:
+# In[6]:
 
 
 def convert_path_to_pixels(path):
@@ -525,7 +525,7 @@ def convert_path_to_pixels(path):
     return pixel_path
 
 
-# In[13]:
+# In[7]:
 
 
 def traverse_path(pixel_path):
@@ -582,7 +582,7 @@ def traverse_path(pixel_path):
 	##################################################
 
 
-# In[14]:
+# In[8]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

@@ -141,9 +141,11 @@ def read_start_end_coordinates(file_name, maze_name):
 	end_coord = None
 
 	################# ADD YOUR CODE HERE #################
-
-
-		
+	f=open(file_name,)
+	data=json.load(f)
+	start_coord=data[maze_name]["start_coord"]
+	end_coord=data[maze_name]["end_coord"]
+	f.close()
 	######################################################
 
 	return start_coord, end_coord
