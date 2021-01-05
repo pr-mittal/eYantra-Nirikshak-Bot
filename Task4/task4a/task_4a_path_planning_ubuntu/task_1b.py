@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[15]:
-
-
 '''
 *****************************************************************************************
 *
@@ -40,7 +34,7 @@
 import numpy as np
 import cv2
 import csv
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 ##############################################################
 
 

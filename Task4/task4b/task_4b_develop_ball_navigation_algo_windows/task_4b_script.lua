@@ -19,7 +19,7 @@
 
 
 --[[
-# Team ID:			[ Team-ID ]
+# Team ID:			2182
 # Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
 # Filename:			task_4b_lua
 # Functions:        createWall, receiveData, generateHorizontalWalls, 
@@ -59,14 +59,15 @@ function setWallLocation(pos,ori,name,parent)
     sim.setObjectPosition(wallObjectHandle,-1,pos)
     --print(name)
     sim.setObjectName(wallObjectHandle,name)
-    sim.setObjectParent(wallObjectHandle,parent,true)
+    
+    --sim.setObjectParent(wallObjectHandle,parent,true)
 end
 function deleteWall(name)
     --delete the wall element of that name if it exists
     local handle=sim.getObjectHandle(name)
     if(handle~=-1)
     then
-        sim.removeObject(sim.getObjectHandle(name))
+        sim.removeObject(handle)
     end
 end
 function getObjectCoordinates(name)
@@ -89,7 +90,7 @@ end
 function getWallZValue()
     --gets the z value calculated according to the base
     --dimensions of wall {0.09, 0.01, 0.1}
-    local dimensions=getObjectSize("Base")
+    local dimensions=getObjectSize("top_plate_respondable_1")
     local z=dimensions[3]
     return z/2+0.1/2
 end
@@ -127,6 +128,7 @@ function createWall()
 	--The walls should only be collidable with the ball and not with each other.
 	--Hence we are enabling only the local respondable masks of the walls created.
 	sim.setObjectSpecialProperty(wallObjectHandle, sim.objectspecialproperty_collidable)
+    --sim.setObjectSpecialProperty(wallObjectHandle, sim.objectspecialproperty_renderable)
 	--Walls may have to be set as renderable........................... 
 	--This is required to make the wall as collidable
 	return wallObjectHandle
@@ -225,18 +227,31 @@ function generateHorizontalWalls()
     10x1 10x2 ........... 10x10
     11x1 11x2 ........... 11x10
     ]]--
-    local base=getObjectCoordinates("Base")
+    --[[Axis in simulation coordinate system
+    y-0,1,2,3,................
+    x
+    0
+    1
+    2
+    .
+    .
+    .
+    
+    ]]--(0,0) at 5x5
+    local base=getObjectCoordinates("top_plate_respondable_1")
+    
     local wall=10
     local x_gap=0.1
     local y_gap=0.1
     local z_value=getWallZValue()
-    --pos={0.05-0.1*5,0.01*5,0.08}
+    --pos={-0.01*5,0.05-0.1*5,0.08}
     --starting position is the top left corner
     --format = midpoint of x/y_gap +/- measure of distance to the edge of the base + coordinate of base
-    local pos={x_gap/2-x_gap*wall/2+base[1],y_gap*wall/2+base[2],z_value+base[3]}
-    local ori={0,0,0}
+    local pos={-x_gap*wall/2+base[1],y_gap/2-y_gap*wall/2+base[2],z_value+base[3]}
+    local ori={0,0,math.pi/2}
     
-    local parent=sim.getObjectHandle("Base")
+    --local parent=sim.getObjectHandle("Base")
+    local parent=-1
     for i=1,wall+1,1
     do
         for j=1,wall,1
@@ -245,16 +260,16 @@ function generateHorizontalWalls()
             --print(pos)
             setWallLocation(pos,ori,name,parent)
             --print(pos)
-            --adding 0.01 to x,going left to right 
-            --pos[1]=pos[1]+0.1
-            pos[1]=pos[1]+x_gap
+            --adding 0.01 to y,going left to right 
+            --pos[2]=pos[2]+0.1
+            pos[2]=pos[2]+y_gap
         end
-        --reseting values of x , going left to right
-        --pos[1]=0.05-0.1*5
-        pos[1]=x_gap/2-x_gap*wall/2
-        --subtracting 0.01 to y , coming one level down
-        --pos[2]=pos[2]-0.1
-        pos[2]=pos[2]-y_gap
+        --reseting values of y , going left to right
+        --pos[2]=0.05-0.1*5
+        pos[2]=y_gap/2-y_gap*wall/2
+        --adding 0.01 to x , coming one level down
+        --pos[1]=pos[1]+0.1
+        pos[1]=pos[1]+x_gap
     end
 	--*******************************************************
 end
@@ -290,17 +305,30 @@ function generateVerticalWalls()
     .
     10x1 10x2 ........... 10x10 10x11
     ]]--
-    local base=getObjectCoordinates("Base")
+    --[[Axis in simulation coordinate system
+    y-0,1,2,3,................
+    x
+    0
+    1
+    2
+    .
+    .
+    .
+    
+    ]]--(0,0) at 5x5
+    local base=getObjectCoordinates("top_plate_respondable_1")
     local wall=10
     local x_gap=0.1
     local y_gap=0.1
     local z_value=getWallZValue()
-    --pos={-0.1*5,-0.05+0.1*5,0.08}
+    --pos={0.05-0.1*5,-0.1*5,0.08}
     --format = midpoint of x/y_gap +/- measure of distance to the edge of the base + coordinate of base
-    local pos={-x_gap*wall/2+base[1],-y_gap/2+y_gap*wall/2+base[2],z_value+base[3]}
-    local ori={0,0,math.pi/2}
+    local pos={x_gap/2-x_gap*wall/2+base[1],-y_gap*wall/2+base[2],z_value+base[3]}
+    local ori={0,0,0}
     
-    local parent=sim.getObjectHandle("Base")
+    --local parent=sim.getObjectHandle("Base")
+    local parent=-1
+    
     for i=1,wall,1
     do
         for j=1,wall+1,1
@@ -309,16 +337,16 @@ function generateVerticalWalls()
             --print(pos)
             setWallLocation(pos,ori,name,parent)
             --print(pos)
-            --adding 0.01 to x,going left to right 
-            --pos[1]=pos[1]+0.1
-            pos[1]=pos[1]+x_gap
+            --adding 0.01 to y,going left to right 
+            --pos[2]=pos[2]+0.1
+            pos[2]=pos[2]+y_gap
         end
-        --reseting values of x , going left to right
-        --pos[1]=-0.05-0.1*5
-        pos[1]=-x_gap*wall/2
-        --subtracting 0.01 to y , coming one level down
-        --pos[2]=pos[2]-0.1
-        pos[2]=pos[2]-y_gap
+        --reseting values of y , going left to right
+        --pos[2]=-0.1*5
+        pos[2]=-y_gap*wall/2
+        --adding 0.01 to x , coming one level down
+        --pos[1]=pos[1]+0.1
+        pos[1]=pos[1]+x_gap
     end
     
 
@@ -346,7 +374,7 @@ end
 **************************************************************	
 ]]--
 function deleteWalls()
-
+    --print("DELETING WALLS.")
 	--*******************************************************
 	--               ADD YOUR CODE HERE
     --"V_WallSegment_"..i.."x"..j[1-10,1-11]
@@ -392,9 +420,10 @@ function deleteWalls()
         name="H_WallSegment_11x"..i
         deleteWall(name)
     end
+    deleteWall("walls_1")
     --reseting runtime error on objectHandle not found
     sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
-		
+    
 	--*******************************************************
 end
 
@@ -443,9 +472,20 @@ function createMaze()
     .
     .
     10x1 10x2 ........... 10x10 10x11
-    ]]--        
+    ]]--
+    --[[Axis in simulation coordinate system
+    y-0,1,2,3,................
+    x
+    0
+    1
+    2
+    .
+    .
+    .
+    
+    ]]--(0,0) at 5x5
     --*******************************************************
-    --[[mazearray={{11, 2, 6, 3, 2, 10, 10, 6, 3, 6},
+    --[[maze_array={{11, 2, 6, 3, 2, 10, 10, 6, 3, 6},
               {3, 4, 13, 5, 5, 11, 10, 8, 12, 5},
               {5, 5, 3, 12, 5, 3, 10, 10, 6, 5},
               {5, 13, 5, 3, 12, 9, 6, 3, 12, 13},
@@ -456,6 +496,16 @@ function createMaze()
               {5, 5, 9, 10, 6, 5, 5, 9, 12, 5},
               {13, 9, 10, 10, 8, 12, 9, 10, 10, 12}}
     ]]--
+    --[[maze_array={{3, 10, 10, 14, 7, 11, 10, 10, 10, 6},
+    {5, 11, 2, 2, 12, 3, 2, 10, 14, 5}, 
+    {5, 3, 12, 5, 3, 12, 9, 10, 6, 5}, 
+    {5, 5, 11, 12, 9, 10, 10, 6, 5, 13}, 
+    {13, 1, 10, 10, 10, 10, 10, 12, 1, 14}, 
+    {11, 12, 3, 2, 10, 10, 10, 6, 5, 7}, 
+    {7, 3, 12, 13, 3, 6, 11, 8, 12, 5}, 
+    {5, 1, 10, 10, 12, 9, 10, 10, 6, 5}, 
+    {5, 9, 14, 11, 10, 2, 10, 10, 12, 5}, 
+    {9, 10, 10, 10, 14, 13, 11, 10, 10, 12}}]]--
     --print(mazearray)
     if(#maze_array==0)
     then
@@ -503,7 +553,7 @@ function createMaze()
             end
         end
     end
-
+    --print("Maze Complete")
 	--*******************************************************
 end
 --[[
@@ -559,8 +609,12 @@ function groupWalls()
             
         end
     end
-    shapeHandle=sim.groupShapes(handles,false)
-    result=sim.setObjectName(shapeHandle,"walls_1")
+    wallsGroupHandle=sim.groupShapes(handles,false)
+    result=sim.setObjectName(wallsGroupHandle,"walls_1")
+    --print(wallsGroupHandle)
+    --set walls_1 as child of force_sensor_tp_1
+    --print(sim.getObjectHandle("force_sensor_pw_1"))
+    sim.setObjectParent(wallsGroupHandle,sim.getObjectHandle("force_sensor_pw_1"),true)
     
     --reseting runtime error on objectHandle not found
     sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
@@ -592,10 +646,15 @@ function addToCollection()
 	--*******************************************************
 	--               ADD YOUR CODE HERE
     --number result=sim.addObjectToCollection(number collectionHandle,number objectHandle,number what,number options)
+    --sim.handle_tree,sim.handle_single
     wallGrp=sim.getObjectHandle("walls_1")
     collHandle=sim.getCollectionHandle("colliding_objects")
-    result=sim.addObjectToCollection(collHandle,wallGrp,sim.sim_handle_single,1)
-    
+    result=sim.addObjectToCollection(collHandle,wallGrp,sim.handle_single,1)
+    --print(wallGrp)
+    --print(collHandle)
+    --print(result)
+    --print(sim.getObjectHandle("pegs_1"))
+    --print(sim.getCollectionObjects(collHandle))
 	--*******************************************************
 end
 
