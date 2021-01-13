@@ -26,7 +26,7 @@
 # Team ID:			NB_2182
 # Author List:		Yatharth Bhargava, Priyank Sisodia, Pranav Mittal
 # Filename:			task_1a_part1.py
-# Functions:		scan_image,getContours,getShape4,isEqual,isPerpendicular,isParallel
+# Functions:		scan_image,getContours,getShape4,isEqual,isPerpendicular,isParallel,colorMask
 # 					[ Comma separated list of functions in this file ]
 # Global variables:	shapes
 # 					[ List of global variables defined in this file ]
