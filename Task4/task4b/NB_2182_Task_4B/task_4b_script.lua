@@ -20,11 +20,12 @@
 
 --[[
 # Team ID:			2182
-# Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Author List:		Pranav Mittal
 # Filename:			task_4b_lua
 # Functions:        createWall, receiveData, generateHorizontalWalls, 
 #                   generateVerticalWalls, deleteWalls, createMaze, sysCall_init, sysCall_beforeSimulation
-#                   sysCall_afterSimulation, sysCall_cleanup,setWallLocation,deleteWall
+#                   sysCall_afterSimulation, sysCall_cleanup,setWallLocation       
+#                   deleteExit,setWallLocation,getObjectCoordinates,deleteWall,getWallZValue, getObjectSize 
 #                    [ Comma separated list of functions in this file ]
 # Global variables:	 maze_array
 # 					[ List of global variables defined in this file ]
@@ -101,7 +102,7 @@ function deleteExit(number)
     --for Table4(Center),Exit points are Vertical_wall-(4,0),vertical_wall-(5,9),horizontal_wall-(9,4)
     --for Table1(Right),Exit points are Horizontal_wall-(0,4),vertical_wall-(4,9),horizontal_wall-(9,5)
     --for Table2(Bottom),Exit points are Vertical_wall-(5,0),vertical_wall-(4,9),horizontal_wall-(9,5)
-    --for Table3(Left),Exit points are Vertical_wall-(5,0),horizontal_wall-(0,4),horizontal_wall-(9,5)
+    --for Table3(Left),Exit points are Vertical_wall-(4,9),horizontal_wall-(0,4),horizontal_wall-(9,5)
     --the names of walls start from one where as wall number start from 1
     --FORMAT:list[table][i][1]==1,remove horizontal else remove veritcal at list[table][i][2]xlist[table][i][3]
     if(number>4) or (number<1)
@@ -110,7 +111,7 @@ function deleteExit(number)
     end
     list={{{1,1,5},{-1,5,11},{1,11,6}},
             {{-1,6,1},{-1,5,11},{1,11,6}},
-            {{-1,6,1},{1,1,5},{1,11,6}},
+            {{-1,5,11},{1,1,5},{1,11,6}},
             {{-1,5,1},{-1,6,11},{1,11,5}}}
     for i=1,3,1
     do
@@ -515,17 +516,30 @@ function createMaze()
     
     ]]--(0,0) at 5x5
     --*******************************************************
+    --[[maze_array={{11, 2, 6, 3, 2, 10, 10, 6, 3, 6},
+              {3, 4, 13, 5, 5, 11, 10, 8, 12, 5},
+              {5, 5, 3, 12, 5, 3, 10, 10, 6, 5},
+              {5, 13, 5, 3, 12, 9, 6, 3, 12, 13},
+              {5, 3, 12, 9, 10, 10, 12, 9, 10, 6},
+              {5, 9, 10, 10, 6, 3, 6, 3, 6, 5},
+              {1, 6, 3, 10, 12, 5, 9, 12, 5, 13},
+              {5, 5, 5, 11, 10, 4, 3, 6, 5, 7},
+              {5, 5, 9, 10, 6, 5, 5, 9, 12, 5},
+              {13, 9, 10, 10, 8, 12, 9, 10, 10, 12}}
+    ]]--
     --[[maze_array={{3, 10, 10, 14, 7, 11, 10, 10, 10, 6},
- {5, 3, 14, 3, 8, 6, 3, 10, 6, 5},
- {5, 1, 6, 1, 14, 9, 8, 14, 5, 5},
- {5, 5, 9, 12, 3, 6, 3, 10, 12, 13},
- {13, 5, 7, 11, 12, 5, 5, 11, 2, 14},
- {11, 8, 4, 3, 14, 9, 12, 3, 4, 7},
- {7, 3, 12, 9, 10, 10, 10, 4, 5, 5},
- {5, 5, 3, 6, 3, 10, 10, 12, 5, 5},
- {5, 9, 12, 9, 12, 3, 10, 10, 12, 5},
- {9, 10, 10, 10, 14, 13, 11, 10, 10, 12}}
-]]--
+    {5, 11, 2, 2, 12, 3, 2, 10, 14, 5}, 
+    {5, 3, 12, 5, 3, 12, 9, 10, 6, 5}, 
+    {5, 5, 11, 12, 9, 10, 10, 6, 5, 13}, 
+    {13, 1, 10, 10, 10, 10, 10, 12, 1, 14}, 
+    {11, 12, 3, 2, 10, 10, 10, 6, 5, 7}, 
+    {7, 3, 12, 13, 3, 6, 11, 8, 12, 5}, 
+    {5, 1, 10, 10, 12, 9, 10, 10, 6, 5}, 
+    {5, 9, 14, 11, 10, 2, 10, 10, 12, 5}, 
+    {9, 10, 10, 10, 14, 13, 11, 10, 10, 12}}]]--
+    --print(mazearray)
+    
+
     if(#maze_array==0)
     then
         return

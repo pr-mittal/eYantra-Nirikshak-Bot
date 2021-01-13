@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[10]:
-
 
 '''
 *****************************************************************************************
@@ -24,7 +19,7 @@
 '''
 
 # Team ID:			2182
-# Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Author List:		Yatharth Bhargava,Priyank Sisodia,Pranav Mittal
 # Filename:			task_2b.py
 # Functions:		init_remote_api_server, exit_remote_api_server, get_vision_sensor_image,
 # 					transform_vision_sensor_image, send_data
@@ -47,9 +42,6 @@ import math
 import time
 ##############################################################
 
-
-
-# In[11]:
 
 
 # Importing the sim module for Remote API connection with CoppeliaSim
@@ -81,9 +73,6 @@ client_id = -1
 
 
 ##############################################################
-
-
-# In[12]:
 
 
 def init_remote_api_server():
@@ -127,10 +116,6 @@ def init_remote_api_server():
 	##################################################
 
 	return client_id
-
-
-# In[45]:
-
 
 def get_vision_sensor_image():
 	
@@ -186,10 +171,6 @@ def get_vision_sensor_image():
 	##################################################
 
 	return vision_sensor_image, image_resolution, return_code
-
-
-# In[46]:
-
 
 
 def transform_vision_sensor_image(vision_sensor_image, image_resolution):
@@ -249,10 +230,6 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	return transformed_image
 
 
-# In[47]:
-
-
-
 def send_data(clientid,maze_array):
 	
 	"""
@@ -298,10 +275,6 @@ def send_data(clientid,maze_array):
 	return return_code
 
 
-# In[48]:
-
-
-
 def exit_remote_api_server():
 	
 	"""
@@ -336,10 +309,6 @@ def exit_remote_api_server():
 	sim.simxFinish(client_id)
 	##################################################
 	
-
-
-# In[52]:
-
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

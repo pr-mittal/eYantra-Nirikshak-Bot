@@ -17,11 +17,11 @@
 *****************************************************************************************
 '''
 
-# Team ID:		 NB_2182
-# Author List:	  	Yatharth Bhargava, Pranav Mittal
-# Filename:		task_4b.py
-# Functions:		calculate_path_from_maze_image, send_data_to_draw_path, 
-# 					convert_path_to_pixels, traverse_path. getBallCoordinates
+# Team ID:		  NB_2182
+# Author List:	  	 Yatharth Bhargava, Pranav Mittal
+# Filename:		 task_4b.py
+# Functions:		 calculate_path_from_maze_image, send_data_to_draw_path, 
+# 					convert_path_to_pixels, traverse_path,getBallCoordinates
 #				   [ Comma separated list of functions in this file ]
 # Global variables: client_id, setpoint, start_coord, end_coord
 # 					[ List of global variables defined in this file ]
@@ -169,7 +169,6 @@ end_coord = (9,5)
 ## readable and easy to understand.						 ##
 ##############################################################
 def getBallCoordinates():
-	global vision_sensor_handle
 	
 	vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(task_3.vision_sensor_handle)
 	if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
@@ -483,12 +482,15 @@ def convert_path_to_pixels(path):
 	#(8,0),(8,1)(8,2)...................(8,7),(8,8)(8,9)
 	#(9,0),(9,1)(9,2)(9,3)(9,4)(9,5)(9,6)(9,7)(9,8)(9,9)
 	#the pixels in image
-	#x(right)/y(down)
+	#x(right)/y(down)-
+
 	#0,1,...................1280
-	#1..............................
-	#...............................
-	#...............................
-	#1280.......................
+	#0,............................
+	#1 ,............................
+	#. ,............................
+	#. ,............................
+	#1280, .....................
+
 	pixel_path=[]
 	wh=1280/10
 	
@@ -524,17 +526,49 @@ def traverse_path(pixel_path):
 	traverse_path(pixel_path)
 
 	"""
+
 	##############	ADD YOUR CODE HERE	#############
+	'''
+	Here we have implemented a logic to optimize the path/pixel_path. The pixel_path  that we have got from
+	tash_4a has each node at a distance of 1 unit from each other. In the case of straight lines in path we can skip
+	some of the in between nodes this helps in rdeucing the time becuase ball travels better and wihout sudden 
+	change in the set point. 
+
+	lets suppose that our path is -[[(1, 4), (1, 3), (1, 2), (1, 1), (2, 1), (3, 1)]] 
+	then we can convert this path to [[(1, 4), (1, 1), (3, 1)]] 
+
+		|_1,1_| 	|_1,2_| 	|_1,3_| 	|_1,4_|
+		|_2,1_| 	|_2,2_| 	|_2,3_| 	|_2,4_|
+		|_3,1_| 	|_3,2_| 	|_3,3_| 	|_3,4_|
+		|_4,1_| 	|_4,2_| 	|_4,3_| 	|_4,4_|
+		|_5,1_| 	|_5,2_| 	|_5,3_| 	|_5,4_|
+	We have done this optimization in the pixel_path that we got as an argument in this function.
+	for that we have to use the previous pixel coordinates(i-1) and just future coordinates(i+1) and 
+	if both the pixel coordinates do not match completely this implies that there is a turn at i.
+	'''
 	# loop from start to a point less than end,as dst=src+1
-	thresh=1500
+	thresh=1000
 	task_3.setAngles(np.array([0,0]))
-	z=1
-	center_x,center_y=getBallCoordinates()
-	# task_3.lastInput=task_3.coordinateTransform([center_x,center_y])
+	z=1	
+	# this is a kind of flag variable which will help in setting the last coordinates of ball for the first frame of run, 
+	# which is used in the calculation of derivative term in PID calculation.
+	prev_x=pixel_path[0][0]
+	prev_y=pixel_path[0][1]
+	# print("prev-x=",prev_x)
+	# print("prev-y=",prev_y)
 	for i in range(len(pixel_path)-1):
 		#true loop until ball reached destination
+
+		if( (i+2)<(len(pixel_path))and(pixel_path[i+2][0]==prev_x or pixel_path[i+2][1]==prev_y)):
+			prev_x=pixel_path[i+1][0]
+			prev_y=pixel_path[i+1][1]
+			# print("prev-x=",prev_x)
+			# print("prev-y=",prev_y)
+			continue
 		src=pixel_path[i]
 		dst=pixel_path[i+1]
+		prev_x=pixel_path[i+1][0]
+		prev_y=pixel_path[i+1][1]
 		task_3.change_setpoint(dst)
 		task_3.summation=np.array([0,0],dtype='float64')
 		task_3.ITerm=np.array([0,0],dtype='float64')
@@ -549,7 +583,6 @@ def traverse_path(pixel_path):
 			if((center_x==None) or (center_x==None)):
 				continue
 			if(z==1):
-				# setting last input for first iteration 
 				task_3.lastInput=task_3.coordinateTransform([center_x,center_y])
 				z=0
 			return_code_signal,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
@@ -560,8 +593,10 @@ def traverse_path(pixel_path):
 			else:
 				timechange=0
 			temp=now
-			# Ball has to stay under thresold radius at every set point for minimum 0.6sec  
-			if(timechange>=0.6):
+
+			#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+			# this help in stability of the ball while traversal. 
+			if(timechange>=0.7):
 				break
 			try:
 				task_3.control_logic(center_x,center_y)

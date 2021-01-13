@@ -17,12 +17,15 @@
 *****************************************************************************************
 '''
 
-# Team ID:		  NB_2182
+# Team ID:		NB_2182
 # Author List:	  	Priyank Sisodia,Aman Sharma, Yatharth Bhargava, Pranav Mittal
 # Filename:		 task_3.py
-# Functions:		init_setup(rec_client_id), control_logic(center_x,center_y), change_setpoint(new_setpoint)
+# Functions:		init_setup(rec_client_id), control_logic(center_x,center_y), change_setpoint(new_setpoint),setAngles(Output),
+# 				SetTunings(Kp,Ki,Kd), SetSampleTime(NewSampleTime), 
+# 				SetOutputLimits(Min,Max), Initialize(), coordinateTransform(xy)
 #				   [ Comma separated list of functions in this file ]
-# Global variables: client_id, setpoint=[]
+# Global variables: client_id, setpoint=[],vision_sensor_handle,revolute_handle,kp,ki,kd,outMax,outMin,lastTime,error,summation
+			# , Input, lastInput, ITerm, SampleTime, Output, lastOutput
 					# [ List of global variables defined in this file ]
 
 
@@ -36,7 +39,6 @@ import cv2
 import os, sys
 import traceback
 import time
-#import matplotlib.pyplot as plt
 ##############################################################
 
 # Importing the sim module for Remote API connection with CoppeliaSim
@@ -71,7 +73,7 @@ vision_sensor_handle = 0
 revolute_handle=[-1,-1,-1,-1,-1,-1,-1,-1]
 outMax=60
 outMin=-60
-kp=np.array([0.02,0.02],dtype='float64')
+kp=np.array([0.018,0.018],dtype='float64')
 ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 kd=np.array([0.135,0.135],dtype='float64')#kd=kd/SampleTime
 lastTime=0
@@ -94,25 +96,30 @@ lastOutput=np.array([0,0],dtype="float64")
 ##############################################################
 def setAngles(Output):
 	global revolute_handle,client_id
-	# print(Output,"o")
 	
 	# print("Output=",Output)
 	#setting output to joints/motors
 	#This can be useful if you need to send several values to CoppeliaSim that should be received and evaluated at the same time. 
 	_=sim.simxPauseCommunication(client_id,True)
+	# Output[0]=(-1)*Output[0]
+	# Output[1]=(-1)*Output[1]
 	
+	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[7],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 
 	
+	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[4],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	
 	
+	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	
 	
+	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[5],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[6],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 
@@ -328,7 +335,6 @@ def control_logic(center_x,center_y):
 		
 		Input=coordinateTransform([center_x,center_y])
 		#calculation of error
-		#error=getError(Input,coordinateTransform(setpoint))
 		setpoint=np.array(setpoint,dtype="float64")
 		error=setpoint-np.array([center_x,center_y],dtype="float64")
 		#matrix multiplication of error and coordinate transformation matrix
@@ -336,7 +342,7 @@ def control_logic(center_x,center_y):
 		error=np.dot(error,transform)
 		# print("Error=",error[0]*error[0]+error[1]*error[1])
 
-		#calclating integral term ,ki*error*delta t,here delta t already multiplied in ki 
+		#calclating integral term ,ki*error*delta t,here assuming that delta t already multiplied in ki 
 
 		# print(timeChange)
 		# here summation means the summation of all previous error
@@ -369,8 +375,8 @@ def control_logic(center_x,center_y):
 		lastTime = now
 		lastOutput=Output
 		setAngles(Output)
+		#  In case value of kd has changed
 		kd=np.array([0.135,0.135],dtype='float64')
-	
 
 	##################################################
 	

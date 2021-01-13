@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
 
 '''
 *****************************************************************************************
@@ -29,8 +24,8 @@
 # Functions:        init_remote_api_server, start_simulation, get_vision_sensor_image, transform_vision_sensor_image,
 # 					stop_simulation, exit_remote_api_server
 #                   [ Comma separated list of functions in this file ]
-# Global variables: client_id
-# 					[ List of global variables defined in this file ]   flag
+# Global variables: client_id,flag,vision_sensor_handle
+# 					[ List of global variables defined in this file ]
 
 
 ####################### IMPORT MODULES #######################
@@ -60,12 +55,10 @@ except Exception:
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
 client_id = -1
-calibrate=[]
+#calibrate=[]
 flag=False
 vision_sensor_handle=-1
 
-
-# In[2]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -132,8 +125,6 @@ def calibrateCameraMatrix():
 
 ##############################################################
 
-
-# In[3]:
 
 
 def init_remote_api_server():
@@ -252,67 +243,9 @@ def get_vision_sensor_image(vision_sensor_handle):
 
     ##############	ADD YOUR CODE HERE	##############
 
-    #global flag,vision_sensor_handle
-    #vision_sensor_handle=sensor_handle
-    #print(flag)
-    # _, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
-    #if(flag==False):
-        #_, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
-    
-    #    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
-    #    flag=True
-    #    rCode, pingTime = sim.simxGetPingTime(client_id)
-        #calibrateCameraMatrix()
-        
-        #return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
-        #stabilising when the simualtion is started
-    #    revolute_handle=[-1,-1,-1,-1,-1,-1,-1,-1]
-    #    _,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1",sim.simx_opmode_blocking)
-    #    _,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2",sim.simx_opmode_blocking)
-    #    _,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_3",sim.simx_opmode_blocking)
-    #    _,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_4",sim.simx_opmode_blocking)
-    #    _,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_5",sim.simx_opmode_blocking)
-    #    _,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_6",sim.simx_opmode_blocking)
-    #    _,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_7",sim.simx_opmode_blocking)
-    #    _,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_8",sim.simx_opmode_blocking)
-
-    #    _=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],0,sim.simx_opmode_oneshot)
-    #    _=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],0,sim.simx_opmode_oneshot)
-
-    #    _=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],0,sim.simx_opmode_oneshot)
-    #    _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],0,sim.simx_opmode_oneshot)
-    #	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[4],0,sim.simx_opmode_oneshot)
-    #    _=sim.simxSetJointTargetPosition(client_id,revolute_handle[5],0,sim.simx_opmode_oneshot)
-
-    #    _=sim.simxSetJointTargetPosition(client_id,revolute_handle[6],0,sim.simx_opmode_oneshot)
-    #    _=sim.simxSetJointTargetPosition(client_id,revolute_handle[7],0,sim.simx_opmode_oneshot)
-    #else:
-    #    return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
     return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
-        
-#------------------------------------------------------------------------------------------------------------------#
-    # _, sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
-
-    # return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, sensor_handle, 0, sim.simx_opmode_streaming)  # streaming may need change
-
-    # rCode, pingTime = sim.simxGetPingTime(client_id)
-
-    # return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
-    #    client_id, sensor_handle, 0, sim.simx_opmode_buffer)
-
-    #print(sensor_handle,return_code,image_resolution,len(vision_sensor_image),flag)
-    #print(vision_sensor_handle,return_code,image_resolution,len(vision_sensor_image),flag)
-    
-    #_,ball=sim.simxGetObjectHandle(client_id,"ball_1",sim.simx_opmode_blocking)
-    #_,topPlate=sim.simxGetObjectHandle(client_id,"top_plate_respondable_1",sim.simx_opmode_blocking)
-    #rtrnCode,pos=sim.simxGetObjectPosition(client_id,ball,sim.sim_handle_parent,sim.simx_opmode_blocking)
-    #print("Calirate Ball Pos=",-640*pos[0]/0.5+640,640*pos[1]/0.5+640)
-    ##################################################
-
+ 
     return vision_sensor_image, image_resolution, return_code
-
-
-# In[4]:
 
 
 def transform_vision_sensor_image(vision_sensor_image, image_resolution):
@@ -361,9 +294,6 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
     ##################################################
 
     return transformed_image
-
-
-# In[5]:
 
 
 def stop_simulation():
@@ -431,10 +361,6 @@ def exit_remote_api_server():
     rCode,pingTime= sim.simxGetPingTime(client_id)
     sim.simxFinish(client_id)
     ##################################################
-
-
-# In[ ]:
-
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

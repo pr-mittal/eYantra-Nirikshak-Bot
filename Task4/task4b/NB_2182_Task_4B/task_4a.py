@@ -17,12 +17,12 @@
 *****************************************************************************************
 '''
 
-# Team ID:			 NB-2182
+# Team ID:			2182
 # Author List:		Aman Kumar,Pranav Mittal
 # Filename:			task_4a.py
-# Functions:		find_path, read_start_end_coordinates
+# Functions:		find_path, read_start_end_coordinates,make_step,getMinPath,getPath
 # 					[ Comma separated list of functions in this file ]
-#                     make_step,getMinPath,getPath
+#                     
 # Global variables:	
 # 					[ List of global variables defined in this file ]
                     
@@ -56,6 +56,9 @@ except Exception as e:
     sys.exit()
 
 ##############################################################
+
+
+# In[9]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################

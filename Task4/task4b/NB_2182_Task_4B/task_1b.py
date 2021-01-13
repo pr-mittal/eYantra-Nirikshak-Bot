@@ -33,13 +33,9 @@
 ##############################################################
 import numpy as np
 import cv2
-# import csv
+import csv
 # import matplotlib.pyplot as plt
 ##############################################################
-
-
-# In[35]:
-
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -129,9 +125,6 @@ def threshInputImage(img):
     imgMorph=cv2.dilate(imgCanny,kernel,iterations=2)
     
     return imgMorph
-
-
-# In[41]:
 
 
 def mazeDimension(warped_img):
@@ -239,9 +232,6 @@ def checkWall(roi):
     
 
 ##############################################################
-
-
-# In[39]:
 
 
 def applyPerspectiveTransform(input_img):
@@ -437,7 +427,6 @@ def detectMaze(warped_img):
 #detectMaze(applyPerspectiveTransform(cv2.imread(path)))
 
 
-# In[ ]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -461,12 +450,11 @@ def writeToCsv(csv_file_path, maze_array):
 	warped_img = writeToCsv('test_cases/maze00.csv', maze_array)
 	"""
 
-	with open(csv_file_path, 'w', newline='') as file:
-		writer = csv.writer(file)
-		writer.writerows(maze_array)
+	# with open(csv_file_path, 'w', newline='') as file:
+		# writer = csv.writer(file)
+		# writer.writerows(maze_array)
 
 
-# In[ ]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

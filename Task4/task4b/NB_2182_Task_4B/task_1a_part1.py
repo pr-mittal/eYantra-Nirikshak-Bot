@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
-
 '''
 *****************************************************************************************
 *
@@ -44,7 +38,6 @@ import os
 ##############################################################
 
 
-# In[3]:
 
 
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
@@ -194,7 +187,6 @@ def getContours(imgColor):
     return shapes
 
 
-# In[4]:
 
 
 def colorMask(imgHsv):
@@ -207,7 +199,6 @@ def colorMask(imgHsv):
     return mask
 
 
-# In[5]:
 
 
 def calibrateCentroid(cX,cY):
@@ -306,7 +297,6 @@ def isParallel(v1,v2):
 ##############################################################
 
 
-# In[6]:
 
 
 def scan_image(wraped_img):
@@ -356,7 +346,6 @@ def scan_image(wraped_img):
 #shapes = scan_image(cv2.imread(path));
 
 
-# In[43]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
