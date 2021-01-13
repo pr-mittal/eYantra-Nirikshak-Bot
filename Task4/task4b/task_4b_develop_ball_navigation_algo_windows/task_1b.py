@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[15]:
-
-
 '''
 *****************************************************************************************
 *
@@ -39,8 +33,8 @@
 ##############################################################
 import numpy as np
 import cv2
-import csv
-import matplotlib.pyplot as plt
+# import csv
+# import matplotlib.pyplot as plt
 ##############################################################
 
 
@@ -213,7 +207,8 @@ def mazeDimension(warped_img):
 
     #    cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
     
-    plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
+    # plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
+
     
     #print(cntVer,cntHor)
     dim=max(cntVer-1,cntHor-1)
@@ -336,10 +331,6 @@ def applyPerspectiveTransform(input_img):
 #applyPerspectiveTransform(cv2.imread(path))
 
 
-# In[92]:
-
-
-
 def detectMaze(warped_img):
 
     """
@@ -376,7 +367,7 @@ def detectMaze(warped_img):
     
     #applying dilation for better maze detection 
     kernel = np.ones((10, 10), np.uint8)
-    resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=3)
+    resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=4)
     #plt.imshow(cv2.cvtColor(resultBitmap,cv2.COLOR_BGR2RGB))
     
     h,w=resultBitmap.shape

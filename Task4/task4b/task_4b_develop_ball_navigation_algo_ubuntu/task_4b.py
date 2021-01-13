@@ -1,15 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 '''
 *****************************************************************************************
 *
-*        		===============================================
-*           		Nirikshak Bot (NB) Theme (eYRC 2020-21)
-*        		===============================================
+*				===============================================
+*		   		Nirikshak Bot (NB) Theme (eYRC 2020-21)
+*				===============================================
 *
 *  This script is to implement Task 4B of Nirikshak Bot (NB) Theme (eYRC 2020-21).
 *  
@@ -23,12 +17,12 @@
 *****************************************************************************************
 '''
 
-# Team ID:          [ Team-ID ]
-# Author List:      [ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
-# Filename:         task_4b.py
-# Functions:        calculate_path_from_maze_image, send_data_to_draw_path, 
-# 					convert_path_to_pixels, traverse_path
-#                   [ Comma separated list of functions in this file ]
+# Team ID:		 NB_2182
+# Author List:	  	Yatharth Bhargava, Pranav Mittal
+# Filename:		task_4b.py
+# Functions:		calculate_path_from_maze_image, send_data_to_draw_path, 
+# 					convert_path_to_pixels, traverse_path. getBallCoordinates
+#				   [ Comma separated list of functions in this file ]
 # Global variables: client_id, setpoint, start_coord, end_coord
 # 					[ List of global variables defined in this file ]
 
@@ -36,14 +30,12 @@
 ####################### IMPORT MODULES #######################
 ## You are not allowed to make any changes in this section. ##
 ## You have to implement this task with the three available ##
-## modules for this task (numpy,opencv,os,sys,traceback)    ##
+## modules for this task (numpy,opencv,os,sys,traceback)	##
 ##############################################################
 import numpy as np
 import cv2
 import os, sys
 import traceback
-import time
-import math
 ##############################################################
 
 # Importing the sim module for Remote API connection with CoppeliaSim
@@ -150,10 +142,6 @@ except Exception as e:
 	sys.exit()
 
 
-# In[2]:
-
-
-
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
 client_id = -1
@@ -175,85 +163,79 @@ end_coord = (9,5)
 ##############################################################
 
 
-# In[3]:
-
-
 ################# ADD UTILITY FUNCTIONS HERE #################
-## You can define any utility functions for your code.      ##
+## You can define any utility functions for your code.	  ##
 ## Please add proper comments to ensure that your code is   ##
-## readable and easy to understand.                         ##
+## readable and easy to understand.						 ##
 ##############################################################
 def getBallCoordinates():
-    global vision_sensor_handle
-    
-    vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(task_3.vision_sensor_handle)
-    if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
-        #print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
-        pass
-    else:
-        #start loop again
-        return None,None
+	global vision_sensor_handle
+	
+	vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(task_3.vision_sensor_handle)
+	if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
+		#print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
+		pass
+	else:
+		#start loop again
+		return None,None
 
 
-    # Get the transformed vision sensor image captured in correct format
-    try:
-        transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image, image_resolution)
-        if (type(transformed_image) is np.ndarray):
-            # Get the resultant warped transformed vision sensor image after applying Perspective Transform
-            try:
-                warped_img = task_1b.applyPerspectiveTransform(transformed_image)
-                if (type(warped_img) is np.ndarray):
-                    # Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
-                    try:
-                        shapes = task_1a_part1.scan_image(warped_img)
-                        if (type(shapes) is dict and shapes!={}):
-                            #print('\nShapes detected by Vision Sensor are: ')
-                            #print(shapes)
-                            # Storing the detected x and y centroid in center_x and center_y variable repectively
-                            center_x = shapes['Circle'][1]
-                            center_y = shapes['Circle'][2]
-                        elif(type(shapes) is not dict):
-                            #print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
-                            #print('Stop the CoppeliaSim simulation manually.')
-                            return None,None
-                    except Exception:
-                        print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
-                        print('Stop the CoppeliaSim simulation manually.\n')
-                        traceback.print_exc(file=sys.stdout)
-                        print()
-                        sys.exit()
+	# Get the transformed vision sensor image captured in correct format
+	try:
+		transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image, image_resolution)
+		if (type(transformed_image) is np.ndarray):
+			# Get the resultant warped transformed vision sensor image after applying Perspective Transform
+			try:
+				warped_img = task_1b.applyPerspectiveTransform(transformed_image)
+				if (type(warped_img) is np.ndarray):
+					# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
+					try:
+						shapes = task_1a_part1.scan_image(warped_img)
+						if (type(shapes) is dict and shapes!={}):
+							#print('\nShapes detected by Vision Sensor are: ')
+							# print(shapes)
+							# Storing the detected x and y centroid in center_x and center_y variable repectively
+							center_x = shapes['Circle'][1]
+							center_y = shapes['Circle'][2]
+						elif(type(shapes) is not dict):
+							#print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
+							#print('Stop the CoppeliaSim simulation manually.')
+							return None,None
+					except Exception:
+						print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
+						print('Stop the CoppeliaSim simulation manually.\n')
+						traceback.print_exc(file=sys.stdout)
+						print()
+						sys.exit()
 
-                else:
-                    print('\n[ERROR] applyPerspectiveTransform function is not configured correctly, check the code.')
-                    print('Stop the CoppeliaSim simulation manually.')
-                    print()
-                    sys.exit()
+				else:
+					print('\n[ERROR] applyPerspectiveTransform function is not configured correctly, check the code.')
+					print('Stop the CoppeliaSim simulation manually.')
+					print()
+					sys.exit()
 
-            except Exception:
-                print('\n[ERROR] Your applyPerspectiveTransform function in task_1b.py throwed an Exception. Kindly debug your code!')
-                print('Stop the CoppeliaSim simulation manually.\n')
-                traceback.print_exc(file=sys.stdout)
-                print()
-                sys.exit()
+			except Exception:
+				print('\n[ERROR] Your applyPerspectiveTransform function in task_1b.py throwed an Exception. Kindly debug your code!')
+				print('Stop the CoppeliaSim simulation manually.\n')
+				traceback.print_exc(file=sys.stdout)
+				print()
+				sys.exit()
 
-        else:
-            print('\n[ERROR] transform_vision_sensor_image function in task_2a.py is not configured correctly, check the code.')
-            print('Stop the CoppeliaSim simulation manually.')
-            print()
-            sys.exit()
+		else:
+			print('\n[ERROR] transform_vision_sensor_image function in task_2a.py is not configured correctly, check the code.')
+			print('Stop the CoppeliaSim simulation manually.')
+			print()
+			sys.exit()
 
-    except Exception:
-        print('\n[ERROR] Your transform_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
-        print('Stop the CoppeliaSim simulation manually.\n')
-        traceback.print_exc(file=sys.stdout)
-        print()
-        sys.exit()
-    return center_x,center_y
+	except Exception:
+		print('\n[ERROR] Your transform_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
+		print('Stop the CoppeliaSim simulation manually.\n')
+		traceback.print_exc(file=sys.stdout)
+		print()
+		sys.exit()
+	return center_x,center_y
 
 ##############################################################
-
-
-# In[4]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -352,8 +334,6 @@ def calculate_path_from_maze_image(img_file_path):
 
 	return maze_array, path
 
-
-# In[5]:
 
 
 def send_data_to_draw_path(rec_client_id, path):
@@ -473,124 +453,136 @@ def send_data_to_draw_path(rec_client_id, path):
 	##################################################
 
 
-# In[6]:
-
-
 def convert_path_to_pixels(path):
-    """
-    Purpose:
-    ---
-    This function should convert the obtained path (list of tuples) to pixels.
-    Teams are free to choose the number of points and logic for this conversion.
+	"""
+	Purpose:
+	---
+	This function should convert the obtained path (list of tuples) to pixels.
+	Teams are free to choose the number of points and logic for this conversion.
 
-    Input Arguments:
-    ---
-    `path` 	:  [ list ]
-        Path returned from task_4a.find_path() function.
+	Input Arguments:
+	---
+	`path` 	:  [ list ]
+		Path returned from task_4a.find_path() function.
 
-    Returns:
-    ---
-    `pixel_path` : [ type can be decided by teams ]
+	Returns:
+	---
+	`pixel_path` : [ type can be decided by teams ]
 
-    Example call:
-    ---
-    pixel_path = convert_path_to_pixels(path)
+	Example call:
+	---
+	pixel_path = convert_path_to_pixels(path)
 
-    """
-    ##############	ADD YOUR CODE HERE	##############
-    #the size of image is 1280x1280
-    #the coordinates for path are
-    #(0,0),(0,1)(0,2)(0,3)(0,4)(0,5)(0,6)(0,7)(0,8)(0,9)
-    #(1,0),(1,1)(1,2)...................(1,7),(1,8)(1,9)
-    #..................................................
-    #(8,0),(8,1)(8,2)...................(8,7),(8,8)(8,9)
-    #(9,0),(9,1)(9,2)(9,3)(9,4)(9,5)(9,6)(9,7)(9,8)(9,9)
-    #the pixels in image
-    #x(right)/y(down)-0,1,...................1280
-    #0
-    #1
-    #.
-    #.
-    #1280
-    
-    pixel_path=[]
-    wh=1280/10
-    
-    for i in range(len(path)):
-        cX=path[i][0]
-        cY=path[i][1]
-        pixel_path+=[[wh*cX+wh/2,wh*cY+wh/2]]
-        
-    ##################################################	
-    return pixel_path
-
-
-# In[7]:
-
+	"""
+	##############	ADD YOUR CODE HERE	##############
+	#the size of image is 1280x1280
+	#the coordinates for path are
+	#(0,0),(0,1)(0,2)(0,3)(0,4)(0,5)(0,6)(0,7)(0,8)(0,9)
+	#(1,0),(1,1)(1,2)...................(1,7),(1,8)(1,9)
+	#..................................................
+	#(8,0),(8,1)(8,2)...................(8,7),(8,8)(8,9)
+	#(9,0),(9,1)(9,2)(9,3)(9,4)(9,5)(9,6)(9,7)(9,8)(9,9)
+	#the pixels in image
+	#x(right)/y(down)
+	#0,1,...................1280
+	#1..............................
+	#...............................
+	#...............................
+	#1280.......................
+	pixel_path=[]
+	wh=1280/10
+	
+	for i in range(len(path)):
+		cX=path[i][1]
+		cY=path[i][0]
+		pixel_path+=[[wh*cX+wh/2,wh*cY+wh/2]]
+		
+	##################################################	
+	return pixel_path
 
 def traverse_path(pixel_path):
 
-    """
-    Purpose:
-    ---
-    This function should make the ball traverse the calculated path.
+	"""
+	Purpose:
+	---
+	This function should make the ball traverse the calculated path.
 
-    Teams are free to choose logic for this function.
+	Teams are free to choose logic for this function.
 
-    NOTE: Refer the code of main function in task_3.py.
+	NOTE: Refer the code of main function in task_3.py.
 
-    Input Arguments:
-    ---
-    `pixel_path` : [ type can be decided by teams ]
+	Input Arguments:
+	---
+	`pixel_path` : [ type can be decided by teams ]
 
-    Returns:
-    ---
-    None
+	Returns:
+	---
+	None
 
-    Example call:
-    ---
-    traverse_path(pixel_path)
+	Example call:
+	---
+	traverse_path(pixel_path)
 
-    """
-    ##############	ADD YOUR CODE HERE	#############
-    #loop from start to a point less than end,as dst=src+1
-    thresh=2000
-    
-    for i in range(len(pixel_path)-1):
-        #true loop until ball reached destination
-        src=pixel_path[i]
-        dst=pixel_path[i+1]
-        task_3.change_setpoint(dst)
-        print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
-        
-        while(True):                
-            
-            center_x,center_y=getBallCoordinates()
-            if((center_x==None) or (center_x==None)):
-                continue
-            if((center_x-dst[0])**2+(center_y-dst[1])**2 < thresh):
-                break
-            try:
-                task_3.control_logic(center_x,center_y)
-            except:
-                print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
-                print('Stop the CoppeliaSim simulation manually.\n')
-                traceback.print_exc(file=sys.stdout)
-                print()
-                sys.exit()
-
+	"""
+	##############	ADD YOUR CODE HERE	#############
+	# loop from start to a point less than end,as dst=src+1
+	thresh=1500
+	task_3.setAngles(np.array([0,0]))
+	z=1
+	center_x,center_y=getBallCoordinates()
+	# task_3.lastInput=task_3.coordinateTransform([center_x,center_y])
+	for i in range(len(pixel_path)-1):
+		#true loop until ball reached destination
+		src=pixel_path[i]
+		dst=pixel_path[i+1]
+		task_3.change_setpoint(dst)
+		task_3.summation=np.array([0,0],dtype='float64')
+		task_3.ITerm=np.array([0,0],dtype='float64')
+		# print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
+		temp=0
+		timechange = 0
+		while(True):				
+			
+			center_x,center_y=getBallCoordinates()
+			# print(dst)
+			# print("center_x = ",center_x,"center_y",center_y)
+			if((center_x==None) or (center_x==None)):
+				continue
+			if(z==1):
+				# setting last input for first iteration 
+				task_3.lastInput=task_3.coordinateTransform([center_x,center_y])
+				z=0
+			return_code_signal,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+			now=float(now)
+			if((center_x-dst[0])**2+(center_y-dst[1])**2 < thresh):
+				timechange=timechange+(now-temp)
+				# print (now)
+			else:
+				timechange=0
+			temp=now
+			# Ball has to stay under thresold radius at every set point for minimum 0.6sec  
+			if(timechange>=0.6):
+				break
+			try:
+				task_3.control_logic(center_x,center_y)
+			except:
+				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
+				print('Stop the CoppeliaSim simulation manually.\n')
+				traceback.print_exc(file=sys.stdout)
+				print()
+				sys.exit()
+			task_3.lastInput = task_3.coordinateTransform([center_x,center_y])
+			
 	##################################################
 
-
-# In[8]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
 # 
-# Function Name:    main
-#        Inputs:    None
-#       Outputs:    None
-#       Purpose:    This part of the code is only for testing your solution. The function does the following:
+# Function Name:	main
+#		Inputs:	None
+#	   Outputs:	None
+#	   Purpose:	This part of the code is only for testing your solution. The function does the following:
 # 						- imports 'task_1b' file as module
 # 						- imports 'task_1a_part1' file as module
 #						- imports 'task_2a' file as module
@@ -754,6 +746,7 @@ if __name__ == "__main__":
 				task_2a.exit_remote_api_server()
 
 				if (task_2a.start_simulation() == sim.simx_return_initialize_error_flag):
+					task_3.setAngles(np.array([0,0]))
 					print('\nDisconnected successfully from Remote API Server in CoppeliaSim!')
 
 				else:
