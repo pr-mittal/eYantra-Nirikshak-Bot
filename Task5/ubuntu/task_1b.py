@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[26]:
+
+
 '''
 *****************************************************************************************
 *
@@ -34,8 +40,12 @@
 import numpy as np
 import cv2
 import csv
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 ##############################################################
+
+
+# In[27]:
+
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -75,27 +85,135 @@ def orderedPolyDp(corners):
 
     return rect
 def getBorderCoordinates(imgMorph):
+    #maze is an open maze---
+    img=imgMorph
     #finding the coordinates of corners of maze border
     #finding the ouutermost square
-    contours, heirarchy = cv2.findContours(imgMorph,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    contours, heirarchy = cv2.findContours(img,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    #############################old code for closed maze#######
     #for c in contours:
     #print(len(contours))
-    #getting the countour having max area
-    row,col=imgMorph.shape
-    maxCnt=contours[0]
-    maxArea=0
+    ##getting the countour having max area
+    #row,col=imgMorph.shape
+    #maxCnt=contours[0]
+    #maxArea=0
+    #for cnt in contours:
+    #    area=cv2.contourArea(cnt)
+    #    if((area>maxArea) and (area<row*col*0.95)):
+    #        maxArea=area
+    #        maxCnt=cnt
+    #perimeter = cv2.arcLength(maxCnt,True)
+    #corners = cv2.approxPolyDP(maxCnt, 0.01*perimeter,True)
+    ##image = cv2.polylines(img, cnt,True,(255,0,0),5) 
+    ##fig.add_subplot(rows,cols,2)
+    ##plt.imshow(image)
+    ##print(corners)
+    #rect=orderedPolyDp(corners)
+    #############################code for open maze################
+    #calculating bounding rectangles
+    contours_poly = []
+    boundRect = []
+    minArea=100
+    row,col=img.shape
     for cnt in contours:
+        #image = cv2.polylines(imgCpy, cnt,True,(0,0,255),5)
+        perimeter = cv2.arcLength(cnt,True)
+        corners = cv2.approxPolyDP(cnt, 0.01*perimeter,True)
         area=cv2.contourArea(cnt)
-        if((area>maxArea) and (area<row*col*0.95)):
-            maxArea=area
-            maxCnt=cnt
-    perimeter = cv2.arcLength(maxCnt,True)
-    corners = cv2.approxPolyDP(maxCnt, 0.01*perimeter,True)
-    #image = cv2.polylines(img, cnt,True,(255,0,0),5) 
-    #fig.add_subplot(rows,cols,2)
-    #plt.imshow(image)
-    #print(corners)
-    return corners
+        #storing coordinates of all contours
+        if((area>minArea) and (area<row*col*0.95)):
+            #bounding rect for every contour
+            #print(corners)
+            contours_poly += [corners]
+            boundRect += [cv2.boundingRect(corners)]
+    #we have array of all corners and their bounding rect
+    boundRect = np.array(boundRect)
+    
+    #calculating all coordinates of corners of bounding rect and storing in allvertex
+    #x y w h, this is format of bounding rect
+    #x y
+    #x y+h
+    #x+w , y+h
+    #x+w y
+    allVertex = list()
+    #print(allVertex.shape)
+    for i in range(0,boundRect.shape[0]):
+        allVertex+=[
+                     [boundRect[i][0], boundRect[i][1]],
+                     [boundRect[i][0], boundRect[i][1]+boundRect[i][3]],
+                     [boundRect[i][0]+boundRect[i][2], boundRect[i][1]+boundRect[i][3]],
+                     [boundRect[i][0]+boundRect[i][2], boundRect[i][1]]
+                   ]
+    allVertex = np.array(allVertex)
+    #print(allVertex)
+    #calculating all corners of maze
+    top_left = [0,0]
+    top_right = [0,0]
+    bottom_left = [0,0]
+    bottom_right = [0,0]
+    
+    #for top_left,sum of coordinates is minimum
+    minSum =1e5#as max coord is 1280,1280
+    for coord in allVertex:
+        sumCordi = coord[0] + coord[1]
+        if minSum>sumCordi:
+            minSum = sumCordi
+            top_left = [coord[0] ,coord[1]]
+
+    #for bottom_right,sum is maximum
+    maxSum = 0
+    for coord in allVertex:
+        sumCordi = coord[0] + coord[1]
+        if minSum<sumCordi:
+            minSum = sumCordi
+            bottom_right = [coord[0], coord[1]]
+
+    #print("topright all")
+    #for top_right(diff max-->(x-y))
+    maxdiff = 0
+    for coord in allVertex:
+        diffCordi = coord[0] - coord[1]
+        #print(coord[0],coord[1])
+        if maxdiff<diffCordi:
+            maxdiff = diffCordi
+            top_right = [coord[0], coord[1]]
+
+    #for bottom_left(diff max-->(y-x))
+    maxdiff = 0
+    for coord in allVertex:
+        diffCordi = coord[1] - coord[0]
+        if maxdiff<diffCordi:
+            maxdiff = diffCordi
+            bottom_left = [coord[0], coord[1]]
+
+    #=============================================
+    #Height = bottom_left[1] - top_left[1]
+    #Width = top_right[0] - top_left[0]
+    #=======================================================
+    rect = np.zeros((4, 2), dtype="float32")
+    rect = [[top_left[0],top_left[1]], [top_right[0],top_right[1]], [bottom_right[0],bottom_right[1]], [bottom_left[0],bottom_left[1]]]
+    #print(rect)
+    #drawContours(img,contours_poly,boundRect,top_right,top_left,bottom_right,bottom_left)
+    return np.array(rect, dtype = "float32")
+def drawContours(imgCpy,contours_poly,boundRect,top_right,top_left,bottom_right,bottom_left):
+    drawing = np.zeros((imgCpy.shape[0],imgCpy.shape[1], 3), dtype=np.uint8)
+    for i in range(len(contours_poly)):
+        color = (0,255,0)
+        colorp = (0,0,255)
+        cv2.drawContours(drawing, contours_poly, i, colorp)
+        cv2.rectangle(drawing, (int(boundRect[i][0]), int(boundRect[i][1])),(int(boundRect[i][0]+boundRect[i][2]), int(boundRect[i][1]+boundRect[i][3])), color, 2)
+        #print(boundRect)
+        #boundRect = np.array(boundRect)
+        #print(boundRect.shape)
+    
+    drawing = cv2.circle(drawing, tuple(top_left), 20, (255,0,0), 6) #correct
+    drawing = cv2.circle(drawing, tuple(bottom_right), 20, (255,0,0), 6) #correct
+    # print("topright and fucking bottom left")
+    # print(top_right)
+    # print(bottom_left)
+    drawing = cv2.circle(drawing, tuple(top_right), 20, (255,0,0), 6)
+    drawing = cv2.circle(drawing, tuple(bottom_left), 20, (255,0,0), 6)
+    #plt.imshow(cv2.cvtColor(drawing,cv2.COLOR_BGR2RGB))
 def threshInputImage(img):
     #thresholding image overall by increasing contrast and features
     imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -127,111 +245,116 @@ def threshInputImage(img):
     return imgMorph
 
 
-def mazeDimension(warped_img):
-    #applying hough trasformation on image to calculate the dimensions
-    imgGray = cv2.cvtColor(warped_img,cv2.COLOR_BGR2GRAY)
-    imgGray = cv2.GaussianBlur(imgGray,(7,7),1)
-    ret,imgThresh=cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    imgCanny = cv2.Canny(imgThresh,80,80)
-    lines= cv2.HoughLines(imgCanny, 1, np.pi/180.0, 150, np.array([]), 0, 0)
-    
-    #preprocesing the lines to filter some of the options
-    bx=lambda x:x[0][0]
-    lines=sorted(lines,key=bx)
-    
-    #taking error between two detcted lines as 30px<1280/11
-    errRho=50
-    prevVer=0#previous vertical line
-    cntVer=1#current count of vertical lines
-    prevHor=0#previous horizontal line
-    cntHor=1#current count of horizontal lines
-    
-    #removing repeating lines
-    for x in lines:
-        rho,theta=x[0][0],x[0][1]
-        #angle is 90 deg
-        if((np.cos(theta)<0.1)and(np.cos(theta)>-0.1)):
-            #checking for repeating lines
-            if(abs(prevVer-rho)>errRho):
-                #print("Vertical=",prevVer)
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a*rho
-                y0 = b*rho
-                x1 = int(x0 + 1000*(-b))
-                y1 = int(y0 + 1000*(a))
-                x2 = int(x0 - 1000*(-b))
-                y2 = int(y0 - 1000*(a))
+# In[28]:
 
-                cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
-                prevVer=rho
-                cntVer=cntVer+1
-        #angle is 0 deg
-        if((np.cos(theta)<1.1)and(np.cos(theta)>0.9)):
-            #checking for repeating lines
-            if(abs(prevHor-rho)>errRho):
-                #print("Horizontal=",prevHor)
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a*rho
-                y0 = b*rho
-                x1 = int(x0 + 1000*(-b))
-                y1 = int(y0 + 1000*(a))
-                x2 = int(x0 - 1000*(-b))
-                y2 = int(y0 - 1000*(a))
 
-                cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
-                prevHor=rho
-                cntHor=cntHor+1
+# def mazeDimension(warped_img):
+#     #applying hough trasformation on image to calculate the dimensions
+#     imgGray = cv2.cvtColor(warped_img,cv2.COLOR_BGR2GRAY)
+#     imgGray = cv2.GaussianBlur(imgGray,(7,7),1)
+#     ret,imgThresh=cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+#     imgCanny = cv2.Canny(imgThresh,80,80)
+#     lines= cv2.HoughLines(imgCanny, 1, np.pi/180.0, 150, np.array([]), 0, 0)
     
-    #print(lines.shape)
-    #for x in lines:
-    #    rho,theta=x[0][0],x[0][1]
-    #    #print(theta,end=" ")
-    #    print(rho,end=" ")
-    #    a = np.cos(theta)
-    #    b = np.sin(theta)
-    #    x0 = a*rho
-    #    y0 = b*rho
-    #    x1 = int(x0 + 1000*(-b))
-    #    y1 = int(y0 + 1000*(a))
-    #    x2 = int(x0 - 1000*(-b))
-    #    y2 = int(y0 - 1000*(a))
-
-    #    cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+#     #preprocesing the lines to filter some of the options
+#     bx=lambda x:x[0][0]
+#     lines=sorted(lines,key=bx)
     
-    # plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
-
+#     #taking error between two detcted lines as 30px<1280/11
+#     errRho=50
+#     prevVer=0#previous vertical line
+#     cntVer=1#current count of vertical lines
+#     prevHor=0#previous horizontal line
+#     cntHor=1#current count of horizontal lines
     
-    #print(cntVer,cntHor)
-    dim=max(cntVer-1,cntHor-1)
-    if(dim>8):
-        dim=10
-    else:
-        dim=8
-    print(dim)
-    return imgCanny,dim
+#     #removing repeating lines
+#     for x in lines:
+#         rho,theta=x[0][0],x[0][1]
+#         #angle is 90 deg
+#         if((np.cos(theta)<0.1)and(np.cos(theta)>-0.1)):
+#             #checking for repeating lines
+#             if(abs(prevVer-rho)>errRho):
+#                 #print("Vertical=",prevVer)
+#                 a = np.cos(theta)
+#                 b = np.sin(theta)
+#                 x0 = a*rho
+#                 y0 = b*rho
+#                 x1 = int(x0 + 1000*(-b))
+#                 y1 = int(y0 + 1000*(a))
+#                 x2 = int(x0 - 1000*(-b))
+#                 y2 = int(y0 - 1000*(a))
 
-def checkWall(roi):
-    #checking for wall in the received roi
-    contours, _ = cv2.findContours(roi,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-    #for c in contours:
-    #print(len(contours))
-    #getting the countour having max area
-    maxArea=0
-    for cnt in contours:
-        area=cv2.contourArea(cnt)
-        if(area>maxArea):
-            maxArea=area
-    #print(maxArea)
-    w,h=roi.shape
-    if(maxArea>w*h/25):
-        return True
-    else:
-        return False
+#                 cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+#                 prevVer=rho
+#                 cntVer=cntVer+1
+#         #angle is 0 deg
+#         if((np.cos(theta)<1.1)and(np.cos(theta)>0.9)):
+#             #checking for repeating lines
+#             if(abs(prevHor-rho)>errRho):
+#                 #print("Horizontal=",prevHor)
+#                 a = np.cos(theta)
+#                 b = np.sin(theta)
+#                 x0 = a*rho
+#                 y0 = b*rho
+#                 x1 = int(x0 + 1000*(-b))
+#                 y1 = int(y0 + 1000*(a))
+#                 x2 = int(x0 - 1000*(-b))
+#                 y2 = int(y0 - 1000*(a))
+
+#                 cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+#                 prevHor=rho
+#                 cntHor=cntHor+1
+    
+#     #print(lines.shape)
+#     #for x in lines:
+#     #    rho,theta=x[0][0],x[0][1]
+#     #    #print(theta,end=" ")
+#     #    print(rho,end=" ")
+#     #    a = np.cos(theta)
+#     #    b = np.sin(theta)
+#     #    x0 = a*rho
+#     #    y0 = b*rho
+#     #    x1 = int(x0 + 1000*(-b))
+#     #    y1 = int(y0 + 1000*(a))
+#     #    x2 = int(x0 - 1000*(-b))
+#     #    y2 = int(y0 - 1000*(a))
+
+#     #    cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+    
+#     plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
+    
+#     #print(cntVer,cntHor)
+#     dim=max(cntVer-1,cntHor-1)
+#     if(dim>8):
+#         dim=10
+#     else:
+#         dim=8
+#     print(dim)
+#     return imgCanny,dim
+
+# def checkWall(roi):
+#     #checking for wall in the received roi
+#     contours, _ = cv2.findContours(roi,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+#     #for c in contours:
+#     #print(len(contours))
+#     #getting the countour having max area
+#     maxArea=0
+#     for cnt in contours:
+#         area=cv2.contourArea(cnt)
+#         if(area>maxArea):
+#             maxArea=area
+#     #print(maxArea)
+#     w,h=roi.shape
+#     if(maxArea>w*h/25):
+#         return True
+#     else:
+#         return False
     
 
 ##############################################################
+
+
+# In[30]:
 
 
 def applyPerspectiveTransform(input_img):
@@ -262,7 +385,6 @@ def applyPerspectiveTransform(input_img):
     
     #taking image-> gray-> canny ->findContour->draw contour on blank image
     img = input_img
-    # print(img)
     #imgThresh=threshInputImage(img)
     #imgMorph=imgThresh
     #rows=2
@@ -273,8 +395,8 @@ def applyPerspectiveTransform(input_img):
     #imgThresh=threshInputImage(img)
     #plt.imshow(cv2.cvtColor(imgCanny,cv2.COLOR_BGR2RGB))
     #plt.imshow(cv2.cvtColor(imgMorph,cv2.COLOR_BGR2RGB))
-    corners=getBorderCoordinates(imgThresh)
-    rect=orderedPolyDp(corners)
+    rect=getBorderCoordinates(imgThresh)
+    
     (tl, tr, br, bl) = rect
     #applying perspective transform
     # compute the width of the new image, which will be the
@@ -319,7 +441,12 @@ def applyPerspectiveTransform(input_img):
     return warped_img
 #path="test_cases/ball.jpeg"
 #path="test_cases/maze01.jpg"
+#path="generated_images/result_maze00.jpg"
 #applyPerspectiveTransform(cv2.imread(path))
+
+
+# In[ ]:
+
 
 
 def detectMaze(warped_img):
@@ -428,6 +555,7 @@ def detectMaze(warped_img):
 #detectMaze(applyPerspectiveTransform(cv2.imread(path)))
 
 
+# In[ ]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -451,11 +579,12 @@ def writeToCsv(csv_file_path, maze_array):
 	warped_img = writeToCsv('test_cases/maze00.csv', maze_array)
 	"""
 
-	# with open(csv_file_path, 'w', newline='') as file:
-		# writer = csv.writer(file)
-		# writer.writerows(maze_array)
+	with open(csv_file_path, 'w', newline='') as file:
+		writer = csv.writer(file)
+		writer.writerows(maze_array)
 
 
+# In[ ]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -569,3 +698,4 @@ if __name__ == "__main__":
 	else:
 
 		print('')
+
