@@ -168,9 +168,9 @@ end_coord = (9,5)
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.						 ##
 ##############################################################
-def getBallCoordinates():
+def getBallData(client_id,vision_sensor_handle):
 	
-	vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(task_3.vision_sensor_handle)
+	vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vision_sensor_handle)
 	if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
 		#print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
 		pass
@@ -194,8 +194,7 @@ def getBallCoordinates():
 							#print('\nShapes detected by Vision Sensor are: ')
 							# print(shapes)
 							# Storing the detected x and y centroid in center_x and center_y variable repectively
-							center_x = shapes['Circle'][1]
-							center_y = shapes['Circle'][2]
+							return shapes
 						elif(type(shapes) is not dict):
 							#print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
 							#print('Stop the CoppeliaSim simulation manually.')
@@ -203,139 +202,92 @@ def getBallCoordinates():
 					except Exception:
 						print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
 						print('Stop the CoppeliaSim simulation manually.\n')
-						traceback.print_exc(file=sys.stdout)
-						print()
-						sys.exit()
+						#traceback.print_exc(file=sys.stdout)
+						#print()
+						#sys.exit()
 
 				else:
 					print('\n[ERROR] applyPerspectiveTransform function is not configured correctly, check the code.')
 					print('Stop the CoppeliaSim simulation manually.')
-					print()
-					sys.exit()
+					#print()
+					#sys.exit()
 
 			except Exception:
 				print('\n[ERROR] Your applyPerspectiveTransform function in task_1b.py throwed an Exception. Kindly debug your code!')
 				print('Stop the CoppeliaSim simulation manually.\n')
-				traceback.print_exc(file=sys.stdout)
-				print()
-				sys.exit()
+				#traceback.print_exc(file=sys.stdout)
+				#print()
+				#sys.exit()
 
 		else:
 			print('\n[ERROR] transform_vision_sensor_image function in task_2a.py is not configured correctly, check the code.')
 			print('Stop the CoppeliaSim simulation manually.')
-			print()
-			sys.exit()
+			#print()
+			#sys.exit()
 
 	except Exception:
 		print('\n[ERROR] Your transform_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
 		print('Stop the CoppeliaSim simulation manually.\n')
-		traceback.print_exc(file=sys.stdout)
+		#traceback.print_exc(file=sys.stdout)
 		print()
-		sys.exit()
-	return center_x,center_y
+		#sys.exit()
+	return None
 
 ##############################################################
 
+def calculate_path_from_maze(maze_array,start_coord, end_coord):
+    """
+    Purpose:
+    ---
+    This function reads encoded maze array.
+    It then calls the find_path function from task_4a.py to compute the path
+    between start and end coordinate values declared globally.
 
-# NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
-def calculate_path_from_maze_image(img_file_path):
-	"""
-	Purpose:
-	---
-	This function reads the image from `img_file_path` input, applies
-	Perspective Transform and computes the encoded maze array by calling
-	applyPerspectiveTransform and detectMaze functions from task_1b.py.
+    Input Arguments:
+    `maze_array` 	:   [ nested list of lists ]
+        encoded maze in the form of a 2D array
 
-	It then calls the find_path function from task_4a.py to compute the path
-	between start and end coordinate values declared globally.
 
-	Input Arguments:
-	---
-	`img_file_path` :  [ str ]
-		File path of maze image.
-	
-	Returns:
-	---
-	`maze_array` 	:   [ nested list of lists ]
-		encoded maze in the form of a 2D array
-	
-	`path` :  [ list of tuples ]
-		path between start and end coordinates
+    Returns:
+    ---
+    `path` :  [ list of tuples ]
+        path between start and end coordinates
 
-	Example call:
-	---
-	maze_array, path = calculate_path_from_maze_image(img_file_path)
-	
-	"""
+    Example call:
+    ---
+    maze_array, path = calculate_path_from_maze_image(img_file_path)
 
-	# read the 'maze00.jpg' image file
-	input_img = cv2.imread(img_file_path)
+    """
+    if (type(maze_array) is list) and (len(maze_array) == 10):
+        print('\nEncoded Maze Array = %s' % (maze_array))
+        print('\n============================================')
 
-	if type(input_img) is np.ndarray:
+        try:
+            path = task_4a.find_path(maze_array, start_coord, end_coord)
 
-		try:
-			# get the resultant warped maze image after applying Perspective Transform
-			warped_img = task_1b.applyPerspectiveTransform(input_img)
+            if (type(path) is list):
 
-			if type(warped_img) is np.ndarray:
+                print('\nPath calculated between %s and %s is = %s' % (start_coord, end_coord, path))
+                print('\n============================================')
 
-				try:
-					# get the encoded maze in the form of a 2D array
-					maze_array = task_1b.detectMaze(warped_img)
+            else:
+                print('It seems that path is of type ', type(path),'.\n Make sure that is a list.')
 
-					if (type(maze_array) is list) and (len(maze_array) == 10):
-						print('\nEncoded Maze Array = %s' % (maze_array))
-						print('\n============================================')
+        except Exception:
+            print('\n[ERROR] Your find_path function in \'task_4a.py\' throwed an Exception, kindly debug your code!')
+            #traceback.print_exc(file=sys.stdout)
+            #print()
+            #sys.exit()
 
-						try:
-							path = task_4a.find_path(maze_array, start_coord, end_coord)
-
-							if (type(path) is list):
-
-								print('\nPath calculated between %s and %s is = %s' % (start_coord, end_coord, path))
-								print('\n============================================')
-							
-							else:
-								print('It seems that path is of type ', type(path),'.\n Make sure that is a list.')
-						
-						except Exception:
-							print('\n[ERROR] Your find_path function in \'task_4a.py\' throwed an Exception, kindly debug your code!')
-							traceback.print_exc(file=sys.stdout)
-							print()
-							sys.exit()
-
-					else:
-						print('\n[ERROR] maze_array returned by detectMaze function in \'task_1b.py\' is not returning maze array in expected format!, check the code.')
-						print()
-						sys.exit()
-				
-				except Exception:
-					print('\n[ERROR] Your detectMaze function in \'task_1b.py\' throwed an Exception, kindly debug your code!')
-					traceback.print_exc(file=sys.stdout)
-					print()
-					sys.exit()
-			
-			else:
-				print('\n[ERROR] applyPerspectiveTransform function in \'task_1b.py\' is not returning the warped maze image in expected format!, check the code.')
-				print()
-				sys.exit()
-
-		except Exception:
-			print('\n[ERROR] Your applyPerspectiveTransform function in \'task_1b.py\' throwed an Exception, kindly debug your code!')
-			traceback.print_exc(file=sys.stdout)
-			print()
-			sys.exit()
-	
-	else:
-		print('\n[ERROR] maze0' + str(file_num) + '.jpg was not read correctly, something went wrong!')
-		print()
-		sys.exit()
-
-	return maze_array, path
+    else:
+        print('\n[ERROR] maze_array returned by detectMaze function in \'task_1b.py\' is not returning maze array in expected format!, check the code.')
+        #print()
+        #sys.exit()
+    return  maze_array,path
 
 
 
-def send_data_to_draw_path(rec_client_id, path):
+def send_data_to_draw_path(rec_client_id, path,table_number):
 	"""
 	Purpose:
 	---
@@ -430,7 +382,7 @@ def send_data_to_draw_path(rec_client_id, path):
 	send_data_to_draw_path(rec_client_id,path)
 	
 	"""
-	global client_id
+	#global client_id
 	client_id = rec_client_id
 
 	##############	IF REQUIRED, CHANGE THE CODE FROM HERE	##############
@@ -447,7 +399,7 @@ def send_data_to_draw_path(rec_client_id, path):
 
 	inputBuffer = bytearray()
 
-	return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 						'top_plate_respondable_1', sim.sim_scripttype_customizationscript, 'drawPath', [], 						coppelia_sim_coord_path, [], inputBuffer, sim.simx_opmode_blocking)
+	return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 						'top_plate_respondable_t'+table_number+'_1', sim.sim_scripttype_customizationscript, 'drawPath', [], 						coppelia_sim_coord_path, [], inputBuffer, sim.simx_opmode_blocking)
 	
 	##################################################
 
@@ -502,7 +454,7 @@ def convert_path_to_pixels(path):
 	##################################################	
 	return pixel_path
 
-def traverse_path(pixel_path):
+def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 
 	"""
 	Purpose:
@@ -548,8 +500,17 @@ def traverse_path(pixel_path):
 	'''
 	# loop from start to a point less than end,as dst=src+1
 	thresh=1000
-	task_3.setAngles(np.array([0,0]))
+	setAngles(client_id,revolute_handle,[0,0]) 
 	z=1	
+	setpoint=[0,0]
+	ITerm=np.array([0,0],dtype="float64")
+	lastInput=np.array([0,0],dtype="float64")
+	lastTime=np.array([0,0],dtype="float64")
+	Input=np.array([0,0],dtype="float64")
+	lastOutput=np.array([0,0],dtype="float64")
+	summation=np.array([0,0],dtype="float64")
+	Output=np.array([0,0],dtype="float64")
+	
 	# this is a kind of flag variable which will help in setting the last coordinates of ball for the first frame of run, 
 	# which is used in the calculation of derivative term in PID calculation.
 	prev_x=pixel_path[0][0]
@@ -569,21 +530,25 @@ def traverse_path(pixel_path):
 		dst=pixel_path[i+1]
 		prev_x=pixel_path[i+1][0]
 		prev_y=pixel_path[i+1][1]
-		task_3.change_setpoint(dst)
-		task_3.summation=np.array([0,0],dtype='float64')
-		task_3.ITerm=np.array([0,0],dtype='float64')
+		setpoint=dst
+		summation=np.array([0,0],dtype='float64')
+		ITerm=np.array([0,0],dtype='float64')
 		# print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
 		temp=0
 		timechange = 0
 		while(True):				
 			
-			center_x,center_y=getBallCoordinates()
+			shapes= getBallData(client_id,vision_sensor_handle) 
+			if (shapes==None):
+				continue
+			center_x = shapes['Circle'][1]
+			center_y = shapes['Circle'][2]
 			# print(dst)
 			# print("center_x = ",center_x,"center_y",center_y)
 			if((center_x==None) or (center_x==None)):
 				continue
 			if(z==1):
-				task_3.lastInput=task_3.coordinateTransform([center_x,center_y])
+				lastInput=task_3.coordinateTransform([center_x,center_y])
 				z=0
 			return_code_signal,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 			now=float(now)
@@ -599,14 +564,14 @@ def traverse_path(pixel_path):
 			if(timechange>=0.7):
 				break
 			try:
-				task_3.control_logic(center_x,center_y)
+				ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output)
 			except:
 				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
 				print('Stop the CoppeliaSim simulation manually.\n')
-				traceback.print_exc(file=sys.stdout)
-				print()
-				sys.exit()
-			task_3.lastInput = task_3.coordinateTransform([center_x,center_y])
+				#traceback.print_exc(file=sys.stdout)
+				#print()
+				#sys.exit()
+			lastInput = task_3.coordinateTransform([center_x,center_y])
 			
 	##################################################
 

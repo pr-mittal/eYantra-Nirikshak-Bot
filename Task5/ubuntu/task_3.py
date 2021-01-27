@@ -70,21 +70,14 @@ vision_sensor_handle = 0
 # You can add your global variables here
 ##############################################################
 
-revolute_handle=[-1,-1,-1,-1,-1,-1,-1,-1]
+
 outMax=60
 outMin=-60
 kp=np.array([0.018,0.018],dtype='float64')
 ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 kd=np.array([0.135,0.135],dtype='float64')#kd=kd/SampleTime
 lastTime=0
-error = np.array([0,0],dtype='float64')
-summation = np.array([0,0],dtype='float64')
-ITerm=np.array([0,0],dtype='float64')
-lastInput=np.array([0,0],dtype='float64')
-Input=np.array([0,0],dtype='float64')
 SampleTime = 0.01 #0.01 sec
-Output=np.array([0,0],dtype="float64")
-lastOutput=np.array([0,0],dtype="float64")
 ##############################################################
 
 
@@ -94,9 +87,7 @@ lastOutput=np.array([0,0],dtype="float64")
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.						 ##
 ##############################################################
-def setAngles(Output):
-	global revolute_handle,client_id
-	
+def setAngles(client_id,revolute_handle,Output):
 	# print("Output=",Output)
 	#setting output to joints/motors
 	#This can be useful if you need to send several values to CoppeliaSim that should be received and evaluated at the same time. 
@@ -134,53 +125,53 @@ def setAngles(Output):
 	#simxSynchronousTrigger(client_id)
 	
 	
-def SetTunings(Kp,Ki,Kd):
-	#changing the values of kp,ki,kd
-	global kp,ki,kd,SampleTime
-	kp = Kp
-	ki = Ki * SampleTime
-	kd = Kd / SampleTime
+# def SetTunings(Kp,Ki,Kd):
+# 	#changing the values of kp,ki,kd
+# 	global kp,ki,kd,SampleTime
+# 	kp = Kp
+# 	ki = Ki * SampleTime
+# 	kd = Kd / SampleTime
 
-def SetSampleTime(NewSampleTime):
+# def SetSampleTime(NewSampleTime):
 	
-	global SampleTime,ki,kd
-	if (NewSampleTime > 0):
-		ratio  = NewSampleTime/ SampleTime
-		ki *= ratio
-		kd /= ratio
-		SampleTime = NewSampleTime
+# 	global SampleTime,ki,kd
+# 	if (NewSampleTime > 0):
+# 		ratio  = NewSampleTime/ SampleTime
+# 		ki *= ratio
+# 		kd /= ratio
+# 		SampleTime = NewSampleTime
 		
-def SetOutputLimits(Min,Max):
-	global outMin,outMax
-	if(Min > Max):
-		return
-	outMin = Min
-	outMax = Max
-	#for i in range(len(Output)):
-	#	if(Output[i] > outMax):
-	#		Output[i] = outMax
-	#	elif(Output[i] < outMin): 
-	#		Output[i] = outMin
+# def SetOutputLimits(Min,Max):
+# 	global outMin,outMax
+# 	if(Min > Max):
+# 		return
+# 	outMin = Min
+# 	outMax = Max
+# 	#for i in range(len(Output)):
+# 	#	if(Output[i] > outMax):
+# 	#		Output[i] = outMax
+# 	#	elif(Output[i] < outMin): 
+# 	#		Output[i] = outMin
 		
-	for i in range(len(ITerm)):
-		if(ITerm[i]> outMax):
-			ITerm[i]= outMax
-		elif(ITerm[i]< outMin): 
-			ITerm[i]= outMin	
-def Initialize():
-	global lastInput,ITerm,Input,outMax,outMin
-	lastInput = Input
-	ITerm = Output
-	for i in range(len(ITerm)):
-		if(ITerm[i]> outMax):
-			ITerm[i]= outMax
-		elif(ITerm[i]< outMin):
-			ITerm[i]= outMin
+# 	for i in range(len(ITerm)):
+# 		if(ITerm[i]> outMax):
+# 			ITerm[i]= outMax
+# 		elif(ITerm[i]< outMin): 
+# 			ITerm[i]= outMin	
+# def Initialize():
+# 	global lastInput,ITerm,Input,outMax,outMin
+# 	lastInput = Input
+# 	ITerm = Output
+# 	for i in range(len(ITerm)):
+# 		if(ITerm[i]> outMax):
+# 			ITerm[i]= outMax
+# 		elif(ITerm[i]< outMin):
+# 			ITerm[i]= outMin
 ##############################################################
 
 
 
-def init_setup(rec_client_id):
+def init_setup(rec_client_id,table_number):
 	"""
 	Purpose:
 	---
@@ -203,24 +194,22 @@ def init_setup(rec_client_id):
 	init_setup()
 	
 	"""
-	global client_id, vision_sensor_handle,revolute_handle
-
 	# since client_id is defined in task_2a.py file, it needs to be assigned here as well.
 	client_id = rec_client_id
-
+	revolute_handle=[-1,-1,-1,-1,-1,-1,-1,-1]
 	##############	ADD YOUR CODE HERE	##############
 	#The function is blocking. While in synchronous operation mode, the client application is in charge of triggering the next simulation step.
 	#_=sim.simxSynchronous(client_id,1)
 	#saving andles to global variables
-	_,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1",sim.simx_opmode_blocking)
-	_,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2",sim.simx_opmode_blocking)
-	_,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_3",sim.simx_opmode_blocking)
-	_,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_4",sim.simx_opmode_blocking)
-	_,revolute_handle[4]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_5",sim.simx_opmode_blocking)
-	_,revolute_handle[5]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_6",sim.simx_opmode_blocking)
-	_,revolute_handle[6]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_7",sim.simx_opmode_blocking)
-	_,revolute_handle[7]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_8",sim.simx_opmode_blocking)
-	_, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
+	_,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_1",sim.simx_opmode_blocking)
+	_,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_2",sim.simx_opmode_blocking)
+	_,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_3",sim.simx_opmode_blocking)
+	_,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_4",sim.simx_opmode_blocking)
+	_,revolute_handle[4]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_5",sim.simx_opmode_blocking)
+	_,revolute_handle[5]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_6",sim.simx_opmode_blocking)
+	_,revolute_handle[6]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_7",sim.simx_opmode_blocking)
+	_,revolute_handle[7]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_8",sim.simx_opmode_blocking)
+	_, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_'+table_number, sim.simx_opmode_blocking)
 
 	# _=sim.simxPauseCommunication(client_id,True)
 	
@@ -248,7 +237,7 @@ def init_setup(rec_client_id):
 	# _=sim.simxPauseCommunication(client_id,False)
 	
 	#setting all angles target pposition to [0,0]
-	setAngles([0,0])
+	setAngles(client_id,revolute_handle,[0,0]) 
 	# print(sensor_handle, "sensor_handle")
 	#staring vision sensor image in sim.simx_opmode_streaming
 	_, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_streaming)  # streamig may need change
@@ -258,7 +247,7 @@ def init_setup(rec_client_id):
 	#print("init_simulation_time_string=",(float)init_simulation_time_string)
 	_,_ = sim.simxGetPingTime(client_id)
 	#print(vision_sensor_handle,revolute_handle)
-	
+	return revolute_handle,vision_sensor_handle
 	##################################################
 
 def coordinateTransform(xy):
@@ -268,7 +257,7 @@ def coordinateTransform(xy):
 	transformed=[np.cos(theta)*xy[0]+np.sin(theta)*xy[1],-np.sin(theta)*xy[0]+np.cos(theta)*xy[1]]
 	return np.array(transformed,dtype='float64')
 
-def control_logic(center_x,center_y):
+def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output):
 	"""
 	Purpose:
 	---
@@ -303,15 +292,13 @@ def control_logic(center_x,center_y):
 	control_logic(center_x,center_y)
 	
 	"""
-	global setpoint, client_id
-	
 	##############	ADD YOUR CODE HERE	##############
 	#taking handles from global variables
 	#the pid computes using the coordinates and setpoint and returns us the value
 	# print("Centroid=",center_x," ",center_y," setpoint=",setpoint)
 	
 	#global variables
-	global kp,ki,kd,ITerm,outMin,outMax,lastInput,SampleTime,lastTime,Input,lastOutput,summation,Output
+	global kp,ki,kd,outMin,outMax,SampleTime
 	#IMPORTANT: most the variables here are a list having two elements 
 	# representing 2 independent linear unit
 	#now = time.time()
@@ -377,9 +364,8 @@ def control_logic(center_x,center_y):
 		setAngles(Output)
 		#  In case value of kd has changed
 		kd=np.array([0.135,0.135],dtype='float64')
-
+    return ITerm,lastInput,lastTime,Input,lastOutput,summation,Output
 	##################################################
-	
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
 # 
@@ -389,10 +375,10 @@ def control_logic(center_x,center_y):
 #	   Outputs:	None
 #	   Purpose:	The function updates the value of global "setpoint" list after every 15 seconds of simulation time.
 #					This will be ONLY called by executable file. 
-def change_setpoint(new_setpoint):
+# def change_setpoint(new_setpoint):
 
-	global setpoint
-	setpoint=new_setpoint[:]
+# 	global setpoint
+# 	setpoint=new_setpoint[:]
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

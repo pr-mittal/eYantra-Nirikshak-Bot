@@ -323,7 +323,7 @@ def scan_image(wraped_img):
     shapes = scan_image(img_file_path)
     """
 
-    global shapes
+    #global shapes
 
     ##############	ADD YOUR CODE HERE	##############
     shapes={}

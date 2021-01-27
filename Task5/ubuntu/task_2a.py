@@ -54,10 +54,10 @@ except Exception:
 
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
-client_id = -1
+#client_id = -1
 #calibrate=[]
-flag=False
-vision_sensor_handle=-1
+#flag=False
+#vision_sensor_handle=-1
 
 
 
@@ -66,8 +66,8 @@ vision_sensor_handle=-1
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-def getShape():
-    vision_sensor_image, image_resolution, return_code=get_vision_sensor_image()
+def getShape(client_id,vision_sensor_handle):
+    vision_sensor_image, image_resolution, return_code=get_vision_sensor_image(client_id,vision_sensor_handle)
     _, _ = sim.simxGetPingTime(client_id)
     
     transformed_image=transform_vision_sensor_image(vision_sensor_image, image_resolution)
@@ -75,52 +75,52 @@ def getShape():
     shapes=task_1a_part1.scan_image(wraped_img)
     return shapes
 
-def calibrateCameraMatrix():
-    #error due to single eyed vision is removed,by comparing real time ball positions and vision sensor image
-    global client_id,calibrate
-    #np.save("calibrate",calibrate)
-    #calibrate=np.load("calibrate.npy")
-    #print(calibrate)
+# def calibrateCameraMatrix():
+#     #error due to single eyed vision is removed,by comparing real time ball positions and vision sensor image
+#     global client_id,calibrate
+#     #np.save("calibrate",calibrate)
+#     #calibrate=np.load("calibrate.npy")
+#     #print(calibrate)
     
-    #if ball is present get its handle
-    _,ball=sim.simxGetObjectHandle(client_id,"ball_1",sim.simx_opmode_blocking)
+#     #if ball is present get its handle
+#     _,ball=sim.simxGetObjectHandle(client_id,"ball_1",sim.simx_opmode_blocking)
     
-    _,topPlate=sim.simxGetObjectHandle(client_id,"top_plate_respondable_1",sim.simx_opmode_blocking)
-    #print("Top plate Handle=",topPlate)
-    #_,topPos=sim.simxGetObjectPosition(client_id,topPlate,-1,sim.simx_opmode_oneshot)
-    #1.0000e-02-height of top plate,1.000 is height and width of plate
-    #4.0000e-02-diameter of ball
-    #print("TOP POS=",topPos)
-    num=10
-    for i in range(num):
-        for j in range(num):    
-            _=sim.simxSetObjectPosition(client_id,ball,topPlate,[0.5*j/num,-0.5*i/num,0.01/2+0.04/2],sim.simx_opmode_blocking)
+#     _,topPlate=sim.simxGetObjectHandle(client_id,"top_plate_respondable_1",sim.simx_opmode_blocking)
+#     #print("Top plate Handle=",topPlate)
+#     #_,topPos=sim.simxGetObjectPosition(client_id,topPlate,-1,sim.simx_opmode_oneshot)
+#     #1.0000e-02-height of top plate,1.000 is height and width of plate
+#     #4.0000e-02-diameter of ball
+#     #print("TOP POS=",topPos)
+#     num=10
+#     for i in range(num):
+#         for j in range(num):    
+#             _=sim.simxSetObjectPosition(client_id,ball,topPlate,[0.5*j/num,-0.5*i/num,0.01/2+0.04/2],sim.simx_opmode_blocking)
 
-            import task_1a_part1
-            import task_1b
-            try:
-                shapes=getShape()
-                if((len(shapes)==0) or (len(shapes['Circle'])==0)):
-                    continue
-                cX=shapes['Circle'][1]
-                cY=shapes['Circle'][2]
+#             import task_1a_part1
+#             import task_1b
+#             try:
+#                 shapes=getShape()
+#                 if((len(shapes)==0) or (len(shapes['Circle'])==0)):
+#                     continue
+#                 cX=shapes['Circle'][1]
+#                 cY=shapes['Circle'][2]
 
-                rtrnCode,pos=sim.simxGetObjectPosition(client_id,ball,sim.sim_handle_parent,sim.simx_opmode_blocking)
-                #print("Calirate,Ball=",ball,"position=",pos," centroid=",cX,cY," rtrnCode=",rtrnCode)
-                #print("Calirate,centroid=",cX,cY,"Ball Pos=",-640*pos[0]/0.5+640,640*pos[1]/0.5+640)
-                eX=(int)(-640*pos[0]/0.5+640)-cX
-                eY=(int)(640*pos[1]/0.5+640)-cY
-                calibrate+=[[[abs(cX-640),abs(cY-640)],[abs(eX),abs(eY)]]]
+#                 rtrnCode,pos=sim.simxGetObjectPosition(client_id,ball,sim.sim_handle_parent,sim.simx_opmode_blocking)
+#                 #print("Calirate,Ball=",ball,"position=",pos," centroid=",cX,cY," rtrnCode=",rtrnCode)
+#                 #print("Calirate,centroid=",cX,cY,"Ball Pos=",-640*pos[0]/0.5+640,640*pos[1]/0.5+640)
+#                 eX=(int)(-640*pos[0]/0.5+640)-cX
+#                 eY=(int)(640*pos[1]/0.5+640)-cY
+#                 calibrate+=[[[abs(cX-640),abs(cY-640)],[abs(eX),abs(eY)]]]
 
-            except Exception:
-                print('\n[ERROR] Your calibrateCamera() function in task_2a.py throwed an Exception, kindly debug your code!')
-                print('Stop the CoppeliaSim simulation manually.\n')
-                traceback.print_exc(file=sys.stdout)
-                print()
-                #sys.exit()
-    #print(calibrate)
-    np.save("calibrate",calibrate)
-    #calibrate=np.load("calibrate.npy")
+#             except Exception:
+#                 print('\n[ERROR] Your calibrateCamera() function in task_2a.py throwed an Exception, kindly debug your code!')
+#                 print('Stop the CoppeliaSim simulation manually.\n')
+#                 traceback.print_exc(file=sys.stdout)
+#                 print()
+#                 #sys.exit()
+#     #print(calibrate)
+#     np.save("calibrate",calibrate)
+#     #calibrate=np.load("calibrate.npy")
     
 
 ##############################################################
@@ -152,9 +152,6 @@ def init_remote_api_server():
 
     NOTE: This function will be automatically called by test_task_2a executable before starting the simulation.
     """
-
-    global client_id
-
     ##############	ADD YOUR CODE HERE	##############
     sim.simxFinish(-1)
     IP = '127.0.0.1'
@@ -166,7 +163,7 @@ def init_remote_api_server():
     return client_id
 
 
-def start_simulation():
+def start_simulation(client_id):
     """
     Purpose:
     ---
@@ -193,8 +190,6 @@ def start_simulation():
     NOTE: This function will be automatically called by test_task_2a executable at the start of simulation.
     """
 
-    global client_id
-
     return_code = 0
 
     ##############	ADD YOUR CODE HERE	##############
@@ -206,7 +201,7 @@ def start_simulation():
 
     return return_code
 
-def get_vision_sensor_image(vision_sensor_handle):
+def get_vision_sensor_image(client_id,vision_sensor_handle):
 # def get_vision_sensor_image():
     """
     Purpose:
@@ -234,7 +229,7 @@ def get_vision_sensor_image(vision_sensor_handle):
     NOTE: This function will be automatically called by test_task_2a executable at regular intervals.
     """
 
-    global client_id
+    #global client_id
     
 
     vision_sensor_image = []
@@ -296,7 +291,7 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
     return transformed_image
 
 
-def stop_simulation():
+def stop_simulation(client_id):
     """
     Purpose:
     ---
@@ -320,9 +315,6 @@ def stop_simulation():
 
     NOTE: This function will be automatically called by test_task_2a executable at the end of simulation.
     """
-
-    global client_id
-
     return_code = 0
 
     ##############	ADD YOUR CODE HERE	##############
@@ -332,7 +324,7 @@ def stop_simulation():
     return return_code
 
 
-def exit_remote_api_server():
+def exit_remote_api_server(client_id):
     """
     Purpose:
     ---
@@ -354,8 +346,6 @@ def exit_remote_api_server():
 
     NOTE: This function will be automatically called by test_task_2a executable after ending the simulation.
     """
-
-    global client_id
 
     ##############	ADD YOUR CODE HERE	##############
     rCode,pingTime= sim.simxGetPingTime(client_id)
