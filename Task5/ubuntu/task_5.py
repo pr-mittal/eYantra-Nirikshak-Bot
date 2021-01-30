@@ -184,9 +184,8 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-maze_all=[[],[],[],[]]
-vs_handle=[[],[],[],[],[],[]]
-ball={}
+maze_all=[[],[],[],[],[]]#we use maze_all starting from 1
+vs_handle=[[],[],[],[],[],[]]##we use vs_handle starting from 1
 curB=0
 totB=1
 totM=[1,4]
@@ -325,7 +324,7 @@ def setup_maze_for_ball(client_id,table_number,path):
     
     #if found start pid
     try:
-        task_3.init_setup(client_id,table_number)
+        revolute_handle,vision_sensor_handle=task_3.init_setup(client_id,table_number)
         try:
             send_data_to_draw_path(client_id,path)
         except Exception:
@@ -340,19 +339,7 @@ def setup_maze_for_ball(client_id,table_number,path):
         #traceback.print_exc(file=sys.stdout)
         #print()
         #sys.exit()
-    try:
-        pixel_path = convert_path_to_pixels(path)
-        print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))
-        print('\n============================================')
-
-        
-    except Exception:
-        print('\n[ERROR] Your convert_path_to_pixels() function throwed an Exception. Kindly debug your code!')
-        print('Stop the CoppeliaSim simulation manually.\n')
-        #traceback.print_exc(file=sys.stdout)
-        #print()
-        #sys.exit()
-    return pixel_path
+    return revolute_handle,vision_sensor_handle
 def stopSimulation(client_id):
     try:
         return_code = task_2a.stop_simulation(client_id)
@@ -388,41 +375,124 @@ def stopSimulation(client_id):
 # In[ ]:
 
 
+#get all info of journey of ball
+def getBallInfo(ball_color):
+    global ball_details,maze_all,vs_handle
+    ball_info=[[4],[],[],[]]
+    #current table number,path in table 4,[path,vision_sensor_handle,revolute_handle],table x,[path in x,vision_sensor_handle,revolute_handle]
+    #ball_color ="blue"
+    #cb = "T4_CB1"
+    collection_box_name=ball_details[ball_color][0]
+    #removing this from ball_details
+    if(len(ball_details[ball_color])==1):
+        #remove color from ball
+        ball_details.pop(ball_color)
+    else:
+        #remove that collection box from list
+        ball_details[ball_color].pop(0)
+    table = int(collection_box_name[1])
+    box =int(collection_box_name[-1])
+    #starting cordinates and ending cordinates for path in table 4
+    start_cordinates = [0,5]
+    if(table==1):
+        end_cordinates = [5,9]
+    if(table==2):
+        end_cordinates = [9,4]
+    if(table==3):
+        end_cordinates = [4,0]
+                
+    #from table 4 to exit and storing in ball_info at index1
+    maze_array, ball_info[1] = task_4b.calculate_path_from_maze(maze_all[4],start_coord, end_coord)
+    
+    if(table==1):
+        start_cordinates = [5,0]
+        if(box==1):
+            end_cordinates = [0,4]
+        if(box==2):
+            end_cordinates = [4,9]
+        if(box==3):
+            end_cordinates = [9,5]
+    if(table==2):
+        start_cordinates = [0,4]
+        if(box==1):
+            end_cordinates = [4,9]
+        if(box==2):
+            end_cordinates = [9,5]
+        if(box==3):
+            end_cordinates = [5,0]
+    if(table==3):
+        start_cordinates = [4,9]
+        if(box==1):
+            end_cordinates = [9,5]
+        if(box==2):
+            end_cordinates = [5,0]
+        if(box==3):
+            end_cordinates = [0,4]
+    ball_info[2]=table
+    #from table 4 to exit and storing in ball_info at index1
+    maze_array, ball_info[3] = task_4b.calculate_path_from_maze(maze_all[table],start_coord, end_coord)
+    return ball_info
+##############################################################
+
+
+# In[ ]:
+
+
+###################################################################################################
 def read_ball_details(file_name):
-    ################# ADD YOUR CODE HERE #################
     global ball_details
     f=open(file_name,)
     ball_details=json.load(f)
-    ######################################################
-def addBallToDict(color):
-    return
-###############################################################
-def processMaze(table_number):
+##############################################################################################
+def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle):
     #if this table is current table in dictionary of ball
     #check if ball in vision sensor table 4
     while(True):
         #process 1
         #check if ball in stream of vision sensor conveyer
-        shapes=task4b.getBallCoordinates(vision_sensor_handle)
-        if((len(shapes)!=0) and newBall):
-        #if ball detected , start pid as a multiprocess thread
-            try:
-                traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle)
-            except Exception:
-                print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
-                print('Stop the CoppeliaSim simulation manually.\n')
-                #traceback.print_exc(file=sys.stdout)
-                #print()
-                #sys.exit()
+        shapes=task4b.getBallData(client_id,vision_sensor_handle)
+        if(len(shapes)!=0):
+        #if ball detected , start pid
+                try:
+                    pixel_path = task4b.convert_path_to_pixels(ball_info[1])
+                    print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))
+                    #print('\n============================================')
+
+                    try:
+                        task4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle)
+                    except Exception:
+                        print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
+                        print('Stop the CoppeliaSim simulation manually.\n')
+                        #traceback.print_exc(file=sys.stdout)
+                        #print()
+                        #sys.exit()
+
+                except Exception:
+                    print('\n[ERROR] Your convert_path_to_pixels() function throwed an Exception. Kindly debug your code!')
+                    print('Stop the CoppeliaSim simulation manually.\n')
+                    #traceback.print_exc(file=sys.stdout)
+                    #print()
+                    #sys.exit()
+            
+            #if this is not table 4 return, journey of ball is complete
+            if(ball_info[0]!=4):
+                return
+            
             #start vision sensor for next ball from this table
-            setup_maze_for_ball(client_id,table_number,path)
+            #setup_maze_for_ball(client_id,table_number,path)
+            revolute_handle,vision_sensor_handle=setup_maze_for_ball(client_id,ball_info[2],ball_info[3])
             #process 3
-            #change currrent table in dictionary to next table,start checking for ball in next table
+            #change currrent table in list ball_info
+            ball_info[0]=ball_info[2]
+            #changing current path
+            ball_info[1]=ball_info[3]
+            
+            #start checking for ball in next table
             #do same thing as in process 2
-            processMaze(table_number)
+            processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle)
             ####################also delete current ball from dictionary######################not done yet
             #stop streaming this vision sensor
-            stopStreaming(vs_number)
+            stopStreaming(vision_sensor_handle)
                 
 
 
@@ -491,17 +561,18 @@ def main(rec_client_id):
             #if ball found,add 1 to number of ball
             curB+=1
             newBall=False
-            #global dictionary store its uid=number of ball,color,current table number,path in table 4,path in table x,table x
-            addBallToDict(color)
+            #get info of ball from ball_details current table number,path in table 4,path in table x,table x
+            #differentiate balls based on color
+            ball_info=getBallInfo(color)
             
             #start streaming of table 4 vision sensor
-            setup_maze_for_ball(client_id,table_number,path)
+            revolute_handle,vision_sensor_handle=setup_maze_for_ball(client_id,table_number,path)
             
             #start task3 in multiprocessing
             #with concurrent.futures.ProcessPoolExecutor() as executor:
             #    f1=executor.submit(processMaze(table_number),1)
             
-            process=Process(target=processMaze,args=(table_number,))
+            process=Process(target=processMaze,args=(client_id,ball_info,revolute_handle,vision_sensor_handle,))
             #processes are spawned by creating Process object and calling its start method
             process.start()
             
