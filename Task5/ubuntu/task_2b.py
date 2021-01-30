@@ -263,9 +263,7 @@ def send_data(client_id,maze_array,table_number):
         maze_list+=maze_array[i][:]
     #print(maze_list)
     #sim_scripttype_customizationscript--6
-    return_code,outInts,outFloats,outStrings,outBuffer=
-        sim.simxCallScriptFunction(client_id,top_plate,6,'receiveData',maze_list
-                                   [],[],emptyBuff,sim.simx_opmode_blocking)
+    return_code,outInts,outFloats,outStrings,outBuffer=sim.simxCallScriptFunction(client_id,top_plate,6,'receiveData',maze_list,[],[],emptyBuff,sim.simx_opmode_blocking)
 
     ##################################################
 

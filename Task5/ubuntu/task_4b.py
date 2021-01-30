@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[5]:
+
+
 '''
 *****************************************************************************************
 *
@@ -163,6 +169,9 @@ end_coord = (9,5)
 ##############################################################
 
 
+# In[6]:
+
+
 ################# ADD UTILITY FUNCTIONS HERE #################
 ## You can define any utility functions for your code.	  ##
 ## Please add proper comments to ensure that your code is   ##
@@ -235,56 +244,108 @@ def getBallData(client_id,vision_sensor_handle):
 
 ##############################################################
 
-def calculate_path_from_maze(maze_array,start_coord, end_coord):
-    """
-    Purpose:
-    ---
-    This function reads encoded maze array.
-    It then calls the find_path function from task_4a.py to compute the path
-    between start and end coordinate values declared globally.
 
-    Input Arguments:
-    `maze_array` 	:   [ nested list of lists ]
-        encoded maze in the form of a 2D array
+# In[7]:
 
 
-    Returns:
-    ---
-    `path` :  [ list of tuples ]
-        path between start and end coordinates
+# NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
+def calculate_path_from_maze_image(img_file_path):
+	"""
+	Purpose:
+	---
+	This function reads the image from `img_file_path` input, applies
+	Perspective Transform and computes the encoded maze array by calling
+	applyPerspectiveTransform and detectMaze functions from task_1b.py.
 
-    Example call:
-    ---
-    maze_array, path = calculate_path_from_maze_image(img_file_path)
+	It then calls the find_path function from task_4a.py to compute the path
+	between start and end coordinate values declared globally.
 
-    """
-    if (type(maze_array) is list) and (len(maze_array) == 10):
-        print('\nEncoded Maze Array = %s' % (maze_array))
-        print('\n============================================')
+	Input Arguments:
+	---
+	`img_file_path` :  [ str ]
+		File path of maze image.
+	
+	Returns:
+	---
+	`maze_array` 	:   [ nested list of lists ]
+		encoded maze in the form of a 2D array
+	
+	`path` :  [ list of tuples ]
+		path between start and end coordinates
 
-        try:
-            path = task_4a.find_path(maze_array, start_coord, end_coord)
+	Example call:
+	---
+	maze_array, path = calculate_path_from_maze_image(img_file_path)
+	
+	"""
 
-            if (type(path) is list):
+	# read the 'maze00.jpg' image file
+	input_img = cv2.imread(img_file_path)
 
-                print('\nPath calculated between %s and %s is = %s' % (start_coord, end_coord, path))
-                print('\n============================================')
+	if type(input_img) is np.ndarray:
 
-            else:
-                print('It seems that path is of type ', type(path),'.\n Make sure that is a list.')
+		try:
+			# get the resultant warped maze image after applying Perspective Transform
+			warped_img = task_1b.applyPerspectiveTransform(input_img)
 
-        except Exception:
-            print('\n[ERROR] Your find_path function in \'task_4a.py\' throwed an Exception, kindly debug your code!')
-            #traceback.print_exc(file=sys.stdout)
-            #print()
-            #sys.exit()
+			if type(warped_img) is np.ndarray:
 
-    else:
-        print('\n[ERROR] maze_array returned by detectMaze function in \'task_1b.py\' is not returning maze array in expected format!, check the code.')
-        #print()
-        #sys.exit()
-    return  maze_array,path
+				try:
+					# get the encoded maze in the form of a 2D array
+					maze_array = task_1b.detectMaze(warped_img)
 
+					if (type(maze_array) is list) and (len(maze_array) == 10):
+						print('\nEncoded Maze Array = %s' % (maze_array))
+						print('\n============================================')
+
+						try:
+							path = task_4a.find_path(maze_array, start_coord, end_coord)
+
+							if (type(path) is list):
+
+								print('\nPath calculated between %s and %s is = %s' % (start_coord, end_coord, path))
+								print('\n============================================')
+							
+							else:
+								print('It seems that path is of type ', type(path),'.\n Make sure that is a list.')
+						
+						except Exception:
+							print('\n[ERROR] Your find_path function in \'task_4a.py\' throwed an Exception, kindly debug your code!')
+							traceback.print_exc(file=sys.stdout)
+							print()
+							sys.exit()
+
+					else:
+						print('\n[ERROR] maze_array returned by detectMaze function in \'task_1b.py\' is not returning maze array in expected format!, check the code.')
+						print()
+						sys.exit()
+				
+				except Exception:
+					print('\n[ERROR] Your detectMaze function in \'task_1b.py\' throwed an Exception, kindly debug your code!')
+					traceback.print_exc(file=sys.stdout)
+					print()
+					sys.exit()
+			
+			else:
+				print('\n[ERROR] applyPerspectiveTransform function in \'task_1b.py\' is not returning the warped maze image in expected format!, check the code.')
+				print()
+				sys.exit()
+
+		except Exception:
+			print('\n[ERROR] Your applyPerspectiveTransform function in \'task_1b.py\' throwed an Exception, kindly debug your code!')
+			traceback.print_exc(file=sys.stdout)
+			print()
+			sys.exit()
+	
+	else:
+		print('\n[ERROR] maze0' + str(file_num) + '.jpg was not read correctly, something went wrong!')
+		print()
+		sys.exit()
+
+	return maze_array, path
+
+
+# In[8]:
 
 
 def send_data_to_draw_path(rec_client_id, path,table_number):
@@ -398,10 +459,13 @@ def send_data_to_draw_path(rec_client_id, path,table_number):
 	print(coppelia_sim_coord_path)
 
 	inputBuffer = bytearray()
-
-	return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 						'top_plate_respondable_t'+table_number+'_1', sim.sim_scripttype_customizationscript, 'drawPath', [], 						coppelia_sim_coord_path, [], inputBuffer, sim.simx_opmode_blocking)
+	table_number=str(table_number)
+	return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 						'top_plate_respondable_t'+table_number+'_1', sim.sim_scripttype_customizationscript, 'drawPath', [], 						coppelia_sim_coord_path, table_number, inputBuffer, sim.simx_opmode_blocking)
 	
 	##################################################
+
+
+# In[ ]:
 
 
 def convert_path_to_pixels(path):
@@ -453,6 +517,10 @@ def convert_path_to_pixels(path):
 		
 	##################################################	
 	return pixel_path
+
+
+# In[ ]:
+
 
 def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 
@@ -575,6 +643,8 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 			
 	##################################################
 
+
+# In[ ]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

@@ -201,6 +201,7 @@ def init_setup(rec_client_id,table_number):
 	#The function is blocking. While in synchronous operation mode, the client application is in charge of triggering the next simulation step.
 	#_=sim.simxSynchronous(client_id,1)
 	#saving andles to global variables
+	table_number=str(table_number)
 	_,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_1",sim.simx_opmode_blocking)
 	_,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_2",sim.simx_opmode_blocking)
 	_,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_3",sim.simx_opmode_blocking)
@@ -364,7 +365,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 		setAngles(Output)
 		#  In case value of kd has changed
 		kd=np.array([0.135,0.135],dtype='float64')
-    return ITerm,lastInput,lastTime,Input,lastOutput,summation,Output
+	return ITerm,lastInput,lastTime,Input,lastOutput,summation,Output
 	##################################################
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
