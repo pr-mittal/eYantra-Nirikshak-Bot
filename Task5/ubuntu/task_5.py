@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[18]:
+# In[1]:
 
 
 '''
@@ -191,7 +191,7 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
                             sim.sim_scripttype_childscript,'color_and_cb_identification',[],[],color_and_cb,inputBuffer,sim.simx_opmode_blocking)
 
 
-# In[12]:
+# In[3]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -201,16 +201,15 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ##############################################################
 maze_all=[-1,-1,-1,-1,-1]#we use maze_all starting from 1
 vs_handle=[-1,-1,-1,-1,-1,-1]##we use vs_handle starting from 1
-curB=0
 totB=1#check , total number of balls expected
 totM=[1,4]#check , list of all maze numbers
 client_id=-1
 ball_details={}
-process=[]
+processX=[]
 ############################################################################
 
 
-# In[5]:
+# In[4]:
 
 
 def vs_conveyer():
@@ -221,14 +220,14 @@ def vs_conveyer():
     _, _, _ = sim.simxGetVisionSensorImage(client_id,vs_handle[5], 0, sim.simx_opmode_streaming)
     rCode,pingTime= sim.simxGetPingTime(client_id)
 ####################################################################################################
-def stopStreaming(vs_number):
-    vision_sensor_handle=vs_handle[vs_number]
+def stopStreaming(vision_sensor_handle):
+    #vision_sensor_handle=vs_handle[vs_number]
     _, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_discontinue)
     rCode,pingTime= sim.simxGetPingTime(client_id)
 #######################################################################################################
 
 
-# In[6]:
+# In[5]:
 
 
 def calculateMazeArrays():
@@ -290,78 +289,14 @@ def calculateMazeArrays():
 ###################################################################################################################
 
 
-# In[7]:
-
-
-###################################################################################################
-def read_ball_details(file_name):
-    global ball_details
-    f=open(file_name,)
-    ball_details=json.load(f)
-##############################################################################################
-def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle):
-    #if this table is current table in dictionary of ball
-    #check if ball in vision sensor table 4
-    while(True):
-        #process 1
-        #check if ball in stream of vision sensor conveyer
-        print("Checking for ball in table "+ball_info[0])
-        shapes=task_4b.getBallData(client_id,vision_sensor_handle)
-        if(len(shapes)!=0):
-        #if ball detected , start pid
-            print("Ball has reached at Table "+ball_info[0])
-            try:
-                pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
-                print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))
-                #print('\n============================================')
-
-                try:
-                    task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle)
-                except Exception:
-                    print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
-                    print('Stop the CoppeliaSim simulation manually.\n')
-                    #traceback.print_exc(file=sys.stdout)
-                    #print()
-                    #sys.exit()
-
-            except Exception:
-                print('\n[ERROR] Your convert_path_to_pixels() function throwed an Exception. Kindly debug your code!')
-                print('Stop the CoppeliaSim simulation manually.\n')
-                #traceback.print_exc(file=sys.stdout)
-                #print()
-                #sys.exit()
-
-            #if this is not table 4 return, journey of ball is complete
-            if(ball_info[0]!=4):
-                return
-            
-            #start vision sensor for next ball from this table
-            #setup_maze_for_ball(client_id,table_number,path)
-            revolute_handle,vision_sensor_handle=setup_maze_for_ball(client_id,ball_info[2],ball_info[3])
-            #process 3
-            #change currrent table in list ball_info
-            ball_info[0]=ball_info[2]
-            #changing current path
-            ball_info[1]=ball_info[3]
-            
-            #start checking for ball in next table
-            #do same thing as in process 2
-            print("Starting setup for ball in table "+ball_info[0])
-            processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle)
-            ####################also delete current ball from dictionary######################not done yet
-            #stop streaming this vision sensor
-            stopStreaming(vision_sensor_handle)
-                
-
-
-# In[8]:
+# In[6]:
 
 
 #########################################################################################################
 #get all info of journey of ball
 def getBallInfo(ball_color):
     global ball_details,maze_all,vs_handle
-    ball_info=[[4],[],[],[]]
+    ball_info=[4,[],-1,[]]
     #current table number,path in table 4,[path,vision_sensor_handle,revolute_handle],table x,[path in x,vision_sensor_handle,revolute_handle]
     #ball_color ="blue"
     #cb = "T4_CB1"
@@ -423,7 +358,7 @@ def getBallInfo(ball_color):
 ##############################################################
 
 
-# In[4]:
+# In[7]:
 
 
 def send_mazeData():
@@ -469,128 +404,7 @@ def send_mazeData():
 #################################################################################################
 
 
-# In[15]:
-
-
-def main(rec_client_id):
-    """
-    Purpose:
-    ---
-
-    Teams are free to design their code in this task.
-    The test executable will only call this function of task_5.py.
-    init_remote_api_server() and exit_remote_api_server() functions are already defined
-    in the executable and hence should not be called by the teams.
-    The obtained client_id is passed to this function so that teams can use it in their code.
-
-    However NOTE:
-    Teams will have to call start_simulation() and stop_simulation() function on their own. 
-
-    Input Arguments:
-    ---
-    `rec_client_id` 	:  integer
-        client_id returned after calling init_remote_api_server() function from the executable.
-
-    Returns:
-    ---
-    None
-
-    Example call:
-    ---
-    main(rec_client_id)
-
-    """
-    ##############	ADD YOUR CODE HERE	##############
-    global maze_all,vs_handle,client_id,ball,curB,totB,totM
-    client_id=rec_client_id
-    if (client_id != -1):
-        print('\nConnected successfully to Remote API Server in CoppeliaSim!')
-    else:
-        print('\n[ERROR] Your init_remote_api_server function in task_2a.py throwed an Exception. Kindly debug your code!')
-        return
-    
-    #global variables
-    #maze arrays,vision sensor handles,dictionary about ball,number of balls passed,totalballs
-    
-    #make maze arrays, store maze arrays
-    print("Calcute Maze Arrays")
-    calculateMazeArrays()
-    #print(maze_all)
-    #send maze arrays to coppeliasim and start simulation
-    print("Sending Data to Maze in Scene")
-    send_mazeData()
-    #start vision streaming vision sensor conveyer and check for ball,store all vision sensor handles
-    print("Started Streaming vision sensor conveyer")
-    vs_conveyer()
-    print("Vision Sensor handles ",vs_handle)
-    #read json file for ball details
-    read_ball_details("ball_details.json")
-    
-    #########################################check maze,will be seen at last
-    newBall=True#che
-    count=0
-    threshCount=10#balling missing from vision sensor for this many frames, means we can start waiting for next ball
-    
-    #while true
-    while(True):
-        #process 1
-        #check if ball in stream of vision sensor conveyer
-        shapes=task_4b.getBallData(client_id,vs_handle[5])
-        if(shapes==None):
-            continue
-        if((len(shapes)!=0) and newBall):
-            #if ball found,add 1 to number of ball
-            print(shapes)
-            curB+=1
-            newBall=False
-            count=0
-            color=shapes['Circle'][0]
-            print("Found "+color+" ball in vision coveyer")
-            #get info of ball from ball_details current table number,path in table 4,path in table x,table x
-            #differentiate balls based on color
-            ball_info=getBallInfo(color)
-            #start streaming of table 4 vision sensor
-            print("setup maze 4 for ball to come")
-            revolute_handle,vision_sensor_handle=setup_maze_for_ball(client_id,4,ball_info[1])
-            return
-            #start task3 in multiprocessing
-            #with concurrent.futures.ProcessPoolExecutor() as executor:
-            #    f1=executor.submit(processMaze(table_number),1)
-            print("Started a subprocess for this ball")
-            process=Process(target=processMaze,args=(client_id,ball_info,revolute_handle,vision_sensor_handle,))
-            #processes are spawned by creating Process object and calling its start method
-            process.start()
-            
-            #if this is last ball stop streaming vision conveyer
-            if(curB==totB):
-                print("Max balls for this has passed , stopping vision sensor conveyer stream.")
-                stopStreaming(vs_handle[5])
-                break
-        else:
-            count+=1
-            if(count>threshCount):
-                newBall=True
-            
-    ##################################################
-
-
-# In[20]:
-
-
-#Function Name:    main (built in)
-#        Inputs:    None
-#       Outputs:    None
-#       Purpose:    To call the main(rec_client_id) function written by teams when they
-#					run task_5.py only.
-
-# NOTE: Write your solution ONLY in the space provided in the above functions. This function should not be edited.
-if __name__ == "__main__":
-
-    client_id = task_2a.init_remote_api_server()
-    main(client_id)
-
-
-# In[19]:
+# In[8]:
 
 
 def setup_maze_for_ball(client_id,table_number,path):
@@ -604,15 +418,15 @@ def setup_maze_for_ball(client_id,table_number,path):
         except Exception:
             print('\n[ERROR] Your send_data_to_draw_path() function throwed an Exception. Kindly debug your code!')
             #print('Stop the CoppeliaSim simulation manually.\n')
-            traceback.print_exc(file=sys.stdout)
+            #traceback.print_exc(file=sys.stdout)
             #print()
-            sys.exit()
+            #sys.exit()
     except Exception:
         print('\n[ERROR] Your init_setup() function throwed an Exception. Kindly debug your code!')
         #print('Stop the CoppeliaSim simulation manually if started.\n')
-        traceback.print_exc(file=sys.stdout)
+        #traceback.print_exc(file=sys.stdout)
         #print()
-        sys.exit()
+        #sys.exit()
     return revolute_handle,vision_sensor_handle
 #########################################################################################################
 def stopSimulation(client_id):
@@ -645,4 +459,206 @@ def stopSimulation(client_id):
         #traceback.print_exc(file=sys.stdout)
         #print()
         #sys.exit()
+
+
+# In[9]:
+
+
+def main(rec_client_id):
+    """
+    Purpose:
+    ---
+
+    Teams are free to design their code in this task.
+    The test executable will only call this function of task_5.py.
+    init_remote_api_server() and exit_remote_api_server() functions are already defined
+    in the executable and hence should not be called by the teams.
+    The obtained client_id is passed to this function so that teams can use it in their code.
+
+    However NOTE:
+    Teams will have to call start_simulation() and stop_simulation() function on their own. 
+
+    Input Arguments:
+    ---
+    `rec_client_id` 	:  integer
+        client_id returned after calling init_remote_api_server() function from the executable.
+
+    Returns:
+    ---
+    None
+
+    Example call:
+    ---
+    main(rec_client_id)
+
+    """
+    ##############	ADD YOUR CODE HERE	##############
+    global maze_all,vs_handle,client_id,ball,totB,totM,processX
+    client_id=rec_client_id
+    if (client_id != -1):
+        print('\nConnected successfully to Remote API Server in CoppeliaSim!')
+    else:
+        print('\n[ERROR] Your init_remote_api_server function in task_2a.py throwed an Exception. Kindly debug your code!')
+        return
+    
+    #global variables
+    #maze arrays,vision sensor handles,dictionary about ball,number of balls passed,totalballs
+    
+    #make maze arrays, store maze arrays
+    print("Calcute Maze Arrays")
+    calculateMazeArrays()
+    #print(maze_all)
+    #send maze arrays to coppeliasim and start simulation
+    print("Sending Data to Maze in Scene")
+    send_mazeData()
+    #start vision streaming vision sensor conveyer and check for ball,store all vision sensor handles
+    print("Started Streaming vision sensor conveyer")
+    vs_conveyer()
+    print("Vision Sensor handles ",vs_handle)
+    #read json file for ball details
+    read_ball_details("ball_details.json")
+    
+    #########################################check maze,will be seen at last
+    curB=0
+    newBall=True#che
+    count=0
+    threshCount=10#balling missing from vision sensor for this many frames, means we can start waiting for next ball
+    
+    #while true
+    while(True):
+        #process 1
+        #check if ball in stream of vision sensor conveyer
+        shapes=task_4b.getBallData(client_id,vs_handle[5])
+        if(shapes==None):
+            continue
+        if((len(shapes)!=0) and newBall):
+            #if ball found,add 1 to number of ball
+            print(shapes)
+            curB+=1
+            newBall=False
+            count=0
+            color=shapes['Circle'][0]
+            print("Found "+color+" ball in vision coveyer")
+            #get info of ball from ball_details current table number,path in table 4,path in table x,table x
+            #differentiate balls based on color
+            ball_info=getBallInfo(color)
+            #start streaming of table 4 vision sensor
+            print("setup maze 4 for ball to come")
+            revolute_handle,vision_sensor_handle=setup_maze_for_ball(client_id,4,ball_info[1])
+
+            #start task3 in multiprocessing
+            #with concurrent.futures.ProcessPoolExecutor() as executor:
+            #    f1=executor.submit(processMaze(table_number),1)
+            print("Started a subprocess for this ball")
+            process=Process(target=processMaze,args=(client_id,ball_info,revolute_handle,vision_sensor_handle,))
+            #processes are spawned by creating Process object and calling its start method
+            process.start()
+            processX.append(process)
+            #if this is last ball stop streaming vision conveyer
+            #print(curB,totB,curB==totB)
+            if(curB==totB):
+                print("Max balls for this has passed , stopping vision sensor conveyer stream.")
+                stopStreaming(vs_handle[5])
+                break
+        else:
+            count+=1
+            if(count>threshCount):
+                newBall=True
+    for process in processX:
+        process.join()
+    #end simulation
+    stopSimulation(client_id)
+    ##################################################
+
+
+# In[10]:
+
+
+#Function Name:    main (built in)
+#        Inputs:    None
+#       Outputs:    None
+#       Purpose:    To call the main(rec_client_id) function written by teams when they
+#					run task_5.py only.
+
+# NOTE: Write your solution ONLY in the space provided in the above functions. This function should not be edited.
+if __name__ == "__main__":
+
+    client_id = task_2a.init_remote_api_server()
+    main(client_id)
+
+
+# In[16]:
+
+
+###################################################################################################
+def read_ball_details(file_name):
+    global ball_details
+    f=open(file_name,)
+    ball_details=json.load(f)
+##############################################################################################
+def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle):
+    #print(client_id,ball_info,revolute_handle,vision_sensor_handle)
+    #if this table is current table in dictionary of ball
+    #check if ball in vision sensor table 4
+    while(True):
+        #process 1
+        #check if ball in stream of vision sensor conveyer
+        print("Checking for ball in table "+str(ball_info[0]))
+        try:
+            shapes=task_4b.getBallData(client_id,vision_sensor_handle)
+        except Exception:
+            print('\n[ERROR] Your stop_simulation function in task_2a.py throwed an Exception. Kindly debug your code!')
+            print('Stop the CoppeliaSim simulation manually.\n')
+            traceback.print_exc(file=sys.stdout)
+            print()
+            sys.exit()
+        
+        if(shapes==None):
+            continue
+        if(len(shapes)!=0):
+        #if ball detected , start pid
+            print("Ball detected in table "+str(ball_info[0]))
+            try:
+                pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
+                #print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))
+                #print('\n============================================')
+                print("Started traversing table :"+ball_info[0])
+                try:
+                    task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle)
+                except Exception:
+                    print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
+                    print('Stop the CoppeliaSim simulation manually.\n')
+                    #traceback.print_exc(file=sys.stdout)
+                    #print()
+                    #sys.exit()
+
+            except Exception:
+                print('\n[ERROR] Your convert_path_to_pixels() function throwed an Exception. Kindly debug your code!')
+                print('Stop the CoppeliaSim simulation manually.\n')
+                #traceback.print_exc(file=sys.stdout)
+                #print()
+                #sys.exit()
+
+            #if this is not table 4 return, journey of ball is complete
+            if(ball_info[0]!=4):
+                return
+            
+            #start vision sensor for next ball from this table
+            #setup_maze_for_ball(client_id,table_number,path)
+            revolute_handle,vision_sensor_handle=setup_maze_for_ball(client_id,ball_info[2],ball_info[3])
+            #process 3
+            #change currrent table in list ball_info
+            ball_info[0]=ball_info[2]
+            #changing current path
+            ball_info[1]=ball_info[3]
+            
+            #start checking for ball in next table
+            #do same thing as in process 2
+            print("Starting setup for ball in table "+ball_info[0])
+            processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle)
+            print("Sent ball to collection box in table "+ball_info[0])
+            #stop streaming this vision sensor
+            stopStreaming(vision_sensor_handle)
+            break
+                
 
