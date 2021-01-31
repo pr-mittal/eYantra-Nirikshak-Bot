@@ -311,8 +311,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 		#print("Now=",now)
 	else:
 		return
-	timeChange=now-lastTime  
-
+	timeChange=now-lastTime 
 	#print("TimeChange=",timeChange)
 	if(timeChange>=SampleTime):
 		#Compute all the working error variables
@@ -362,7 +361,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 		lastInput = Input
 		lastTime = now
 		lastOutput=Output
-		setAngles(Output)
+		
 		#  In case value of kd has changed
 		kd=np.array([0.135,0.135],dtype='float64')
 	return ITerm,lastInput,lastTime,Input,lastOutput,summation,Output

@@ -568,12 +568,12 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 	'''
 	# loop from start to a point less than end,as dst=src+1
 	thresh=1000
-	setAngles(client_id,revolute_handle,[0,0]) 
+	task_3.setAngles(client_id,revolute_handle,[0,0]) 
 	z=1	
 	setpoint=[0,0]
 	ITerm=np.array([0,0],dtype="float64")
 	lastInput=np.array([0,0],dtype="float64")
-	lastTime=np.array([0,0],dtype="float64")
+	lastTime=0
 	Input=np.array([0,0],dtype="float64")
 	lastOutput=np.array([0,0],dtype="float64")
 	summation=np.array([0,0],dtype="float64")
@@ -632,7 +632,8 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 			if(timechange>=0.7):
 				break
 			try:
-				ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output)
+				ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= task_3.control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output)
+				task_3.setAngles(client_id,revolute_handle,Output)
 			except:
 				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
 				print('Stop the CoppeliaSim simulation manually.\n')
