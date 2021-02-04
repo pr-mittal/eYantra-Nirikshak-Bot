@@ -677,7 +677,7 @@ if __name__ == "__main__":
 
 				try:
 					# Send maze array data to CoppeliaSim via Remote API
-					return_code = send_data(maze_array)
+					# return_code = send_data(maze_array)
 
 					if (return_code == sim.simx_return_ok):
 

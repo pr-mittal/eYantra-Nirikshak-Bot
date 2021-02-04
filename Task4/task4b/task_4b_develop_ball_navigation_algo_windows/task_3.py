@@ -18,7 +18,7 @@
 '''
 
 # Team ID:		  NB_2182
-# Author List:	  Priyank Sisodia,Aman Sharman, Yatharth Bhargava, Pranav Mittal
+# Author List:	  	Priyank Sisodia,Aman Sharma, Yatharth Bhargava, Pranav Mittal
 # Filename:		 task_3.py
 # Functions:		init_setup(rec_client_id), control_logic(center_x,center_y), change_setpoint(new_setpoint)
 #				   [ Comma separated list of functions in this file ]
@@ -59,7 +59,7 @@ client_id = -1
 # Global list "setpoint" for storing target position of ball on the platform/top plate
 # The zeroth element stores the x pixel and 1st element stores the y pixel
 # NOTE: DO NOT change the value of this "setpoint" list
-setpoint = [640,640]
+setpoint = [1024,256]
 
 # Global variable "vision_sensor_handle" to store handle for Vision Sensor
 # NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
@@ -69,18 +69,18 @@ vision_sensor_handle = 0
 ##############################################################
 
 revolute_handle=[-1,-1,-1,-1,-1,-1,-1,-1]
-outMax=90
-outMin=-90
-kp=np.array([0.055,0.055],dtype='float64')
-ki=np.array([0.002,0.002],dtype='float64')#ki=ki*SampleTime
-kd=np.array([0.197,0.197],dtype='float64')#kd=kd/SampleTime
+outMax=60
+outMin=-60
+kp=np.array([0.02,0.02],dtype='float64')
+ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+kd=np.array([0.135,0.135],dtype='float64')#kd=kd/SampleTime
 lastTime=0
 error = np.array([0,0],dtype='float64')
 summation = np.array([0,0],dtype='float64')
 ITerm=np.array([0,0],dtype='float64')
 lastInput=np.array([0,0],dtype='float64')
-SampleTime = 0.01 #0.01 sec
 Input=np.array([0,0],dtype='float64')
+SampleTime = 0.01 #0.01 sec
 Output=np.array([0,0],dtype="float64")
 lastOutput=np.array([0,0],dtype="float64")
 ##############################################################
@@ -100,27 +100,21 @@ def setAngles(Output):
 	#setting output to joints/motors
 	#This can be useful if you need to send several values to CoppeliaSim that should be received and evaluated at the same time. 
 	_=sim.simxPauseCommunication(client_id,True)
-	# Output[0]=(-1)*Output[0]
-	# Output[1]=(-1)*Output[1]
 	
-	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[7],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
+	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
+	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[7],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 
 	
-	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[4],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
+	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
+	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[4],Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	
 	
-	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
+	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
+	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	
 	
-	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[5],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[6],Output[1]*np.pi/180,sim.simx_opmode_oneshot)
+	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[5],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
+	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[6],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 
 	# print( -Output[0]*np.pi/180,"-Output[0]*np.pi/180" )
 	# print( Output[0]*np.pi/180,"Output[0]*np.pi/180" )
@@ -215,10 +209,10 @@ def init_setup(rec_client_id):
 	_,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2",sim.simx_opmode_blocking)
 	_,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_3",sim.simx_opmode_blocking)
 	_,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_4",sim.simx_opmode_blocking)
-	_,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_5",sim.simx_opmode_blocking)
-	_,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_6",sim.simx_opmode_blocking)
-	_,revolute_handle[2]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_7",sim.simx_opmode_blocking)
-	_,revolute_handle[3]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_8",sim.simx_opmode_blocking)
+	_,revolute_handle[4]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_5",sim.simx_opmode_blocking)
+	_,revolute_handle[5]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_6",sim.simx_opmode_blocking)
+	_,revolute_handle[6]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_7",sim.simx_opmode_blocking)
+	_,revolute_handle[7]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_8",sim.simx_opmode_blocking)
 	_, vision_sensor_handle = sim.simxGetObjectHandle(client_id, 'vision_sensor_1', sim.simx_opmode_blocking)
 
 	# _=sim.simxPauseCommunication(client_id,True)
@@ -325,7 +319,6 @@ def control_logic(center_x,center_y):
 	timeChange=now-lastTime  
 
 	#print("TimeChange=",timeChange)
-
 	if(timeChange>=SampleTime):
 		#Compute all the working error variables
 		#transform of coordinates
@@ -333,7 +326,6 @@ def control_logic(center_x,center_y):
 		# We ahve divide the 2D plane problem 2 independent linear problems 
 		# and then applied pid independently on them
 		
-		#coord=[center_x,center_y]
 		Input=coordinateTransform([center_x,center_y])
 		#calculation of error
 		#error=getError(Input,coordinateTransform(setpoint))
@@ -348,13 +340,16 @@ def control_logic(center_x,center_y):
 
 		# print(timeChange)
 		# here summation means the summation of all previous error
+		# we are adding the ITerm only when the ball is close to setpoint
 
-		if(error[0]*error[0]+error[1]*error[1]<2000):
-			ITerm= ki*(summation)
+		if(error[0]*error[0]+error[1]*error[1]<8000):
+			ITerm= ki*(summation)*timeChange
 			summation+=error
+			kd=np.array([0.12,0.12],dtype='float64')
+		if(error[0]*error[0]+error[1]*error[1]<1500):
+			kd=np.array([0.2,0.2],dtype='float64')
 
 		dInput = (Input - lastInput)
-
 		for i in range(2):
 			#dealing with windup
 			if(ITerm[i]> outMax):
@@ -363,7 +358,7 @@ def control_logic(center_x,center_y):
 				ITerm[i]= outMin
 			#Compute PID Output, here ki has already been multiplied by sampleTime i.e. delta t
 			Output[i] = (float)(kp[i] * error[i] + ITerm[i]- (float)((kd[i] * dInput[i]))/timeChange)
-			# print(kp[i] * error[i] + ITerm[i]- kd[i] * dInput[i])
+			# print(kp[i] * error[i] + ITerm[i]- kd[i] * dInput[i]/timeChange)
 			if(Output[i]> outMax):
 				Output[i] = outMax
 			elif(Output[i] < outMin):
@@ -374,6 +369,7 @@ def control_logic(center_x,center_y):
 		lastTime = now
 		lastOutput=Output
 		setAngles(Output)
+		kd=np.array([0.135,0.135],dtype='float64')
 	
 
 	##################################################
@@ -399,20 +395,20 @@ def change_setpoint(new_setpoint):
 #		Inputs:	None
 #	   Outputs:	None
 #	   Purpose:	This part of the code is only for testing your solution. The function does the following:
-						# - imports 'task_1b' file as module
-						# - imports 'task_1a_part1' file as module
+# - imports 'task_1b' file as module
+# - imports 'task_1a_part1' file as module
 #						- imports 'task_2a' file as module
-						# - calls init_remote_api_server() function in 'task_2a' to connect with CoppeliaSim Remote API server
-						# - then calls start_simulation() function in 'task_2a' to start the simulation
-#						- then calls init_setup() function to store the required handles in respective global variables and complete initializations if required
-						# - then calls get_vision_sensor_image() function in 'task_2a' to capture an image from the Vision Sensor in CoppeliaSim scene
-						# - If the return code is 'simx_return_ok':
-									# - then calls transform_vision_sensor_image() function in 'task_2a' to transform the captured image
-						  			#   to a format compatible with OpenCV. 
-#			 						- then the transformed image is given as input and Perspective Transform is applied
-#			 						  by calling applyPerspectiveTransform function	from 'task_1b'
-#			 						- then the output of warped_img is given to 'scan_image' function from 'task_1a_part1'
-#			 			- then calls control_logic() function to command the servo motors
+# - calls init_remote_api_server() function in 'task_2a' to connect with CoppeliaSim Remote API server
+# - then calls start_simulation() function in 'task_2a' to start the simulation
+#- then calls init_setup() function to store the required handles in respective global variables and complete initializations if required
+# - then calls get_vision_sensor_image() function in 'task_2a' to capture an image from the Vision Sensor in CoppeliaSim scene
+# - If the return code is 'simx_return_ok':
+# - then calls transform_vision_sensor_image() function in 'task_2a' to transform the captured image
+#   to a format compatible with OpenCV. 
+# - then the transformed image is given as input and Perspective Transform is applied
+# by calling applyPerspectiveTransform function	from 'task_1b'
+# - then the output of warped_img is given to 'scan_image' function from 'task_1a_part1'
+# - then calls control_logic() function to command the servo motors
 
 # NOTE: Write your solution ONLY in the space provided in the above functions. Main function should not be edited.
 
@@ -519,8 +515,10 @@ if __name__ == "__main__":
 		sys.exit()
 	
 	# Initialising the center_x and center_y variable to the current position of the ball
-	center_x = 1063
-	center_y = 1063
+	# center_x = 1063
+	# center_y = 1063
+	center_x = 640
+	center_y = 640
 	
 	init_simulation_time = 0
 	curr_simulation_time = 0
@@ -530,8 +528,9 @@ if __name__ == "__main__":
 	# print("simxGetStringSignal()=",time.time())
 	if(return_code_signal==0):
 		init_simulation_time=float(init_simulation_time_string)
-
+	lastInput = coordinateTransform([center_x,center_y])
 	# Running the coppeliasim simulation for 15 seconds
+	flag=False
 	while(curr_simulation_time - init_simulation_time <=15):
 		# x=time.time()
 		# print("Starting Coppeliasim Loop, time=",x)
@@ -614,8 +613,12 @@ if __name__ == "__main__":
 					sys.exit()
 			
 			try:
-				control_logic(center_x,center_y)
-			
+				# control_logic(center_x,center_y)
+				if(flag):
+					control_logic(center_x,center_y)
+				else:
+					lastInput=coordinateTransform([center_x,center_y])
+					flag=True
 			except:
 				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
 				print('Stop the CoppeliaSim simulation manually.\n')

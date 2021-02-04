@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[22]:
+# In[8]:
 
 
 '''
@@ -23,14 +23,15 @@
 *****************************************************************************************
 '''
 
-# Team ID:			[ Team-ID ]
-# Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Team ID:			2182
+# Author List:		Aman Kumar,Pranav Mittal
 # Filename:			task_4a.py
 # Functions:		find_path, read_start_end_coordinates
 # 					[ Comma separated list of functions in this file ]
+#                     make_step,getMinPath,getPath
 # Global variables:	
 # 					[ List of global variables defined in this file ]
-
+                    
 ####################### IMPORT MODULES #######################
 ## You are not allowed to make any changes in this section. ##
 ## You have to implement this task with the six available   ##
@@ -63,7 +64,7 @@ except Exception as e:
 ##############################################################
 
 
-# In[23]:
+# In[9]:
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -71,9 +72,9 @@ except Exception as e:
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-"""
-we shall find the path by using the fact that each row adjacent to given row must have just one unit difference
-"""
+# """
+# we shall find the path by using the fact that each row adjacent to given row must have just one unit difference
+# """
 def make_step(k, distance_mat, maze_array):
     for i in range(10):
         for j in range(10):  
@@ -114,16 +115,19 @@ def make_step(k, distance_mat, maze_array):
                 
     return distance_mat
 
-"""
-we might have multiple paths from start to end
-we see that which path has least corners and sotre just the corners in the path
-we return the path that has min corners and return that as output
-"""
-def removeExtraPnts(path):
+# """
+# we might have multiple paths from start to end
+# we see that which path has least corners and sotre just the corners in the path
+# we return the path that has min corners and return that as output
+# """
+def getMinPath(path):
+    path_copy=[]
+    #print(path)
     #print(path[0])
     #looping through all the possible paths that we got via traversal in find_path
     #see the path that has least corners
     for m in range(len(path)):
+        path_copy+=[path[m].copy()]
         #storing the previos index
         prev_x=-1
         #count the number of x that have had the same value as x, till present existing in the path
@@ -183,10 +187,12 @@ def removeExtraPnts(path):
             min_c=len(path[i])
             min_indx=i
     #print(path[min_indx])
-    return path[min_indx]
-"""
----Just some extra test cases for checking 
-"""
+    #print(path,path_copy)
+    return path_copy[min_indx]
+
+#"""
+#---Just some extra test cases for checking 
+#"""
 # removeExtraPnts([[(0, 4), (1, 4), (1, 3), (1, 2), (2, 2), (2, 1), (3, 1),
 #         (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6), (4, 7),
 #         (3, 7), (3, 6), (3, 5), (3, 4), (2, 4), (2, 5), (1, 5),
@@ -205,12 +211,12 @@ def removeExtraPnts(path):
 # (8, 5), (9, 5)]
 
 
-# In[28]:
+# In[10]:
 
 
-"""
-it returns the path , traversing from end_coord to start_cood using recursion
-"""
+# """
+# it returns the path , traversing from end_coord to start_cood using recursion
+# """
 def getPath(start_coord,end_coord,distance_mat,maze_array):
     #print(end_coord)
     #path making
@@ -296,9 +302,9 @@ def getPath(start_coord,end_coord,distance_mat,maze_array):
     
     #if the traversal was successful we return final_path, combination of traveral in all four direction(if it is possible)
     return final_path
-"""
----Just some extra test cases for checking 
-"""
+#"""
+#---Just some extra test cases for checking 
+#"""
 # maze_array=[[3, 10, 10, 14, 7, 11, 10, 10, 10, 6], [5, 11, 2, 2, 12, 3, 2, 10, 14, 5], [5, 3, 12, 5, 3, 12, 9, 10, 6, 5], [5, 5, 11, 12, 9, 10, 10, 6, 5, 13], [13, 1, 10, 10, 10, 10, 10, 12, 1, 14], [11, 12, 3, 2, 10, 10, 10, 6, 5, 7], [7, 3, 12, 13, 3, 6, 11, 8, 12, 5], [5, 1, 10, 10, 12, 9, 10, 10, 6, 5], [5, 9, 14, 11, 10, 2, 10, 10, 12, 5], [9, 10, 10, 10, 14, 13, 11, 10, 10, 12]]
 # start_coord=[0, 4]
 # end_coord=[9, 5]
@@ -330,7 +336,7 @@ def getPath(start_coord,end_coord,distance_mat,maze_array):
 ##############################################################
 
 
-# In[29]:
+# In[11]:
 
 
 def find_path(maze_array, start_coord, end_coord):
@@ -403,15 +409,15 @@ def find_path(maze_array, start_coord, end_coord):
         
     #print(path)
     #segregate extra paths that are of least corners
-    path=removeExtraPnts(path)
+    path=getMinPath(path)
     
     #print(len(path))
     ######################################################
 
     return path
-"""
----Just some extra test cases for checking 
-"""
+# """
+# ---Just some extra test cases for checking 
+# """
 # maze_array=[[3, 10, 10, 14, 7, 11, 10, 10, 10, 6], [5, 11, 2, 2, 12, 3, 2, 10, 14, 5], [5, 3, 12, 5, 3, 12, 9, 10, 6, 5], [5, 5, 11, 12, 9, 10, 10, 6, 5, 13], [13, 1, 10, 10, 10, 10, 10, 12, 1, 14], [11, 12, 3, 2, 10, 10, 10, 6, 5, 7], [7, 3, 12, 13, 3, 6, 11, 8, 12, 5], [5, 1, 10, 10, 12, 9, 10, 10, 6, 5], [5, 9, 14, 11, 10, 2, 10, 10, 12, 5], [9, 10, 10, 10, 14, 13, 11, 10, 10, 12]]
 # start_coord=[0, 4]
 # end_coord=[9, 5]
@@ -436,7 +442,7 @@ def find_path(maze_array, start_coord, end_coord):
 # (8, 5), (9, 5)]
 
 
-# In[30]:
+# In[12]:
 
 
 def read_start_end_coordinates(file_name, maze_name):
@@ -480,7 +486,7 @@ def read_start_end_coordinates(file_name, maze_name):
     return (start_coord[0],start_coord[1]), (end_coord[0],end_coord[1])
 
 
-# In[31]:
+# In[13]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

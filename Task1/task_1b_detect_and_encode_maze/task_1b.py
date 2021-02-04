@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[5]:
+# In[16]:
 
 
 '''
@@ -44,7 +44,8 @@ import matplotlib.pyplot as plt
 ##############################################################
 
 
-# In[48]:
+# In[17]:
+
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -123,17 +124,108 @@ def threshInputImage(img):
     #increase contrast and get a suitable threshold value
     #ret,imgThresh = cv2.threshold(imgBlur,100,255,cv2.THRESH_BINARY)
     ret,imgThresh=cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    
+    #plt.imshow(cv2.cvtColor(imgThresh,cv2.COLOR_BGR2RGB))
+    #fig.add_subplot(1,2,2)
     #Appplying morphological tranformation for better detection of maze and table borders
     kernel = np.ones((5, 5), np.uint8)
     #imgMorph=cv2.erode(imgThresh,kernel,iterations=2)
     #imgBlank = np.zeros_like(img)
     imgCanny = cv2.Canny(imgThresh,80,80)
-    #plt.imshow(imgCanny)
+    #plt.imshow(cv2.cvtColor(imgCanny,cv2.COLOR_BGR2RGB))
     imgMorph=cv2.dilate(imgCanny,kernel,iterations=2)
     
     return imgMorph
+
+
+# In[18]:
+
+
+def mazeDimension(warped_img):
+    #applying hough trasformation on image to calculate the dimensions
+    imgGray = cv2.cvtColor(warped_img,cv2.COLOR_BGR2GRAY)
+    imgGray = cv2.GaussianBlur(imgGray,(7,7),1)
+    ret,imgThresh=cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    imgCanny = cv2.Canny(imgThresh,80,80)
+    lines= cv2.HoughLines(imgCanny, 1, np.pi/180.0, 150, np.array([]), 0, 0)
+    
+    #preprocesing the lines to filter some of the options
+    bx=lambda x:x[0][0]
+    lines=sorted(lines,key=bx)
+    
+    #taking error between two detcted lines as 30px<1280/11
+    errRho=50
+    prevVer=0#previous vertical line
+    cntVer=1#current count of vertical lines
+    prevHor=0#previous horizontal line
+    cntHor=1#current count of horizontal lines
+    
+    #removing repeating lines
+    for x in lines:
+        rho,theta=x[0][0],x[0][1]
+        #angle is 90 deg
+        if((np.cos(theta)<0.1)and(np.cos(theta)>-0.1)):
+            #checking for repeating lines
+            if(abs(prevVer-rho)>errRho):
+                #print("Vertical=",prevVer)
+                a = np.cos(theta)
+                b = np.sin(theta)
+                x0 = a*rho
+                y0 = b*rho
+                x1 = int(x0 + 1000*(-b))
+                y1 = int(y0 + 1000*(a))
+                x2 = int(x0 - 1000*(-b))
+                y2 = int(y0 - 1000*(a))
+
+                cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+                prevVer=rho
+                cntVer=cntVer+1
+        #angle is 0 deg
+        if((np.cos(theta)<1.1)and(np.cos(theta)>0.9)):
+            #checking for repeating lines
+            if(abs(prevHor-rho)>errRho):
+                #print("Horizontal=",prevHor)
+                a = np.cos(theta)
+                b = np.sin(theta)
+                x0 = a*rho
+                y0 = b*rho
+                x1 = int(x0 + 1000*(-b))
+                y1 = int(y0 + 1000*(a))
+                x2 = int(x0 - 1000*(-b))
+                y2 = int(y0 - 1000*(a))
+
+                cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+                prevHor=rho
+                cntHor=cntHor+1
+    
+    #print(lines.shape)
+    #for x in lines:
+    #    rho,theta=x[0][0],x[0][1]
+    #    #print(theta,end=" ")
+    #    print(rho,end=" ")
+    #    a = np.cos(theta)
+    #    b = np.sin(theta)
+    #    x0 = a*rho
+    #    y0 = b*rho
+    #    x1 = int(x0 + 1000*(-b))
+    #    y1 = int(y0 + 1000*(a))
+    #    x2 = int(x0 - 1000*(-b))
+    #    y2 = int(y0 - 1000*(a))
+
+    #    cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+    
+    plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
+    
+    #print(cntVer,cntHor)
+    dim=max(cntVer-1,cntHor-1)
+    if(dim>8):
+        dim=10
+    else:
+        dim=8
+    print(dim)
+    return imgCanny,dim
+
 def checkWall(roi):
+    #checking for wall in the received roi
     contours, _ = cv2.findContours(roi,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
     #for c in contours:
     #print(len(contours))
@@ -150,10 +242,11 @@ def checkWall(roi):
     else:
         return False
     
+
 ##############################################################
 
 
-# In[51]:
+# In[19]:
 
 
 def applyPerspectiveTransform(input_img):
@@ -243,7 +336,8 @@ def applyPerspectiveTransform(input_img):
 #applyPerspectiveTransform(cv2.imread(path))
 
 
-# In[21]:
+# In[26]:
+
 
 
 def detectMaze(warped_img):
@@ -273,22 +367,25 @@ def detectMaze(warped_img):
     ##############	ADD YOUR CODE HERE	##############
     
     #plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
-    #print(warped_img)
-    #kernel = np.ones((5,5),np.uint8)
-    #ret,resultBitmap = cv2.threshold(result,100,255,cv2.THRESH_BINARY)
-    #resultBitmap = cv2.erode(resultBitmap,kernel,iterations = 2)#we can change it to 2 if 1 is not working
-    #resultBitmap = cv2.resize(resultBitmap,(500,500))
-    #resultbgr = cv2.cvtColor(result,cv2.COLOR_GRAY2BGR)
-    #resultResize = cv2.resize(resultbgr,(500,500))
-    resultBitmap=threshInputImage(warped_img.copy())
+    
+    #applying hough trasformation on image to calculate the dimensions
+    #get maze dimensions
+    #imgCanny,maze=mazeDimension(warped_img)
+    maze=10
+    resultBitmap=threshInputImage(warped_img)
+    
+    #applying dilation for better maze detection 
+    kernel = np.ones((10, 10), np.uint8)
+    resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=4)
+    #plt.imshow(cv2.cvtColor(resultBitmap,cv2.COLOR_BGR2RGB))
+    
     h,w=resultBitmap.shape
     #print(w,h)
     #maxe of 10 x 10
-    w=(int)(w/10) #width of one unit
-    h=(int)(h/10) #height of one unit
+    w=(int)(w/maze) #width of one unit
+    h=(int)(h/maze) #height of one unit
     wall=255#the pixel value at wall
-    maze=10
-   
+    
     maze_array = np.zeros((maze,maze),dtype=np.uint8)
     #r=0;c=0
     #roi= resultBitmap[(int)(h*r):(int)(h*(r+1)),(int)(w*(c+1)-w/2):(int)(w*(c+1)+w/2)]
@@ -300,31 +397,15 @@ def detectMaze(warped_img):
     #plt.imshow(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB))
     #fig.add_subplot(rows,cols,2)
     #plt.imshow(cv2.cvtColor(resultBitmap,cv2.COLOR_BGR2RGB))
-    for r in range(0,10,1):#row
-        for c in range(0,10,1):#col
+    for r in range(0,maze,1):#row
+        for c in range(0,maze,1):#col
             score =0
-            #creating an roi for each wall applying cv2.findCountour and storing the value in maze_array
-            #we need to do this for alternate boxes only
-            #this method need more improvement
-            #roi for top
-            #roi= resultBitmap[(int)(h*r-h/2):(int)(h*r+h/2),(int)(w*c):(int)(w*(c+1))]
-            #top=checkWall(roi)
-            #if((r==0)&(c==0)):
-            #    plt.imshow(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB))
-            #roi for right
-            #roi= resultBitmap[(int)(h*r):(int)(h*(r+1)),(int)(w*c-w/2):(int)(w*c+w/2)]
-            #right=checkWall(roi)
-            #roi for bottom
-            #roi= resultBitmap[(int)(h*(r+1)-h/2):(int)(h*(r+1)+h/2),(int)(w*c):(int)(w*(c+1))]
-            #bottom=checkWall(roi)
-            #roi for left
-            #roi= resultBitmap[(int)(h*r):(int)(h*(r+1)),(int)(w*(c+1)-w/2):(int)(w*(c+1)+w/2)]
-            #left=checkWall(roi)
             top = resultBitmap[h*r+1,(int)(w*c+w/2)]==wall       #point at center of top
             right = resultBitmap[(int)(h*r+h/2),w*(c+1)-1]==wall#point at center of right
             bottom = resultBitmap[h*(r+1)-1,(int)(w*c+w/2)]==wall   #point at center of bottom
             left = resultBitmap[(int)(h*r+h/2),w*c+1]==wall         #point at center of left
-            
+            #if(c==0):
+            #    print(top,right,bottom,left)
             #cv.circle(resultResize, (50*m+25,50*(n)), 3, (0,0, 255), -1)
             #cv.circle(resultResize, (50*(m+1)-1,50*(n)+25), 3, (0,0, 255), -1)
             #cv.circle(resultResize, (50*m+25,50*(n+1)-1), 3, (0,0, 255), -1)
@@ -357,24 +438,16 @@ def detectMaze(warped_img):
     #cv2.destroyAllWindows()
     #cv2.circle(resultBitmap, (cX, cY), 7, (255, 0, 0), -1)
     #plt.imshow(cv2.cvtColor(resultBitmap,cv2.COLOR_BGR2RGB))
-    #tp = resultBitmap[50*(n),50*m+25]==np.array([0,0,0])
-    #rp = resultBitmap[50*(n)+25,50*(m+1)-1]==np.array([0,0,0])
-    #bp = resultBitmap[50*(n+1)-1,50*m+25]==np.array([0,0,0])
-    #lp = resultBitmap[50*(n)+25,50*m]==np.array([0,0,0])
-    #tp = resultBitmap[50*m+25,50*(n)]==np.array([0,0,0])
-    #rp = resultBitmap[50*(m+1)-1,50*(n)+25]==np.array([0,0,0])
-    #bp = resultBitmap[50*m+25,50*(n+1)-1]==np.array([0,0,0])
-    #lp = resultBitmap[50*m,50*(n)+25]==np.array([0,0,0])
-
     ##################################################
     maze_array=maze_array.tolist()
     return maze_array
-#path="test_cases/maze04.jpg"
-#cv2.imread(path)
-#detectMaze(applyPerspectiveTransform(cv2.imread(path)))
+#path="test_cases/maze08.jpg"
+# path="task_4c_maze_images/maze_t4.jpg"
+# cv2.imread(path)
+# detectMaze(applyPerspectiveTransform(cv2.imread(path)))
 
 
-# In[5]:
+# In[ ]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[15]:
+
+
 '''
 *****************************************************************************************
 *
@@ -134,107 +140,107 @@ def threshInputImage(img):
 # In[41]:
 
 
-def mazeDimension(warped_img):
-    #applying hough trasformation on image to calculate the dimensions
-    imgGray = cv2.cvtColor(warped_img,cv2.COLOR_BGR2GRAY)
-    imgGray = cv2.GaussianBlur(imgGray,(7,7),1)
-    ret,imgThresh=cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    imgCanny = cv2.Canny(imgThresh,80,80)
-    lines= cv2.HoughLines(imgCanny, 1, np.pi/180.0, 150, np.array([]), 0, 0)
+# def mazeDimension(warped_img):
+#     #applying hough trasformation on image to calculate the dimensions
+#     imgGray = cv2.cvtColor(warped_img,cv2.COLOR_BGR2GRAY)
+#     imgGray = cv2.GaussianBlur(imgGray,(7,7),1)
+#     ret,imgThresh=cv2.threshold(imgGray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+#     imgCanny = cv2.Canny(imgThresh,80,80)
+#     lines= cv2.HoughLines(imgCanny, 1, np.pi/180.0, 150, np.array([]), 0, 0)
     
-    #preprocesing the lines to filter some of the options
-    bx=lambda x:x[0][0]
-    lines=sorted(lines,key=bx)
+#     #preprocesing the lines to filter some of the options
+#     bx=lambda x:x[0][0]
+#     lines=sorted(lines,key=bx)
     
-    #taking error between two detcted lines as 30px<1280/11
-    errRho=50
-    prevVer=0#previous vertical line
-    cntVer=1#current count of vertical lines
-    prevHor=0#previous horizontal line
-    cntHor=1#current count of horizontal lines
+#     #taking error between two detcted lines as 30px<1280/11
+#     errRho=50
+#     prevVer=0#previous vertical line
+#     cntVer=1#current count of vertical lines
+#     prevHor=0#previous horizontal line
+#     cntHor=1#current count of horizontal lines
     
-    #removing repeating lines
-    for x in lines:
-        rho,theta=x[0][0],x[0][1]
-        #angle is 90 deg
-        if((np.cos(theta)<0.1)and(np.cos(theta)>-0.1)):
-            #checking for repeating lines
-            if(abs(prevVer-rho)>errRho):
-                #print("Vertical=",prevVer)
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a*rho
-                y0 = b*rho
-                x1 = int(x0 + 1000*(-b))
-                y1 = int(y0 + 1000*(a))
-                x2 = int(x0 - 1000*(-b))
-                y2 = int(y0 - 1000*(a))
+#     #removing repeating lines
+#     for x in lines:
+#         rho,theta=x[0][0],x[0][1]
+#         #angle is 90 deg
+#         if((np.cos(theta)<0.1)and(np.cos(theta)>-0.1)):
+#             #checking for repeating lines
+#             if(abs(prevVer-rho)>errRho):
+#                 #print("Vertical=",prevVer)
+#                 a = np.cos(theta)
+#                 b = np.sin(theta)
+#                 x0 = a*rho
+#                 y0 = b*rho
+#                 x1 = int(x0 + 1000*(-b))
+#                 y1 = int(y0 + 1000*(a))
+#                 x2 = int(x0 - 1000*(-b))
+#                 y2 = int(y0 - 1000*(a))
 
-                cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
-                prevVer=rho
-                cntVer=cntVer+1
-        #angle is 0 deg
-        if((np.cos(theta)<1.1)and(np.cos(theta)>0.9)):
-            #checking for repeating lines
-            if(abs(prevHor-rho)>errRho):
-                #print("Horizontal=",prevHor)
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a*rho
-                y0 = b*rho
-                x1 = int(x0 + 1000*(-b))
-                y1 = int(y0 + 1000*(a))
-                x2 = int(x0 - 1000*(-b))
-                y2 = int(y0 - 1000*(a))
+#                 cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+#                 prevVer=rho
+#                 cntVer=cntVer+1
+#         #angle is 0 deg
+#         if((np.cos(theta)<1.1)and(np.cos(theta)>0.9)):
+#             #checking for repeating lines
+#             if(abs(prevHor-rho)>errRho):
+#                 #print("Horizontal=",prevHor)
+#                 a = np.cos(theta)
+#                 b = np.sin(theta)
+#                 x0 = a*rho
+#                 y0 = b*rho
+#                 x1 = int(x0 + 1000*(-b))
+#                 y1 = int(y0 + 1000*(a))
+#                 x2 = int(x0 - 1000*(-b))
+#                 y2 = int(y0 - 1000*(a))
 
-                cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
-                prevHor=rho
-                cntHor=cntHor+1
+#                 cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+#                 prevHor=rho
+#                 cntHor=cntHor+1
     
-    #print(lines.shape)
-    #for x in lines:
-    #    rho,theta=x[0][0],x[0][1]
-    #    #print(theta,end=" ")
-    #    print(rho,end=" ")
-    #    a = np.cos(theta)
-    #    b = np.sin(theta)
-    #    x0 = a*rho
-    #    y0 = b*rho
-    #    x1 = int(x0 + 1000*(-b))
-    #    y1 = int(y0 + 1000*(a))
-    #    x2 = int(x0 - 1000*(-b))
-    #    y2 = int(y0 - 1000*(a))
+#     #print(lines.shape)
+#     #for x in lines:
+#     #    rho,theta=x[0][0],x[0][1]
+#     #    #print(theta,end=" ")
+#     #    print(rho,end=" ")
+#     #    a = np.cos(theta)
+#     #    b = np.sin(theta)
+#     #    x0 = a*rho
+#     #    y0 = b*rho
+#     #    x1 = int(x0 + 1000*(-b))
+#     #    y1 = int(y0 + 1000*(a))
+#     #    x2 = int(x0 - 1000*(-b))
+#     #    y2 = int(y0 - 1000*(a))
 
-    #    cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
+#     #    cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
     
-    plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
+#     plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
     
-    #print(cntVer,cntHor)
-    dim=max(cntVer-1,cntHor-1)
-    if(dim>8):
-        dim=10
-    else:
-        dim=8
-    print(dim)
-    return imgCanny,dim
+#     #print(cntVer,cntHor)
+#     dim=max(cntVer-1,cntHor-1)
+#     if(dim>8):
+#         dim=10
+#     else:
+#         dim=8
+#     print(dim)
+#     return imgCanny,dim
 
-def checkWall(roi):
-    #checking for wall in the received roi
-    contours, _ = cv2.findContours(roi,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-    #for c in contours:
-    #print(len(contours))
-    #getting the countour having max area
-    maxArea=0
-    for cnt in contours:
-        area=cv2.contourArea(cnt)
-        if(area>maxArea):
-            maxArea=area
-    #print(maxArea)
-    w,h=roi.shape
-    if(maxArea>w*h/25):
-        return True
-    else:
-        return False
+# def checkWall(roi):
+#     #checking for wall in the received roi
+#     contours, _ = cv2.findContours(roi,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+#     #for c in contours:
+#     #print(len(contours))
+#     #getting the countour having max area
+#     maxArea=0
+#     for cnt in contours:
+#         area=cv2.contourArea(cnt)
+#         if(area>maxArea):
+#             maxArea=area
+#     #print(maxArea)
+#     w,h=roi.shape
+#     if(maxArea>w*h/25):
+#         return True
+#     else:
+#         return False
     
 
 ##############################################################
@@ -330,7 +336,7 @@ def applyPerspectiveTransform(input_img):
 #applyPerspectiveTransform(cv2.imread(path))
 
 
-# In[92]:
+# In[1]:
 
 
 
@@ -370,7 +376,7 @@ def detectMaze(warped_img):
     
     #applying dilation for better maze detection 
     kernel = np.ones((10, 10), np.uint8)
-    resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=3)
+    resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=4)
     #plt.imshow(cv2.cvtColor(resultBitmap,cv2.COLOR_BGR2RGB))
     
     h,w=resultBitmap.shape

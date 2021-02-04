@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 '''
 *****************************************************************************************
 *
@@ -40,12 +34,8 @@
 import numpy as np
 import cv2
 import csv
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 ##############################################################
-
-
-# In[2]:
-
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -137,9 +127,6 @@ def threshInputImage(img):
     return imgMorph
 
 
-# In[3]:
-
-
 def mazeDimension(warped_img):
     #applying hough trasformation on image to calculate the dimensions
     imgGray = cv2.cvtColor(warped_img,cv2.COLOR_BGR2GRAY)
@@ -213,7 +200,8 @@ def mazeDimension(warped_img):
 
     #    cv2.line(warped_img,(x1,y1),(x2,y2),(0,0,255),10)
     
-    plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
+    # plt.imshow(cv2.cvtColor(warped_img,cv2.COLOR_BGR2RGB))
+
     
     #print(cntVer,cntHor)
     dim=max(cntVer-1,cntHor-1)
@@ -246,9 +234,6 @@ def checkWall(roi):
 ##############################################################
 
 
-# In[4]:
-
-
 def applyPerspectiveTransform(input_img):
 
     """
@@ -277,6 +262,7 @@ def applyPerspectiveTransform(input_img):
     
     #taking image-> gray-> canny ->findContour->draw contour on blank image
     img = input_img
+    # print(img)
     #imgThresh=threshInputImage(img)
     #imgMorph=imgThresh
     #rows=2
@@ -336,10 +322,6 @@ def applyPerspectiveTransform(input_img):
 #applyPerspectiveTransform(cv2.imread(path))
 
 
-# In[6]:
-
-
-
 def detectMaze(warped_img):
 
     """
@@ -376,8 +358,8 @@ def detectMaze(warped_img):
     
     #applying dilation for better maze detection 
     kernel = np.ones((10, 10), np.uint8)
-    resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=3)
-    plt.imshow(cv2.cvtColor(resultBitmap,cv2.COLOR_BGR2RGB))
+    resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=4)
+    #plt.imshow(cv2.cvtColor(resultBitmap,cv2.COLOR_BGR2RGB))
     
     h,w=resultBitmap.shape
     #print(w,h)
@@ -446,7 +428,6 @@ def detectMaze(warped_img):
 #detectMaze(applyPerspectiveTransform(cv2.imread(path)))
 
 
-# In[ ]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -470,12 +451,11 @@ def writeToCsv(csv_file_path, maze_array):
 	warped_img = writeToCsv('test_cases/maze00.csv', maze_array)
 	"""
 
-	with open(csv_file_path, 'w', newline='') as file:
-		writer = csv.writer(file)
-		writer.writerows(maze_array)
+	# with open(csv_file_path, 'w', newline='') as file:
+		# writer = csv.writer(file)
+		# writer.writerows(maze_array)
 
 
-# In[ ]:
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -589,4 +569,3 @@ if __name__ == "__main__":
 	else:
 
 		print('')
-
