@@ -185,7 +185,7 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 
     global client_id
 
-    color_and_cb = ball_color + '::' + collection_box_name
+    color_and_cb = [ball_color + '::' + collection_box_name]
     inputBuffer = bytearray()
     return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id,'evaluation_screen_respondable_1',
                             sim.sim_scripttype_childscript,'color_and_cb_identification',[],[],color_and_cb,inputBuffer,sim.simx_opmode_blocking)
@@ -207,24 +207,6 @@ client_id=-1
 ball_details={}
 processX=[]
 ############################################################################
-
-
-# In[4]:
-
-
-def vs_conveyer():
-    global client_id,vs_handle,totM
-    for table_number in totM:
-        _,vs_handle[table_number]=sim.simxGetObjectHandle(client_id, 'vision_sensor_'+str(table_number), sim.simx_opmode_blocking)
-    _, vs_handle[5] = sim.simxGetObjectHandle(client_id, 'vision_sensor_5', sim.simx_opmode_blocking)
-    _, _, _ = sim.simxGetVisionSensorImage(client_id,vs_handle[5], 0, sim.simx_opmode_streaming)
-    rCode,pingTime= sim.simxGetPingTime(client_id)
-####################################################################################################
-def stopStreaming(vision_sensor_handle):
-    #vision_sensor_handle=vs_handle[vs_number]
-    _, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_discontinue)
-    rCode,pingTime= sim.simxGetPingTime(client_id)
-#######################################################################################################
 
 
 # In[5]:
@@ -287,6 +269,52 @@ def calculateMazeArrays():
             print('\n[ERROR] mazet' + str(file_num) + '.jpeg not found. Make sure "test_cases" folder is present in current directory.')
             print('Your current directory is: ', os.getcwd())
 ###################################################################################################################
+
+
+# In[7]:
+
+
+def send_mazeData():
+    global totM,maze_all,client_id
+    try:
+        # Send maze array data to CoppeliaSim via Remote API
+        for table_number in totM:
+            print("Sending Maze to table_number "+str(table_number))
+            #print(maze_all[table_number])
+            
+            return_code = task_2b.send_data(client_id,maze_all[table_number],table_number)
+            if(return_code!=sim.simx_return_ok):
+                #try resending the data
+                print('\n[ERROR] Failed sending data to CoppeliaSim!')
+                print('send_data function in task_2b.py is not configured correctly, check the code!')
+                #return_code = task_2b.send_data(client_id,maze_array,table_number)
+                #print()
+                #sys.exit()
+
+    except Exception:
+        print('\n[ERROR] Your send_data function throwed an Exception, kindly debug your code!')
+        #traceback.print_exc(file=sys.stdout)
+        #print()
+        #sys.exit()
+        
+    # Starting the Simulation
+    try:
+        return_code = task_2a.start_simulation(client_id)        
+        if (return_code == sim.simx_return_novalue_flag):
+            print('\nSimulation started correctly in CoppeliaSim.')
+        else:
+            print('\n[ERROR] Failed starting the simulation in CoppeliaSim!')
+            print('start_simulation function in task_2a.py is not configured correctly, check the code!')
+            #print()
+            #sys.exit()
+
+    except Exception:
+        print('\n[ERROR] Your start_simulation function in task_2a.py throwed an Exception. Kindly debug your code!')
+        #print('Stop the CoppeliaSim simulation manually.\n')
+        #traceback.print_exc(file=sys.stdout)
+        #print()
+        #sys.exit()
+#################################################################################################
 
 
 # In[6]:
@@ -354,67 +382,24 @@ def getBallInfo(ball_color):
     print(maze_all[table],start_coord, end_coord)
     ball_info[3] = task_4a.find_path(maze_all[table],start_coord, end_coord)
     print("Path in table "+str(table)+":"+str(ball_info[3]))
+    
+    #calling for grading app
+    #send_color_and_collection_box_identified(ball_color, collection_box_name)
     return ball_info
 ##############################################################
 
 
-# In[7]:
-
-
-def send_mazeData():
-    global totM,maze_all,client_id
-    try:
-        # Send maze array data to CoppeliaSim via Remote API
-        for table_number in totM:
-            print("Sending Maze to table_number "+str(table_number))
-            #print(maze_all[table_number])
-            
-            return_code = task_2b.send_data(client_id,maze_all[table_number],table_number)
-            if(return_code!=sim.simx_return_ok):
-                #try resending the data
-                print('\n[ERROR] Failed sending data to CoppeliaSim!')
-                print('send_data function in task_2b.py is not configured correctly, check the code!')
-                #return_code = task_2b.send_data(client_id,maze_array,table_number)
-                #print()
-                #sys.exit()
-
-    except Exception:
-        print('\n[ERROR] Your send_data function throwed an Exception, kindly debug your code!')
-        #traceback.print_exc(file=sys.stdout)
-        #print()
-        #sys.exit()
-        
-    # Starting the Simulation
-    try:
-        return_code = task_2a.start_simulation(client_id)        
-        if (return_code == sim.simx_return_novalue_flag):
-            print('\nSimulation started correctly in CoppeliaSim.')
-        else:
-            print('\n[ERROR] Failed starting the simulation in CoppeliaSim!')
-            print('start_simulation function in task_2a.py is not configured correctly, check the code!')
-            #print()
-            #sys.exit()
-
-    except Exception:
-        print('\n[ERROR] Your start_simulation function in task_2a.py throwed an Exception. Kindly debug your code!')
-        #print('Stop the CoppeliaSim simulation manually.\n')
-        #traceback.print_exc(file=sys.stdout)
-        #print()
-        #sys.exit()
-#################################################################################################
-
-
-# In[8]:
+# In[ ]:
 
 
 def setup_maze_for_ball(client_id,table_number,path):
     #start checking for ball on table_number
-    
+    path_handle=-1
     #if found start pid
     try:
         revolute_handle,vision_sensor_handle=task_3.init_setup(client_id,table_number)
         try:
-            task_4b.send_data_to_draw_path(client_id, path,table_number)
+            path_handle=task_4b.send_data_to_draw_path(client_id, path,table_number)
         except Exception:
             print('\n[ERROR] Your send_data_to_draw_path() function throwed an Exception. Kindly debug your code!')
             #print('Stop the CoppeliaSim simulation manually.\n')
@@ -427,8 +412,31 @@ def setup_maze_for_ball(client_id,table_number,path):
         #traceback.print_exc(file=sys.stdout)
         #print()
         #sys.exit()
-    return revolute_handle,vision_sensor_handle
+    return revolute_handle,vision_sensor_handle,path_handle
 #########################################################################################################
+
+
+# In[4]:
+
+
+def vs_conveyer():
+    global client_id,vs_handle,totM
+    for table_number in totM:
+        _,vs_handle[table_number]=sim.simxGetObjectHandle(client_id, 'vision_sensor_'+str(table_number), sim.simx_opmode_blocking)
+    _, vs_handle[5] = sim.simxGetObjectHandle(client_id, 'vision_sensor_5', sim.simx_opmode_blocking)
+    _, _, _ = sim.simxGetVisionSensorImage(client_id,vs_handle[5], 0, sim.simx_opmode_streaming)
+    rCode,pingTime= sim.simxGetPingTime(client_id)
+####################################################################################################
+def stopStreaming(vision_sensor_handle):
+    #vision_sensor_handle=vs_handle[vs_number]
+    _, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_discontinue)
+    rCode,pingTime= sim.simxGetPingTime(client_id)
+#######################################################################################################
+
+
+# In[8]:
+
+
 def stopSimulation(client_id):
     try:
         return_code = task_2a.stop_simulation(client_id)
@@ -461,7 +469,19 @@ def stopSimulation(client_id):
         #sys.exit()
 
 
-# In[10]:
+# In[9]:
+
+
+def delete_path(rec_client_id,table_number,handle):
+    #global client_id
+    client_id = rec_client_id
+    inputBuffer = bytearray()
+    return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'deletePath', [handle],[], [], inputBuffer, sim.simx_opmode_blocking)
+    return retInts[0]
+##################################################
+
+
+# In[11]:
 
 
 ###################################################################################################
@@ -470,22 +490,23 @@ def read_ball_details(file_name):
     f=open(file_name,)
     ball_details=json.load(f)
 ##############################################################################################
-def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle):
+def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle):
     try:
         #print(client_id,ball_info,revolute_handle,vision_sensor_handle)
         #if this table is current table in dictionary of ball
         #check if ball in vision sensor table 4
+        print("Checking for ball in table "+str(ball_info[0]),end="")
         while(True):
             #process 1
             #check if ball in stream of vision sensor conveyer
-            print("Checking for ball in table "+str(ball_info[0]))
-
+            print(" . ",end="")
             shapes=task_4b.getBallData(client_id,vision_sensor_handle)
+            #print(shapes)
             if(shapes==None):
                 continue
             if(len(shapes)!=0):
             #if ball detected , start pid
-                print("Ball detected in table "+str(ball_info[0]))
+                print("\nBall detected in table "+str(ball_info[0]))
                 try:
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
                     #print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))
@@ -495,7 +516,7 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle):
                         task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle)
                     except Exception:
                         print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
-                        print('Stop the CoppeliaSim simulation manually.\n')
+                        #print('Stop the CoppeliaSim simulation manually.\n')
                         #traceback.print_exc(file=sys.stdout)
                         #print()
                         #sys.exit()
@@ -506,14 +527,16 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle):
                     #traceback.print_exc(file=sys.stdout)
                     #print()
                     #sys.exit()
-
+                    
+                #delete Path
+                print("Deleteing Path in table "+str(ball_info[0]))
+                delete_path(client_id,ball_info[0],path_handle)
                 #if this is not table 4 return, journey of ball is complete
                 if(ball_info[0]!=4):
                     return
-
                 #start vision sensor for next ball from this table
-                #setup_maze_for_ball(client_id,table_number,path)
-                revolute_handle,vision_sensor_handle=setup_maze_for_ball(client_id,ball_info[2],ball_info[3])
+                #print(client_id,ball_info[2],ball_info[3])
+                revolute_handle,vision_sensor_handle,path_handle=setup_maze_for_ball(client_id,ball_info[2],ball_info[3])
                 #process 3
                 #change currrent table in list ball_info
                 ball_info[0]=ball_info[2]
@@ -523,21 +546,21 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle):
                 #start checking for ball in next table
                 #do same thing as in process 2
                 print("Starting setup for ball in table "+str(ball_info[0]))
-                processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle)
+                processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle)
                 print("Sent ball to collection box in table "+str(ball_info[0]))
                 #stop streaming this vision sensor
                 stopStreaming(vision_sensor_handle)
                 break
     except Exception:
         print('\n[ERROR] Your processMaze function in task_5.py throwed an Exception. Kindly debug your code!')
-        print('Stop the CoppeliaSim simulation manually.\n')
+        #print('Stop the CoppeliaSim simulation manually.\n')
         #traceback.print_exc(file=sys.stdout)
         #print()
         #sys.exit()
         
 
 
-# In[9]:
+# In[10]:
 
 
 def main(rec_client_id):
@@ -599,11 +622,12 @@ def main(rec_client_id):
     newBall=True#che
     count=0
     threshCount=10#balling missing from vision sensor for this many frames, means we can start waiting for next ball
-    
+    print("Waiting for ball in vision sensor conveyer",end="")
     #while true
     while(True):
         #process 1
         #check if ball in stream of vision sensor conveyer
+        print(" . ",end="")
         shapes=task_4b.getBallData(client_id,vs_handle[5])
         if(shapes==None):
             continue
@@ -614,22 +638,23 @@ def main(rec_client_id):
             newBall=False
             count=0
             color=shapes['Circle'][0]
-            print("Found "+color+" ball in vision coveyer")
-            #get info of ball from ball_details current table number,path in table 4,path in table x,table x
+            print("\nFound "+color+" ball in vision coveyer")
+            #get info of ball from ball_details [current table number,path in table 4,table x,path in table x]
             #differentiate balls based on color
             ball_info=getBallInfo(color)
             #start streaming of table 4 vision sensor
             print("setup maze 4 for ball to come")
-            revolute_handle,vision_sensor_handle=setup_maze_for_ball(client_id,4,ball_info[1])
+            revolute_handle,vision_sensor_handle,path_handle=setup_maze_for_ball(client_id,4,ball_info[1])
 
             #start task3 in multiprocessing
             #with concurrent.futures.ProcessPoolExecutor() as executor:
             #    f1=executor.submit(processMaze(table_number),1)
-            print("Started a subprocess for this ball")
-            processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle)
-            #process=Process(target=processMaze,args=(client_id,ball_info,revolute_handle,vision_sensor_handle,))
+            #print("Started a subprocess for this ball")
+            processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle)
+            #process=Process(target=processMaze,args=(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle,))
             #processes are spawned by creating Process object and calling its start method
             #process.start()
+            #process.join()
             #processX.append(process)
             #if this is last ball stop streaming vision conveyer
             #print(curB,totB,curB==totB)
@@ -642,13 +667,13 @@ def main(rec_client_id):
             if(count>threshCount):
                 newBall=True
     #for process in processX:
-        #process.join()
+    #    process.join()
     #end simulation
     stopSimulation(client_id)
     ##################################################
 
 
-# In[11]:
+# In[12]:
 
 
 #Function Name:    main (built in)

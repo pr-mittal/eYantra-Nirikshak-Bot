@@ -185,7 +185,7 @@ def getBallData(client_id,vision_sensor_handle):
 		pass
 	else:
 		#start loop again
-		return None,None
+		return None
 
 
 	# Get the transformed vision sensor image captured in correct format
@@ -207,7 +207,7 @@ def getBallData(client_id,vision_sensor_handle):
 						elif(type(shapes) is not dict):
 							#print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
 							#print('Stop the CoppeliaSim simulation manually.')
-							return None,None
+							return None
 					except Exception:
 						print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
 						print('Stop the CoppeliaSim simulation manually.\n')
@@ -436,8 +436,8 @@ def send_data_to_draw_path(rec_client_id, path,table_number):
 	
 	Returns:
 	---
-	None
 	
+	path_drawing_object_handle
 	Example call:
 	---
 	send_data_to_draw_path(rec_client_id,path)
@@ -447,7 +447,6 @@ def send_data_to_draw_path(rec_client_id, path,table_number):
 	client_id = rec_client_id
 
 	##############	IF REQUIRED, CHANGE THE CODE FROM HERE	##############
-
 	coppelia_sim_coord_path = []
 	
 	for coord in path:
@@ -459,9 +458,9 @@ def send_data_to_draw_path(rec_client_id, path,table_number):
 	print(coppelia_sim_coord_path)
 
 	inputBuffer = bytearray()
-	table_number=str(table_number)
-	return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 						'top_plate_respondable_t'+table_number+'_1', sim.sim_scripttype_customizationscript, 'drawPath', [], 						coppelia_sim_coord_path, table_number, inputBuffer, sim.simx_opmode_blocking)
-	
+
+	return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 						'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'drawPath', [], 						coppelia_sim_coord_path, [str(table_number)], inputBuffer, sim.simx_opmode_blocking)
+	return retInts[0]
 	##################################################
 
 
@@ -633,13 +632,12 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 				break
 			try:
 				ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= task_3.control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output)
-				task_3.setAngles(client_id,revolute_handle,Output)
 			except:
 				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
 				print('Stop the CoppeliaSim simulation manually.\n')
-				#traceback.print_exc(file=sys.stdout)
-				#print()
-				#sys.exit()
+				traceback.print_exc(file=sys.stdout)
+				print()
+				sys.exit()
 			lastInput = task_3.coordinateTransform([center_x,center_y])
 			
 	##################################################
