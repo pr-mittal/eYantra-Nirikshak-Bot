@@ -312,7 +312,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 	else:
 		return
 	timeChange=now-lastTime 
-	#print("TimeChange=",timeChange," SampleTime=",SampleTime)
+	#print("TimeChange=",timeChange)
 	if(timeChange>=SampleTime):
 		#Compute all the working error variables
 		#transform of coordinates
