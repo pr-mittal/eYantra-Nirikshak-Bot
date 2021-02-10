@@ -566,80 +566,88 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 	if both the pixel coordinates do not match completely this implies that there is a turn at i.
 	'''
 	# loop from start to a point less than end,as dst=src+1
-	thresh=1000
-	task_3.setAngles(client_id,revolute_handle,[0,0]) 
-	z=1	
-	setpoint=[0,0]
-	ITerm=np.array([0,0],dtype="float64")
-	lastInput=np.array([0,0],dtype="float64")
-	lastTime=0
-	Input=np.array([0,0],dtype="float64")
-	lastOutput=np.array([0,0],dtype="float64")
-	summation=np.array([0,0],dtype="float64")
-	Output=np.array([0,0],dtype="float64")
-	
-	# this is a kind of flag variable which will help in setting the last coordinates of ball for the first frame of run, 
-	# which is used in the calculation of derivative term in PID calculation.
-	prev_x=pixel_path[0][0]
-	prev_y=pixel_path[0][1]
-	# print("prev-x=",prev_x)
-	# print("prev-y=",prev_y)
-	for i in range(len(pixel_path)-1):
-		#true loop until ball reached destination
-
-		if( (i+2)<(len(pixel_path))and(pixel_path[i+2][0]==prev_x or pixel_path[i+2][1]==prev_y)):
+	try:
+		#print( "client_id=", client_id, "pixel_path" , pixel_path, "vision_sensor_handle", vision_sensor_handle, "revolute_handle", revolute_handle )
+		thresh=1000
+		task_3.setAngles(client_id,revolute_handle,[0,0]) 
+		z=1	
+		setpoint=[0,0]
+		ITerm=np.array([0,0],dtype="float64")
+		lastInput=np.array([0,0],dtype="float64")
+		lastTime=0
+		Input=np.array([0,0],dtype="float64")
+		lastOutput=np.array([0,0],dtype="float64")
+		summation=np.array([0,0],dtype="float64")
+		Output=np.array([0,0],dtype="float64")
+		
+		# this is a kind of flag variable which will help in setting the last coordinates of ball for the first frame of run, 
+		# which is used in the calculation of derivative term in PID calculation.
+		prev_x=pixel_path[0][0]
+		prev_y=pixel_path[0][1]
+		#print("prev-x=",prev_x)
+		#print("prev-y=",prev_y)
+		for i in range(len(pixel_path)-1):
+			#true loop until ball reached destination
+			if( (i+2)<(len(pixel_path))and(pixel_path[i+2][0]==prev_x or pixel_path[i+2][1]==prev_y)):
+				prev_x=pixel_path[i+1][0]
+				prev_y=pixel_path[i+1][1]
+				# print("prev-x=",prev_x)
+				# print("prev-y=",prev_y)
+				continue
+			src=pixel_path[i]
+			dst=pixel_path[i+1]
 			prev_x=pixel_path[i+1][0]
 			prev_y=pixel_path[i+1][1]
-			# print("prev-x=",prev_x)
-			# print("prev-y=",prev_y)
-			continue
-		src=pixel_path[i]
-		dst=pixel_path[i+1]
-		prev_x=pixel_path[i+1][0]
-		prev_y=pixel_path[i+1][1]
-		setpoint=dst
-		summation=np.array([0,0],dtype='float64')
-		ITerm=np.array([0,0],dtype='float64')
-		# print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
-		temp=0
-		timechange = 0
-		while(True):				
-			
-			shapes= getBallData(client_id,vision_sensor_handle) 
-			if (shapes==None):
-				continue
-			center_x = shapes['Circle'][1]
-			center_y = shapes['Circle'][2]
-			# print(dst)
-			# print("center_x = ",center_x,"center_y",center_y)
-			if((center_x==None) or (center_x==None)):
-				continue
-			if(z==1):
-				lastInput=task_3.coordinateTransform([center_x,center_y])
-				z=0
-			return_code_signal,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-			now=float(now)
-			if((center_x-dst[0])**2+(center_y-dst[1])**2 < thresh):
-				timechange=timechange+(now-temp)
-				# print (now)
-			else:
-				timechange=0
-			temp=now
-
-			#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
-			# this help in stability of the ball while traversal. 
-			if(timechange>=0.7):
-				break
-			try:
-				ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= task_3.control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output)
-			except:
-				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
-				print('Stop the CoppeliaSim simulation manually.\n')
-				traceback.print_exc(file=sys.stdout)
-				print()
-				sys.exit()
-			lastInput = task_3.coordinateTransform([center_x,center_y])
-			
+			setpoint=dst
+			summation=np.array([0,0],dtype='float64')
+			ITerm=np.array([0,0],dtype='float64')
+			# print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
+			temp=0
+			timechange = 0
+			while(True):				
+				
+				shapes= getBallData(client_id,vision_sensor_handle) 
+				if (shapes==None):
+					continue
+				center_x = shapes['Circle'][1]
+				center_y = shapes['Circle'][2]
+				# print(dst)
+				#print("center_x = ",center_x,"center_y",center_y)
+				if((center_x==None) or (center_y==None)):
+					continue
+				if(z==1):
+					lastInput=task_3.coordinateTransform([center_x,center_y])
+					z=0
+				return_code_signal,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+				now=float(now)
+				if((center_x-dst[0])**2+(center_y-dst[1])**2 < thresh):
+					timechange=timechange+(now-temp)
+					# print (now)
+				else:
+					timechange=0
+				temp=now
+				#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+				# this help in stability of the ball while traversal. 
+				if(timechange>=0.7):
+					break
+				#print("Calling PID")
+				try:
+					ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= task_3.control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output)
+					#print( "ITerm=", ITerm, "lastInput", lastInput, "lastTime", lastTime, "Input", Input, "lastOutput", lastOutput, "summation", summation, "Output", Output)
+					task_3.setAngles(client_id,revolute_handle,Output) 
+				except:
+					print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
+					print('Stop the CoppeliaSim simulation manually.\n')
+					traceback.print_exc(file=sys.stdout)
+					print()
+					sys.exit()
+				lastInput = task_3.coordinateTransform([center_x,center_y])
+	except:
+		print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
+		print('Stop the CoppeliaSim simulation manually.\n')
+		traceback.print_exc(file=sys.stdout)
+		print()
+		sys.exit()
 	##################################################
 
 

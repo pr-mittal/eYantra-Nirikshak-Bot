@@ -88,6 +88,7 @@ SampleTime = 0.01 #0.01 sec
 ## readable and easy to understand.						 ##
 ##############################################################
 def setAngles(client_id,revolute_handle,Output):
+	#print(client_id,revolute_handle,Output)    
 	# print("Output=",Output)
 	#setting output to joints/motors
 	#This can be useful if you need to send several values to CoppeliaSim that should be received and evaluated at the same time. 
