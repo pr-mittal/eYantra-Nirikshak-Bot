@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[5]:
+
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[26]:
 
 
 '''
@@ -44,7 +50,9 @@ import csv
 ##############################################################
 
 
-# In[3]:
+# In[63]:
+
+
 
 
 
@@ -85,27 +93,140 @@ def orderedPolyDp(corners):
 
     return rect
 def getBorderCoordinates(imgMorph):
+    #maze is an open maze---
+    img=imgMorph
     #finding the coordinates of corners of maze border
     #finding the ouutermost square
-    contours, heirarchy = cv2.findContours(imgMorph,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    contours, heirarchy = cv2.findContours(img,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    #############################old code for closed maze#######
     #for c in contours:
     #print(len(contours))
-    #getting the countour having max area
-    row,col=imgMorph.shape
-    maxCnt=contours[0]
-    maxArea=0
+    ##getting the countour having max area
+    #row,col=imgMorph.shape
+    #maxCnt=contours[0]
+    #maxArea=0
+    #for cnt in contours:
+    #    area=cv2.contourArea(cnt)
+    #    if((area>maxArea) and (area<row*col*0.95)):
+    #        maxArea=area
+    #        maxCnt=cnt
+    #perimeter = cv2.arcLength(maxCnt,True)
+    #corners = cv2.approxPolyDP(maxCnt, 0.01*perimeter,True)
+    ##image = cv2.polylines(img, cnt,True,(255,0,0),5) 
+    ##fig.add_subplot(rows,cols,2)
+    ##plt.imshow(image)
+    ##print(corners)
+    #rect=orderedPolyDp(corners)
+    #############################code for open maze################
+    #calculating bounding rectangles
+    contours_poly = []
+    boundRect = []
+    minArea=100
+    row,col=img.shape
     for cnt in contours:
+        #image = cv2.polylines(imgCpy, cnt,True,(0,0,255),5)
+        perimeter = cv2.arcLength(cnt,True)
+        corners = cv2.approxPolyDP(cnt, 0.01*perimeter,True)
         area=cv2.contourArea(cnt)
-        if((area>maxArea) and (area<row*col*0.95)):
-            maxArea=area
-            maxCnt=cnt
-    perimeter = cv2.arcLength(maxCnt,True)
-    corners = cv2.approxPolyDP(maxCnt, 0.01*perimeter,True)
-    #image = cv2.polylines(img, cnt,True,(255,0,0),5) 
-    #fig.add_subplot(rows,cols,2)
-    #plt.imshow(image)
-    #print(corners)
-    return corners
+        #storing coordinates of all contours
+        if((area>minArea) and (area<row*col*0.95)):
+            #bounding rect for every 
+            #[[[ 113   77]] [[  51 2202]] [[2229 2201]] [[2200   79]]]
+            #print(corners)
+            for corner in corners:
+                contours_poly += [corner[0]]
+            #boundRect += [cv2.boundingRect(corners)]
+    #we have array of all corners and their bounding rect
+    #boundRect = np.array(boundRect)
+    #print(contours_poly)
+    #calculating all coordinates of corners of bounding rect and storing in allvertex
+    #x y w h, this is format of bounding rect
+    #x y
+    #x y+h
+    #x+w , y+h
+    #x+w y
+    #allVertex = list()
+    #print(allVertex.shape)
+    #for i in range(0,boundRect.shape[0]):
+    #    allVertex+=[
+    #                 [boundRect[i][0], boundRect[i][1]],
+    #                 [boundRect[i][0], boundRect[i][1]+boundRect[i][3]],
+    #                 [boundRect[i][0]+boundRect[i][2], boundRect[i][1]+boundRect[i][3]],
+    #                 [boundRect[i][0]+boundRect[i][2], boundRect[i][1]]
+    #               ]
+    #allVertex = np.array(allVertex)
+    allVertex=np.array(contours_poly)
+    #print(allVertex)
+    
+    #calculating all corners of maze
+    top_left = [0,0]
+    top_right = [0,0]
+    bottom_left = [0,0]
+    bottom_right = [0,0]
+    
+    #for top_left,sum of coordinates is minimum
+    minSum =1e5#as max coord is 1280,1280
+    for coord in allVertex:
+        sumCordi = coord[0] + coord[1]
+        if minSum>sumCordi:
+            minSum = sumCordi
+            top_left = [coord[0] ,coord[1]]
+
+    #for bottom_right,sum is maximum
+    maxSum = 0
+    for coord in allVertex:
+        sumCordi = coord[0] + coord[1]
+        if minSum<sumCordi:
+            minSum = sumCordi
+            bottom_right = [coord[0], coord[1]]
+
+    #print("topright all")
+    #for top_right(diff max-->(x-y))
+    maxdiff = 0
+    for coord in allVertex:
+        diffCordi = coord[0] - coord[1]
+        #print(coord[0],coord[1])
+        if maxdiff<diffCordi:
+            maxdiff = diffCordi
+            top_right = [coord[0], coord[1]]
+
+    #for bottom_left(diff max-->(y-x))
+    maxdiff = 0
+    for coord in allVertex:
+        diffCordi = coord[1] - coord[0]
+        if maxdiff<diffCordi:
+            maxdiff = diffCordi
+            bottom_left = [coord[0], coord[1]]
+
+    #=============================================
+    #Height = bottom_left[1] - top_left[1]
+    #Width = top_right[0] - top_left[0]
+    #=======================================================
+    rect = np.zeros((4, 2), dtype="float32")
+    rect = [[top_left[0],top_left[1]], [top_right[0],top_right[1]], [bottom_right[0],bottom_right[1]], [bottom_left[0],bottom_left[1]]]
+    #print(rect)
+    #drawContours(img,contours_poly,boundRect,top_right,top_left,bottom_right,bottom_left)
+    return np.array(rect, dtype = "float32")
+def drawContours(imgCpy,contours_poly,boundRect,top_right,top_left,bottom_right,bottom_left):
+    #drawing = np.zeros((imgCpy.shape[0],imgCpy.shape[1], 3), dtype=np.uint8)
+    drawing=imgCpy
+    for i in range(len(contours_poly)):
+        color = (0,255,0)
+        colorp = (0,0,255)
+        cv2.drawContours(drawing, contours_poly, i, colorp)
+        cv2.rectangle(drawing, (int(boundRect[i][0]), int(boundRect[i][1])),(int(boundRect[i][0]+boundRect[i][2]), int(boundRect[i][1]+boundRect[i][3])), color, 10)
+        #print(boundRect)
+        #boundRect = np.array(boundRect)
+        #print(boundRect.shape)
+    
+    drawing = cv2.circle(drawing, tuple(top_left), 20, (255,0,0), 6) #correct
+    drawing = cv2.circle(drawing, tuple(bottom_right), 20, (255,0,0), 6) #correct
+    # print("topright and fucking bottom left")
+    # print(top_right)
+    # print(bottom_left)
+    drawing = cv2.circle(drawing, tuple(top_right), 20, (255,0,0), 6)
+    drawing = cv2.circle(drawing, tuple(bottom_left), 20, (255,0,0), 6)
+    #plt.imshow(cv2.cvtColor(drawing,cv2.COLOR_BGR2RGB))
 def threshInputImage(img):
     #thresholding image overall by increasing contrast and features
     imgGray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -132,12 +253,13 @@ def threshInputImage(img):
     #imgBlank = np.zeros_like(img)
     imgCanny = cv2.Canny(imgThresh,80,80)
     #plt.imshow(cv2.cvtColor(imgCanny,cv2.COLOR_BGR2RGB))
-    imgMorph=cv2.dilate(imgCanny,kernel,iterations=2)
+    imgMorph=cv2.dilate(imgCanny,kernel,iterations=6)
     
     return imgMorph
 
 
-# In[4]:
+# In[56]:
+
 
 
 # def mazeDimension(warped_img):
@@ -246,7 +368,8 @@ def threshInputImage(img):
 ##############################################################
 
 
-# In[5]:
+# In[68]:
+
 
 
 def applyPerspectiveTransform(input_img):
@@ -255,17 +378,14 @@ def applyPerspectiveTransform(input_img):
     Purpose:
     ---
     takes a maze test case image as input and applies a Perspective Transfrom on it to isolate the maze
-
     Input Arguments:
     ---
     `input_img` :   [ numpy array ]
         maze image in the form of a numpy array
-
     Returns:
     ---
     `warped_img` :  [ numpy array ]
         resultant warped maze image after applying Perspective Transform
-
     Example call:
     ---
     warped_img = applyPerspectiveTransform(input_img)
@@ -285,10 +405,10 @@ def applyPerspectiveTransform(input_img):
     #fig.add_subplot(rows,cols,1)
     imgThresh=threshInputImage(img)
     #imgThresh=threshInputImage(img)
-    #plt.imshow(cv2.cvtColor(imgCanny,cv2.COLOR_BGR2RGB))
+    #plt.imshow(cv2.cvtColor(imgThresh,cv2.COLOR_BGR2RGB))
     #plt.imshow(cv2.cvtColor(imgMorph,cv2.COLOR_BGR2RGB))
-    corners=getBorderCoordinates(imgThresh)
-    rect=orderedPolyDp(corners)
+    rect=getBorderCoordinates(imgThresh)
+    
     (tl, tr, br, bl) = rect
     #applying perspective transform
     # compute the width of the new image, which will be the
@@ -310,10 +430,11 @@ def applyPerspectiveTransform(input_img):
     # order
     dst = np.array([
         [0, 0],
-        [maxWidth - 1, 0],
-        [maxWidth - 1, maxHeight - 1],
-        [0, maxHeight - 1]], dtype = "float32")
+        [maxWidth + 5, 0],
+        [maxWidth + 5, maxHeight + 5],
+        [0, maxHeight + 5]], dtype = "float32")
     #print(dst)
+    #print(rect)
     # compute the perspective transform matrix and then apply it
     M = cv2.getPerspectiveTransform(rect, dst)
     warped_img = cv2.warpPerspective(img, M, (maxWidth, maxHeight))
@@ -332,11 +453,12 @@ def applyPerspectiveTransform(input_img):
 
     return warped_img
 #path="test_cases/ball.jpeg"
-#path="test_cases/maze01.jpg"
+#path="test_cases/maze_t1.jpeg"
+# path="generated_images/result_maze00.jpg"
 #applyPerspectiveTransform(cv2.imread(path))
 
 
-# In[6]:
+# In[72]:
 
 
 
@@ -346,17 +468,14 @@ def detectMaze(warped_img):
     Purpose:
     ---
     takes the warped maze image as input and returns the maze encoded in form of a 2D array
-
     Input Arguments:
     ---
     `warped_img` :    [ numpy array ]
         resultant warped maze image after applying Perspective Transform
-
     Returns:
     ---
     `maze_array` :    [ nested list of lists ]
         encoded maze in the form of a 2D array
-
     Example call:
     ---
     maze_array = detectMaze(warped_img)
@@ -376,8 +495,8 @@ def detectMaze(warped_img):
     
     #applying dilation for better maze detection 
     kernel = np.ones((10, 10), np.uint8)
-    resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=4)
-    #plt.imshow(cv2.cvtColor(resultBitmap,cv2.COLOR_BGR2RGB))
+    resultBitmap=cv2.dilate(resultBitmap,kernel,iterations=2)
+    plt.imshow(cv2.cvtColor(resultBitmap,cv2.COLOR_BGR2RGB))
     
     h,w=resultBitmap.shape
     #print(w,h)
@@ -446,7 +565,8 @@ def detectMaze(warped_img):
 #detectMaze(applyPerspectiveTransform(cv2.imread(path)))
 
 
-# In[ ]:
+# In[4]:
+
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -456,7 +576,6 @@ def writeToCsv(csv_file_path, maze_array):
 	Purpose:
 	---
 	takes the encoded maze array and csv file name as input and writes the encoded maze array to the csv file
-
 	Input Arguments:
 	---
 	`csv_file_path` :	[ str ]
