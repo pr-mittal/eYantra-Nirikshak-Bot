@@ -239,6 +239,10 @@ def get_vision_sensor_image(client_id,vision_sensor_handle):
     ##############	ADD YOUR CODE HERE	##############
 
     return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
+    # cv2.imshow("wraped",vision_sensor_image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
  
     return vision_sensor_image, image_resolution, return_code
 
@@ -285,6 +289,10 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
     transformed_image = cv2.cvtColor(vision_sensor_np_array, cv2.COLOR_BGR2RGB)
 
     transformed_image = np.flip(transformed_image, 0)
+    # if(image_resolution[0] >200):
+    #     cv2.imshow("transformed",transformed_image)
+    #     cv2.waitKey(0)
+    #     cv2.destroyAllWindows()
     
     ##################################################
 

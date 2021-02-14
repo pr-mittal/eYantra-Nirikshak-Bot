@@ -74,10 +74,10 @@ vision_sensor_handle = 0
 outMax=60
 outMin=-60
 kp=np.array([0.018,0.018],dtype='float64')
-ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-kd=np.array([0.135,0.135],dtype='float64')#kd=kd/SampleTime
+ki=np.array([0.0,0.0],dtype='float64')#ki=ki*SampleTime
+kd=np.array([0.0,0.0],dtype='float64')#kd=kd/SampleTime
 lastTime=0
-SampleTime = 0.01 #0.01 sec
+SampleTime = 0.1 #0.01 sec
 ##############################################################
 
 
@@ -88,11 +88,9 @@ SampleTime = 0.01 #0.01 sec
 ## readable and easy to understand.						 ##
 ##############################################################
 def setAngles(client_id,revolute_handle,Output):
-	#print(client_id,revolute_handle,Output)    
-	# print("Output=",Output)
 	#setting output to joints/motors
 	#This can be useful if you need to send several values to CoppeliaSim that should be received and evaluated at the same time. 
-	_=sim.simxPauseCommunication(client_id,True)
+	# _=sim.simxPauseCommunication(client_id,True)
 	# Output[0]=(-1)*Output[0]
 	# Output[1]=(-1)*Output[1]
 	
@@ -115,16 +113,29 @@ def setAngles(client_id,revolute_handle,Output):
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[5],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[6],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 
-	# print( -Output[0]*np.pi/180,"-Output[0]*np.pi/180" )
-	# print( Output[0]*np.pi/180,"Output[0]*np.pi/180" )
-	# print( Output[1]*np.pi/180,"Output[1]*np.pi/180" )
-	# print( -Output[1]*np.pi/180,"-Output[1]*np.pi/180" )
+	# print( -Output[0],"-Output[0]" )
+	# print( Output[0],"Output[0]" )
+	# print( Output[1],"Output[1]" )
+	# print( -Output[1],"-Output[1]" )
 	
-	_=sim.simxPauseCommunication(client_id,False)
-	#returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[0],sim.simx_opmode_streaming)
-	#print(position*180/np.pi)
+	# _=sim.simxPauseCommunication(client_id,False)
+	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[0],sim.simx_opmode_streaming)
+	# print(position*180/np.pi,"***0")
+	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[1],sim.simx_opmode_streaming)
+	# print(position*180/np.pi,"***1")
+	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[2],sim.simx_opmode_streaming)
+	# print(position*180/np.pi,"***2")
+	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[3],sim.simx_opmode_streaming)
+	# print(position*180/np.pi,"***3")
+	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[4],sim.simx_opmode_streaming)
+	# print(position*180/np.pi,"***4")
+	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[5],sim.simx_opmode_streaming)
+	# print(position*180/np.pi,"***5")
+	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[6],sim.simx_opmode_streaming)
+	# print(position*180/np.pi,"***6")
+	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[7],sim.simx_opmode_streaming)
+	# print(position*180/np.pi,"***7")
 	#simxSynchronousTrigger(client_id)
-	
 	
 # def SetTunings(Kp,Ki,Kd):
 # 	#changing the values of kp,ki,kd
@@ -301,7 +312,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 	
 	#global variables
 	global kp,ki,kd,outMin,outMax,SampleTime
-	#IMPORTANT: most the variables here are a list having two elements 
+	#IMPORTANT: most of the variables here are a list having two elements 
 	# representing 2 independent linear unit
 	#now = time.time()
 	#print(now)
@@ -320,11 +331,13 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 
 		# We ahve divide the 2D plane problem 2 independent linear problems 
 		# and then applied pid independently on them
-		
+		print (setpoint)
+		print(center_x,"  ",center_y)
 		Input=coordinateTransform([center_x,center_y])
 		#calculation of error
 		setpoint=np.array(setpoint,dtype="float64")
 		error=setpoint-np.array([center_x,center_y],dtype="float64")
+		print(error)
 		#matrix multiplication of error and coordinate transformation matrix
 		transform=np.array([[np.cos(np.pi/4),-np.sin(np.pi/4)],[np.sin(np.pi/4),np.cos(np.pi/4)]],dtype="float64")
 		error=np.dot(error,transform)
@@ -339,9 +352,9 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 		if(error[0]*error[0]+error[1]*error[1]<8000):
 			ITerm= ki*(summation)*timeChange
 			summation+=error
-			kd=np.array([0.12,0.12],dtype='float64')
+			kd=np.array([0.0,0.0],dtype='float64')
 		if(error[0]*error[0]+error[1]*error[1]<1500):
-			kd=np.array([0.2,0.2],dtype='float64')
+			kd=np.array([0.0,0.0],dtype='float64')
 
 		dInput = (Input - lastInput)
 		for i in range(2):
@@ -352,7 +365,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 				ITerm[i]= outMin
 			#Compute PID Output, here ki has already been multiplied by sampleTime i.e. delta t
 			Output[i] = (float)(kp[i] * error[i] + ITerm[i]- (float)((kd[i] * dInput[i]))/timeChange)
-			# print(kp[i] * error[i] + ITerm[i]- kd[i] * dInput[i]/timeChange)
+			# print(error[i])
 			if(Output[i]> outMax):
 				Output[i] = outMax
 			elif(Output[i] < outMin):
@@ -364,7 +377,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 		lastOutput=Output
 		
 		#  In case value of kd has changed
-		kd=np.array([0.135,0.135],dtype='float64')
+		kd=np.array([0.0,0.0],dtype='float64')
 	return ITerm,lastInput,lastTime,Input,lastOutput,summation,Output
 	##################################################
 

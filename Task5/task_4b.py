@@ -42,6 +42,7 @@ import numpy as np
 import cv2
 import os, sys
 import traceback
+import time
 ##############################################################
 
 # Importing the sim module for Remote API connection with CoppeliaSim
@@ -177,7 +178,7 @@ end_coord = (9,5)
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.						 ##
 ##############################################################
-def getBallData(client_id,vision_sensor_handle):
+def getBallData(client_id,vision_sensor_handle,flag):
 	
 	vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vision_sensor_handle)
 	if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
@@ -195,6 +196,14 @@ def getBallData(client_id,vision_sensor_handle):
 			# Get the resultant warped transformed vision sensor image after applying Perspective Transform
 			try:
 				warped_img = task_1b.applyPerspectiveTransform(transformed_image)
+				if(flag):
+					warped_img = warped_img[80:1200, 80:1200]
+					warped_img = cv2.resize(warped_img, (1280, 1280))
+					# cv2.imshow("cropped", crop_img)
+					# cv2.waitKey(0)
+					# cv2.imshow("warped",warped_img)
+					# cv2.waitKey(0)
+					# cv2.destroyAllWindows()
 				if (type(warped_img) is np.ndarray):
 					# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
 					try:
@@ -203,17 +212,22 @@ def getBallData(client_id,vision_sensor_handle):
 							#print('\nShapes detected by Vision Sensor are: ')
 							# print(shapes)
 							# Storing the detected x and y centroid in center_x and center_y variable repectively
-							return shapes
+							# return shapes
+							if( len(shapes['Circle'])>1 ):
+								return None
+							else:
+								return shapes
 						elif(type(shapes) is not dict):
 							#print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
 							#print('Stop the CoppeliaSim simulation manually.')
 							return None
+
 					except Exception:
 						print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
 						print('Stop the CoppeliaSim simulation manually.\n')
-						#traceback.print_exc(file=sys.stdout)
-						#print()
-						#sys.exit()
+						traceback.print_exc(file=sys.stdout)
+						print()
+						sys.exit()
 
 				else:
 					print('\n[ERROR] applyPerspectiveTransform function is not configured correctly, check the code.')
@@ -222,8 +236,9 @@ def getBallData(client_id,vision_sensor_handle):
 					#sys.exit()
 
 			except Exception:
-				print('\n[ERROR] Your applyPerspectiveTransform function in task_1b.py throwed an Exception. Kindly debug your code!')
-				print('Stop the CoppeliaSim simulation manually.\n')
+				pass
+				# print('\n[ERROR] Your applyPerspectiveTransform function in task_1b.py throwed an Exception. Kindly debug your code!')
+				# print('Stop the CoppeliaSim simulation manually.\n')
 				#traceback.print_exc(file=sys.stdout)
 				#print()
 				#sys.exit()
@@ -521,7 +536,7 @@ def convert_path_to_pixels(path):
 # In[ ]:
 
 
-def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
+def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle):
 
 	"""
 	Purpose:
@@ -565,11 +580,19 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 	for that we have to use the previous pixel coordinates(i-1) and just future coordinates(i+1) and 
 	if both the pixel coordinates do not match completely this implies that there is a turn at i.
 	'''
+	pixel_path = [[0,0]]
+	for i in range(len(prev_pixel_path)):
+		pixel_path.append(prev_pixel_path[i])		
+	print(pixel_path)
+
 	# loop from start to a point less than end,as dst=src+1
+
 	try:
 		#print( "client_id=", client_id, "pixel_path" , pixel_path, "vision_sensor_handle", vision_sensor_handle, "revolute_handle", revolute_handle )
 		thresh=1000
-		task_3.setAngles(client_id,revolute_handle,[0,0]) 
+		# task_3.setAngles(client_id,revolute_handle,[60,60])
+		# time.sleep(10) 
+		# task_3.setAngles(client_id,revolute_handle,[-60,-60])
 		z=1	
 		setpoint=[0,0]
 		ITerm=np.array([0,0],dtype="float64")
@@ -596,6 +619,7 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 				continue
 			src=pixel_path[i]
 			dst=pixel_path[i+1]
+			# print(dst)
 			prev_x=pixel_path[i+1][0]
 			prev_y=pixel_path[i+1][1]
 			setpoint=dst
@@ -603,10 +627,11 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 			ITerm=np.array([0,0],dtype='float64')
 			# print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
 			temp=0
+			print (setpoint)
 			timechange = 0
 			while(True):				
 				
-				shapes= getBallData(client_id,vision_sensor_handle) 
+				shapes= getBallData(client_id,vision_sensor_handle,True) 
 				if (shapes==None):
 					continue
 				center_x = shapes['Circle'][1]
@@ -634,6 +659,7 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle):
 				try:
 					ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= task_3.control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output)
 					#print( "ITerm=", ITerm, "lastInput", lastInput, "lastTime", lastTime, "Input", Input, "lastOutput", lastOutput, "summation", summation, "Output", Output)
+					# Output = 
 					task_3.setAngles(client_id,revolute_handle,Output) 
 				except:
 					print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')

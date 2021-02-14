@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
 
 
 '''
@@ -223,7 +219,7 @@ def calculateMazeArrays():
         print('\n============================================')
         print('\nFor maze_t' + str(file_num) + '.jpeg')
 
-        if os.path.exists(img_file_path):
+        if os.path.exists(img_file_path):    
 
             try:
                 # read the 'maze00.jpg' image file
@@ -384,7 +380,7 @@ def getBallInfo(ball_color):
     print("Path in table "+str(table)+":"+str(ball_info[3]))
     
     #calling for grading app
-    #send_color_and_collection_box_identified(ball_color, collection_box_name)
+    # send_color_and_collection_box_identified(ball_color, collection_box_name)
     return ball_info
 ##############################################################
 
@@ -499,8 +495,8 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_ha
         while(True):
             #process 1
             #check if ball in stream of vision sensor conveyer
-            print(" . ",end="")
-            shapes=task_4b.getBallData(client_id,vision_sensor_handle)
+            # print(" . ",end="")
+            shapes=task_4b.getBallData(client_id,vision_sensor_handle,True)
             #print(shapes)
             if(shapes==None):
                 continue
@@ -627,8 +623,63 @@ def main(rec_client_id):
     while(True):
         #process 1
         #check if ball in stream of vision sensor conveyer
-        print(" . ",end="")
-        shapes=task_4b.getBallData(client_id,vs_handle[5])
+        # print(" . ",end="")
+        # shapes=task_4b.getBallData(client_id,vs_handle[5],False)        
+        vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vs_handle[5])
+        if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
+            #print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
+            pass
+        else:
+            #start loop again
+            # return None
+            continue
+
+
+        # Get the transformed vision sensor image captured in correct format
+        try:
+            transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image, image_resolution)
+            if (type(transformed_image) is np.ndarray):
+                warped_img = transformed_image
+                try:
+                    shapes = task_1a_part1.scan_image(warped_img)
+                    cv2.imshow("warped",warped_img)
+                    cv2.waitKey(0)
+                    cv2.destroyAllWindows()
+                    if (type(shapes) is dict and shapes!={}):
+                        print(shapes)
+                        #print('\nShapes detected by Vision Sensor are: ')
+                        # print(shapes)
+                        # Storing the detected x and y centroid in center_x and center_y variable repectively
+                        # return shapes
+                        if( len(shapes['Circle'])>1 ):
+                            continue
+                        else:
+                            pass
+                            # return shapes
+                    elif(type(shapes) is not dict):
+                        #print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
+                        #print('Stop the CoppeliaSim simulation manually.')
+                        continue
+
+                except Exception:
+                    print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
+                    print('Stop the CoppeliaSim simulation manually.\n')
+                    traceback.print_exc(file=sys.stdout)
+                    print()
+                    sys.exit()
+            else:
+                print('\n[ERROR] transform_vision_sensor_image function in task_2a.py is not configured correctly, check the code.')
+                print('Stop the CoppeliaSim simulation manually.')
+                #print()
+                #sys.exit()
+
+        except Exception:
+            print('\n[ERROR] Your transform_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
+            print('Stop the CoppeliaSim simulation manually.\n')
+            #traceback.print_exc(file=sys.stdout)
+            print()
+            #sys.exit()
+        # return None
         if(shapes==None):
             continue
         if((len(shapes)!=0) and newBall):
@@ -637,8 +688,10 @@ def main(rec_client_id):
             curB+=1
             newBall=False
             count=0
-            color=shapes['Circle'][0]
-            print("\nFound "+color+" ball in vision coveyer")
+            # color=shapes['Circle'][0]
+            color = 'green'
+            
+            # print("\nFound "+color+" ball in vision coveyer")
             #get info of ball from ball_details [current table number,path in table 4,table x,path in table x]
             #differentiate balls based on color
             ball_info=getBallInfo(color)
