@@ -213,7 +213,7 @@ def getBallData(client_id,vision_sensor_handle,flag):
 							# print(shapes)
 							# Storing the detected x and y centroid in center_x and center_y variable repectively
 							# return shapes
-							if( len(shapes['Circle'])>1 ):
+							if( type(shapes['Circle'][0]) is list ):
 								return None
 							else:
 								return shapes
@@ -236,7 +236,7 @@ def getBallData(client_id,vision_sensor_handle,flag):
 					#sys.exit()
 
 			except Exception:
-				pass
+				print(".",end="")
 				# print('\n[ERROR] Your applyPerspectiveTransform function in task_1b.py throwed an Exception. Kindly debug your code!')
 				# print('Stop the CoppeliaSim simulation manually.\n')
 				#traceback.print_exc(file=sys.stdout)
