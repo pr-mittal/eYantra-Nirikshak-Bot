@@ -347,6 +347,7 @@ def getBallInfo(ball_color):
     #from table 4 to exit and storing in ball_info at index1
     #print(maze_all[4],start_coord, end_coord)
     ball_info[1] = task_4a.find_path(maze_all[4],start_coord, end_coord)
+    ball_info[1].append((5,9.6))
     print("Path in table 4:"+str(ball_info[1]))
     
     if(table==1):
@@ -377,10 +378,11 @@ def getBallInfo(ball_color):
     #from table 4 to exit and storing in ball_info at index1
     print(maze_all[table],start_coord, end_coord)
     ball_info[3] = task_4a.find_path(maze_all[table],start_coord, end_coord)
+    ball_info[3].append((-0.6,4))
     print("Path in table "+str(table)+":"+str(ball_info[3]))
     
     #calling for grading app
-    # send_color_and_collection_box_identified(ball_color, collection_box_name)
+    send_color_and_collection_box_identified(ball_color, collection_box_name)
     return ball_info
 ##############################################################
 
@@ -663,10 +665,10 @@ def main(rec_client_id):
             #traceback.print_exc(file=sys.stdout)
             #print()
             #sys.exit()
-        print(shapes)
+        # print(shapes)
         if((len(shapes)!=0) and newBall):
             #if ball found,add 1 to number of ball
-            print(shapes)
+            # print(shapes)
             curB+=1
             newBall=False
             count=0
@@ -701,10 +703,11 @@ def main(rec_client_id):
             count+=1
             if(count>threshCount):
                 newBall=True
+    time.sleep(3)
     #for process in processX:
     #    process.join()
     #end simulation
-    stopSimulation(client_id)
+    # stopSimulation(client_id)
     ##################################################
 
 

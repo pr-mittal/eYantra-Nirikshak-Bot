@@ -580,9 +580,11 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 	for that we have to use the previous pixel coordinates(i-1) and just future coordinates(i+1) and 
 	if both the pixel coordinates do not match completely this implies that there is a turn at i.
 	'''
-	pixel_path = [[0,0]]
+	if(len(prev_pixel_path)>=1):
+		pixel_path = [[prev_pixel_path[0][0]-1,prev_pixel_path[0][1]-1]]
 	for i in range(len(prev_pixel_path)):
 		pixel_path.append(prev_pixel_path[i])		
+	# pixel_path.append([1292.8, 704.0])
 	print(pixel_path)
 
 	# loop from start to a point less than end,as dst=src+1
@@ -590,9 +592,11 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 	try:
 		#print( "client_id=", client_id, "pixel_path" , pixel_path, "vision_sensor_handle", vision_sensor_handle, "revolute_handle", revolute_handle )
 		thresh=1000
-		# task_3.setAngles(client_id,revolute_handle,[60,60])
-		# time.sleep(10) 
-		# task_3.setAngles(client_id,revolute_handle,[-60,-60])
+		# task_3.setAngles(client_id,revolute_handle,[-30,-30])
+		# time.sleep(2) 
+		# task_3.setAngles(client_id,revolute_handle,[30,30])
+		task_3.setAngles(client_id,revolute_handle,[0,0])
+		time.sleep(1.5) 
 		z=1	
 		setpoint=[0,0]
 		ITerm=np.array([0,0],dtype="float64")
@@ -653,7 +657,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 				temp=now
 				#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
 				# this help in stability of the ball while traversal. 
-				if(timechange>=0.7):
+				if(timechange>=0.5):
 					break
 				#print("Calling PID")
 				try:
@@ -668,6 +672,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 					print()
 					sys.exit()
 				lastInput = task_3.coordinateTransform([center_x,center_y])
+			
 	except:
 		print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
 		print('Stop the CoppeliaSim simulation manually.\n')

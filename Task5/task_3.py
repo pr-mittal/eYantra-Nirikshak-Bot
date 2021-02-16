@@ -73,11 +73,14 @@ vision_sensor_handle = 0
 
 outMax=60
 outMin=-60
-kp=np.array([0.018,0.018],dtype='float64')
-ki=np.array([0.0,0.0],dtype='float64')#ki=ki*SampleTime
-kd=np.array([0.0,0.0],dtype='float64')#kd=kd/SampleTime
+# kp=np.array([0.018,0.018],dtype='float64')
+# ki=np.array([0.0,0.0],dtype='float64')#ki=ki*SampleTime
+# kd=np.array([0.0,0.0],dtype='float64')#kd=kd/SampleTime
+kp=np.array([0.03,0.03],dtype='float64')
+ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+kd=np.array([0.145,0.145],dtype='float64')#kd=kd/SampleTime
 lastTime=0
-SampleTime = 0.1 #0.01 sec
+SampleTime = 0.01 #0.01 sec
 ##############################################################
 
 
@@ -331,13 +334,13 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 
 		# We ahve divide the 2D plane problem 2 independent linear problems 
 		# and then applied pid independently on them
-		print (setpoint)
-		print(center_x,"  ",center_y)
+		# print (setpoint)
+		# print(center_x,"  ",center_y)
 		Input=coordinateTransform([center_x,center_y])
 		#calculation of error
 		setpoint=np.array(setpoint,dtype="float64")
 		error=setpoint-np.array([center_x,center_y],dtype="float64")
-		print(error)
+		# print(error)
 		#matrix multiplication of error and coordinate transformation matrix
 		transform=np.array([[np.cos(np.pi/4),-np.sin(np.pi/4)],[np.sin(np.pi/4),np.cos(np.pi/4)]],dtype="float64")
 		error=np.dot(error,transform)
@@ -352,9 +355,9 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 		if(error[0]*error[0]+error[1]*error[1]<8000):
 			ITerm= ki*(summation)*timeChange
 			summation+=error
-			kd=np.array([0.0,0.0],dtype='float64')
+			kd=np.array([0.12,0.12],dtype='float64')
 		if(error[0]*error[0]+error[1]*error[1]<1500):
-			kd=np.array([0.0,0.0],dtype='float64')
+			kd=np.array([0.23,0.23],dtype='float64')
 
 		dInput = (Input - lastInput)
 		for i in range(2):
@@ -377,7 +380,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 		lastOutput=Output
 		
 		#  In case value of kd has changed
-		kd=np.array([0.0,0.0],dtype='float64')
+		kd=np.array([0.145,0.145],dtype='float64')
 	return ITerm,lastInput,lastTime,Input,lastOutput,summation,Output
 	##################################################
 
