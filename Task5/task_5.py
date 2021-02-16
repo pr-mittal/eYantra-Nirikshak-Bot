@@ -540,8 +540,8 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_ha
                     #print('\n============================================')
                     print("Started traversing table :"+str(ball_info[0]))
                     try:
-                        time.sleep(5)
-                        #task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,ball_info[0])
+                        #time.sleep(5)
+                        task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,ball_info[0])
                     except Exception:
                         print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
                         #print('Stop the CoppeliaSim simulation manually.\n')
