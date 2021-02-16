@@ -41,7 +41,7 @@ import os
 
 
 # Global variable for details of shapes found in image and will be put in this dictionary, returned from scan_image function
-shapes = {}
+#shapes = {}
 #calibrate=np.load("calibrate.npy")
 ################# ADD UTILITY FUNCTIONS HERE #################
 ## You can define any utility functions for your code.      ##
@@ -51,8 +51,8 @@ shapes = {}
 #------------------------------------------------------------------------------------------------------
 #function to get contours
 def getContours(imgColor):
+    shapes={}
     #makes countours in the image and tells the color
-    global shapes
     imgHsv=cv2.cvtColor(imgColor,cv2.COLOR_BGR2HSV)
     
     #remove the maze from the image , we extract only the colored part of the image
@@ -123,10 +123,19 @@ def getContours(imgColor):
             # cv2.imshow("point",point)
             # cv2.waitKey(0)
             # cv2.destroyAllWindows()
-
+            
+            #see if the point is black
+            #print(imgColor[cY,cX])
+            b=int(imgColor[cY,cX][0])
+            g=int(imgColor[cY,cX][1])
+            r=int(imgColor[cY,cX][2])
+            if((abs(b-g)+abs(g-r)+abs(r-b))<=20):
+                #print(abs(b-g)+abs(g-r)+abs(r-b))
+                continue
+            
             ##color detection
             h = imgHsv[cY,cX][0]
-
+            
             if (h<=25 and h>=0 )or(h<=180 and h>=175) :
                 color ="red"
             elif h<=70 and h>=35 :
@@ -196,7 +205,12 @@ def colorMask(imgHsv):
     mask=cv2.inRange(imgHsv,lwr_hsv,upr_hsv)#only colored circles are black
     mask=cv2.bitwise_not(mask,mask=None)
     #plt.imshow(cv2.cvtColor(mask,cv2.COLOR_BGR2RGB))
+    # maskCpy=cv2.resize(mask,(540,540))
+    # cv2.imshow("mask",maskCpy)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     return mask
+
 
 
 

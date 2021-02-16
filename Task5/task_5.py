@@ -533,7 +533,7 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_ha
                 continue
             if(len(shapes)!=0):
             #if ball detected , start pid
-                print("\nBall detected in table "+str(ball_info[0]))
+                print("\nBall detected in table "+str(ball_info[0]),"  shapes:",shapes)
                 try:
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
                     #print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))
@@ -658,7 +658,11 @@ def main(rec_client_id):
         # shapes=task_4b.getBallData(client_id,vs_handle[5],False)        
         vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vs_handle[5])
         if ((return_code != sim.simx_return_ok) or (len(image_resolution) != 2) or (len(vision_sensor_image) <= 0)):
-            #print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
+            #print('\n[ERROR] Your get_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
+            #print('Stop the CoppeliaSim simulation manually.\n')
+            #traceback.print_exc(file=sys.stdout)
+            #print()
+            #sys.exit()
             continue
         # Get the transformed vision sensor image captured in correct format
         try:

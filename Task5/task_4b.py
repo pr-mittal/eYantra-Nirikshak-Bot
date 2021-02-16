@@ -201,9 +201,9 @@ def getBallData(client_id,vision_sensor_handle,flag):
 					warped_img = cv2.resize(warped_img, (1280, 1280))
 					# cv2.imshow("cropped", crop_img)
 					# cv2.waitKey(0)
-					# cv2.imshow("warped",warped_img)
-					# cv2.waitKey(0)
-					# cv2.destroyAllWindows()
+					#cv2.imshow("warped",warped_img)
+					#cv2.waitKey(0)
+					#cv2.destroyAllWindows()
 				if (type(warped_img) is np.ndarray):
 					# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
 					try:
@@ -224,14 +224,14 @@ def getBallData(client_id,vision_sensor_handle,flag):
 
 					except Exception:
 						print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
-						print('Stop the CoppeliaSim simulation manually.\n')
-						traceback.print_exc(file=sys.stdout)
-						print()
-						sys.exit()
+						#print('Stop the CoppeliaSim simulation manually.\n')
+						#traceback.print_exc(file=sys.stdout)
+						#print()
+						#sys.exit()
 
 				else:
 					print('\n[ERROR] applyPerspectiveTransform function is not configured correctly, check the code.')
-					print('Stop the CoppeliaSim simulation manually.')
+					#print('Stop the CoppeliaSim simulation manually.')
 					#print()
 					#sys.exit()
 
@@ -245,15 +245,15 @@ def getBallData(client_id,vision_sensor_handle,flag):
 
 		else:
 			print('\n[ERROR] transform_vision_sensor_image function in task_2a.py is not configured correctly, check the code.')
-			print('Stop the CoppeliaSim simulation manually.')
+			#print('Stop the CoppeliaSim simulation manually.')
 			#print()
 			#sys.exit()
 
 	except Exception:
 		print('\n[ERROR] Your transform_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
-		print('Stop the CoppeliaSim simulation manually.\n')
+		#print('Stop the CoppeliaSim simulation manually.\n')
 		#traceback.print_exc(file=sys.stdout)
-		print()
+		#print()
 		#sys.exit()
 	return None
 
