@@ -19,13 +19,17 @@
 *****************************************************************************************
 '''
 
-# Team ID:          [ Team-ID ]
-# Author List:      [ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Team ID:          2182
+# Author List:      Yatharth Bhargava,Priyank Sisodia,Aman Kumar,Pranav Mittal
 # Filename:         task_5.py
 # Functions:        
 #                   [ Comma separated list of functions in this file ]
+#                   send_color_and_collection_box_identified,calculateMazeArrays,send_mazeData,getBallInfo,setup_maze_for_ball
+#                   ,vs_conveyer,stopStreaming,stopSimulation,delete_path,read_ball_details,processMaze,main
 # Global variables: 
 # 					[ List of global variables defined in this file ]
+#                   maze_all,vs_handle,totB,totM,client_id,ball_details
+
 
 # NOTE: Make sure you do NOT call sys.exit() in this code.
 
@@ -201,7 +205,7 @@ totB=1#check , total number of balls expected
 totM=[1,4]#check , list of all maze numbers
 client_id=-1
 ball_details={}
-processX=[]
+#processX=[]
 ############################################################################
 
 
@@ -339,46 +343,58 @@ def getBallInfo(ball_color):
     start_coord = (0,5)
     if(table==1):
         end_coord = (5,9)
+        out_coord=(5,9.6)
     if(table==2):
         end_coord = (9,4)
+        out_coord=(9.6,4)
     if(table==3):
         end_coord = (4,0)
+        out_coord=(3.4,0)
                 
     #from table 4 to exit and storing in ball_info at index1
     #print(maze_all[4],start_coord, end_coord)
     ball_info[1] = task_4a.find_path(maze_all[4],start_coord, end_coord)
-    ball_info[1].append((5,9.6))
+    ball_info[1].append(out_coord)
     print("Path in table 4:"+str(ball_info[1]))
     
     if(table==1):
         start_coord = (5,0)
         if(box==1):
             end_coord = (0,4)
+            out_coord=(-0.6,4)
         if(box==2):
             end_coord = (4,9)
+            out_coord=(4,9.6)
         if(box==3):
             end_coord = (9,5)
+            out_coord=(9,5.6)
     if(table==2):
         start_coord = (0,4)
         if(box==1):
             end_coord = (4,9)
+            out_coord=(4,9.6)
         if(box==2):
             end_coord = (9,5)
+            out_coord=(9.6,5)
         if(box==3):
             end_coord = (5,0)
+            out_coord=(5,-0.6)
     if(table==3):
         start_coord = (4,9)
         if(box==1):
             end_coord = (9,5)
+            out_coord=(9.6,5)
         if(box==2):
             end_coord = (5,0)
+            out_coord=(5,-0.6)
         if(box==3):
             end_coord = (0,4)
+            out_coord=(-0.6,4)
     ball_info[2]=table
     #from table 4 to exit and storing in ball_info at index1
-    print(maze_all[table],start_coord, end_coord)
+    #print(maze_all[table],start_coord, end_coord)
     ball_info[3] = task_4a.find_path(maze_all[table],start_coord, end_coord)
-    ball_info[3].append((-0.6,4))
+    ball_info[3].append(out_coord)
     print("Path in table "+str(table)+":"+str(ball_info[3]))
     
     #calling for grading app
@@ -511,8 +527,8 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_ha
                     #print('\n============================================')
                     print("Started traversing table :"+str(ball_info[0]))
                     try:
-                        #pass
-                        task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle)
+                        pass
+                        #task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,ball_info[0])
                     except Exception:
                         print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
                         #print('Stop the CoppeliaSim simulation manually.\n')
@@ -672,10 +688,9 @@ def main(rec_client_id):
             curB+=1
             newBall=False
             count=0
-            # color=shapes['Circle'][0]
-            color = 'green'
-            
-            # print("\nFound "+color+" ball in vision coveyer")
+
+            color=shapes['Circle'][0]
+            print("\nFound "+color+" ball in vision coveyer")
             #get info of ball from ball_details [current table number,path in table 4,table x,path in table x]
             #differentiate balls based on color
             ball_info=getBallInfo(color)

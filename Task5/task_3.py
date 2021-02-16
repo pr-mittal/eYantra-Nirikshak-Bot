@@ -421,263 +421,263 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 
 # NOTE: Write your solution ONLY in the space provided in the above functions. Main function should not be edited.
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-	# Import 'task_1b.py' file as module
-	try:
-		import task_1b
+# 	# Import 'task_1b.py' file as module
+# 	try:
+# 		import task_1b
 
-	except ImportError:
-		print('\n[ERROR] task_1b.py file is not present in the current directory.')
-		print('Your current directory is: ', os.getcwd())
-		print('Make sure task_1b.py is present in this current directory.\n')
-		sys.exit()
+# 	except ImportError:
+# 		print('\n[ERROR] task_1b.py file is not present in the current directory.')
+# 		print('Your current directory is: ', os.getcwd())
+# 		print('Make sure task_1b.py is present in this current directory.\n')
+# 		sys.exit()
 		
-	except Exception as e:
-		print('Your task_1b.py throwed an Exception. Kindly debug your code!\n')
-		traceback.print_exc(file=sys.stdout)
-		sys.exit()
+# 	except Exception as e:
+# 		print('Your task_1b.py throwed an Exception. Kindly debug your code!\n')
+# 		traceback.print_exc(file=sys.stdout)
+# 		sys.exit()
 	
-	# Import 'task_1a_part1.py' file as module
-	try:
-		import task_1a_part1
+# 	# Import 'task_1a_part1.py' file as module
+# 	try:
+# 		import task_1a_part1
 
-	except ImportError:
-		print('\n[ERROR] task_1a_part1.py file is not present in the current directory.')
-		print('Your current directory is: ', os.getcwd())
-		print('Make sure task_1a_part1.py is present in this current directory.\n')
-		sys.exit()
+# 	except ImportError:
+# 		print('\n[ERROR] task_1a_part1.py file is not present in the current directory.')
+# 		print('Your current directory is: ', os.getcwd())
+# 		print('Make sure task_1a_part1.py is present in this current directory.\n')
+# 		sys.exit()
 		
-	except Exception as e:
-		print('Your task_1a_part1.py throwed an Exception. Kindly debug your code!\n')
-		traceback.print_exc(file=sys.stdout)
-		sys.exit()
+# 	except Exception as e:
+# 		print('Your task_1a_part1.py throwed an Exception. Kindly debug your code!\n')
+# 		traceback.print_exc(file=sys.stdout)
+# 		sys.exit()
 	
-	# Import 'task_2a.py' file as module
-	try:
-		import task_2a
+# 	# Import 'task_2a.py' file as module
+# 	try:
+# 		import task_2a
 
-	except ImportError:
-		print('\n[ERROR] task_2a.py file is not present in the current directory.')
-		print('Your current directory is: ', os.getcwd())
-		print('Make sure task_2a.py is present in this current directory.\n')
-		sys.exit()
+# 	except ImportError:
+# 		print('\n[ERROR] task_2a.py file is not present in the current directory.')
+# 		print('Your current directory is: ', os.getcwd())
+# 		print('Make sure task_2a.py is present in this current directory.\n')
+# 		sys.exit()
 		
-	except Exception as e:
-		print('Your task_2a.py throwed an Exception. Kindly debug your code!\n')
-		traceback.print_exc(file=sys.stdout)
-		sys.exit()
+# 	except Exception as e:
+# 		print('Your task_2a.py throwed an Exception. Kindly debug your code!\n')
+# 		traceback.print_exc(file=sys.stdout)
+# 		sys.exit()
 
-	# Initiate the Remote API connection with CoppeliaSim server
-	print('\nConnection to CoppeliaSim Remote API Server initiated.')
-	print('Trying to connect to Remote API Server...')
-	# print("Start=",time.time())
-	try:
-		client_id = task_2a.init_remote_api_server()
-		# print("init_remote_api_server()=",time.time())
-		if (client_id != -1):
-			print('\nConnected successfully to Remote API Server in CoppeliaSim!')
+# 	# Initiate the Remote API connection with CoppeliaSim server
+# 	print('\nConnection to CoppeliaSim Remote API Server initiated.')
+# 	print('Trying to connect to Remote API Server...')
+# 	# print("Start=",time.time())
+# 	try:
+# 		client_id = task_2a.init_remote_api_server()
+# 		# print("init_remote_api_server()=",time.time())
+# 		if (client_id != -1):
+# 			print('\nConnected successfully to Remote API Server in CoppeliaSim!')
 
-			# Starting the Simulation
-			try:
-				return_code = task_2a.start_simulation()
-				# print("start_simulation()=",time.time())
-				if (return_code == sim.simx_return_novalue_flag):
-					print('\nSimulation started correctly in CoppeliaSim.')
+# 			# Starting the Simulation
+# 			try:
+# 				return_code = task_2a.start_simulation()
+# 				# print("start_simulation()=",time.time())
+# 				if (return_code == sim.simx_return_novalue_flag):
+# 					print('\nSimulation started correctly in CoppeliaSim.')
 					
-					# Storing the required handles in respective global variables.
-					try:
-						init_setup(client_id)
-					except Exception:
-						print('\n[ERROR] Your init_setup() function throwed an Exception. Kindly debug your code!')
-						print('Stop the CoppeliaSim simulation manually if started.\n')
-						traceback.print_exc(file=sys.stdout)
-						print()
-						sys.exit()
+# 					# Storing the required handles in respective global variables.
+# 					try:
+# 						init_setup(client_id)
+# 					except Exception:
+# 						print('\n[ERROR] Your init_setup() function throwed an Exception. Kindly debug your code!')
+# 						print('Stop the CoppeliaSim simulation manually if started.\n')
+# 						traceback.print_exc(file=sys.stdout)
+# 						print()
+# 						sys.exit()
 
-				else:
-					print('\n[ERROR] Failed starting the simulation in CoppeliaSim!')
-					print('start_simulation function in task_2a.py is not configured correctly, check the code!')
-					print()
-					sys.exit()
+# 				else:
+# 					print('\n[ERROR] Failed starting the simulation in CoppeliaSim!')
+# 					print('start_simulation function in task_2a.py is not configured correctly, check the code!')
+# 					print()
+# 					sys.exit()
 
-			except Exception:
-				print('\n[ERROR] Your start_simulation function in task_2a.py throwed an Exception. Kindly debug your code!')
-				print('Stop the CoppeliaSim simulation manually.\n')
-				traceback.print_exc(file=sys.stdout)
-				print()
-				sys.exit()
+# 			except Exception:
+# 				print('\n[ERROR] Your start_simulation function in task_2a.py throwed an Exception. Kindly debug your code!')
+# 				print('Stop the CoppeliaSim simulation manually.\n')
+# 				traceback.print_exc(file=sys.stdout)
+# 				print()
+# 				sys.exit()
 		
-		else:
-			print('\n[ERROR] Failed connecting to Remote API server!')
-			print('[WARNING] Make sure the CoppeliaSim software is running and')
-			print('[WARNING] Make sure the Port number for Remote API Server is set to 19997.')
-			print('[ERROR] OR init_remote_api_server function in task_2a.py is not configured correctly, check the code!')
-			print()
-			sys.exit()
+# 		else:
+# 			print('\n[ERROR] Failed connecting to Remote API server!')
+# 			print('[WARNING] Make sure the CoppeliaSim software is running and')
+# 			print('[WARNING] Make sure the Port number for Remote API Server is set to 19997.')
+# 			print('[ERROR] OR init_remote_api_server function in task_2a.py is not configured correctly, check the code!')
+# 			print()
+# 			sys.exit()
 
-	except Exception:
-		print('\n[ERROR] Your init_remote_api_server function in task_2a.py throwed an Exception. Kindly debug your code!')
-		print('Stop the CoppeliaSim simulation manually if started.\n')
-		traceback.print_exc(file=sys.stdout)
-		print()
-		sys.exit()
+# 	except Exception:
+# 		print('\n[ERROR] Your init_remote_api_server function in task_2a.py throwed an Exception. Kindly debug your code!')
+# 		print('Stop the CoppeliaSim simulation manually if started.\n')
+# 		traceback.print_exc(file=sys.stdout)
+# 		print()
+# 		sys.exit()
 	
-	# Initialising the center_x and center_y variable to the current position of the ball
-	# center_x = 1063
-	# center_y = 1063
-	center_x = 640
-	center_y = 640
+# 	# Initialising the center_x and center_y variable to the current position of the ball
+# 	# center_x = 1063
+# 	# center_y = 1063
+# 	center_x = 640
+# 	center_y = 640
 	
-	init_simulation_time = 0
-	curr_simulation_time = 0
+# 	init_simulation_time = 0
+# 	curr_simulation_time = 0
 
-	# Storing time when the simulation started in variable init_simulation_time
-	return_code_signal,init_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-	# print("simxGetStringSignal()=",time.time())
-	if(return_code_signal==0):
-		init_simulation_time=float(init_simulation_time_string)
-	lastInput = coordinateTransform([center_x,center_y])
-	# Running the coppeliasim simulation for 15 seconds
-	flag=False
-	while(curr_simulation_time - init_simulation_time <=15):
-		# x=time.time()
-		# print("Starting Coppeliasim Loop, time=",x)
-		return_code_signal,curr_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-		# print(init_simulation_time,curr_simulation_time)
-		# print("simxGetStringSignal()=",time.time()-x)
-		# x=time.time()
-		if(return_code_signal == 0):
-			curr_simulation_time=float(curr_simulation_time_string)
+# 	# Storing time when the simulation started in variable init_simulation_time
+# 	return_code_signal,init_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
+# 	# print("simxGetStringSignal()=",time.time())
+# 	if(return_code_signal==0):
+# 		init_simulation_time=float(init_simulation_time_string)
+# 	lastInput = coordinateTransform([center_x,center_y])
+# 	# Running the coppeliasim simulation for 15 seconds
+# 	flag=False
+# 	while(curr_simulation_time - init_simulation_time <=15):
+# 		# x=time.time()
+# 		# print("Starting Coppeliasim Loop, time=",x)
+# 		return_code_signal,curr_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+# 		# print(init_simulation_time,curr_simulation_time)
+# 		# print("simxGetStringSignal()=",time.time()-x)
+# 		# x=time.time()
+# 		if(return_code_signal == 0):
+# 			curr_simulation_time=float(curr_simulation_time_string)
 		
-		try:
-			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
-			# print("get_vision_sensor_image()=",time.time()-x)
-			# x=time.time()
-			if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
-				print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
+# 		try:
+# 			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
+# 			# print("get_vision_sensor_image()=",time.time()-x)
+# 			# x=time.time()
+# 			if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
+# 				print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
 
-				# Get the transformed vision sensor image captured in correct format
-				try:
-					transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image, image_resolution)
-					# print("transform_vision_sensor_image()=",time.time()-x)
-					# x=time.time()
-					if (type(transformed_image) is np.ndarray):
+# 				# Get the transformed vision sensor image captured in correct format
+# 				try:
+# 					transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image, image_resolution)
+# 					# print("transform_vision_sensor_image()=",time.time()-x)
+# 					# x=time.time()
+# 					if (type(transformed_image) is np.ndarray):
 
-						# Get the resultant warped transformed vision sensor image after applying Perspective Transform
-						try:
-							warped_img = task_1b.applyPerspectiveTransform(transformed_image)
+# 						# Get the resultant warped transformed vision sensor image after applying Perspective Transform
+# 						try:
+# 							warped_img = task_1b.applyPerspectiveTransform(transformed_image)
 							
-							if (type(warped_img) is np.ndarray):
-								# print("applyPerspectiveTransform()=",time.time()-x)
-								# x=time.time()
-								# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
-								try:
-									shapes = task_1a_part1.scan_image(warped_img)
-									# print("scan_image()=",time.time()-x)
-									# x=time.time()
-									if (type(shapes) is dict and shapes!={}):
-										print('\nShapes detected by Vision Sensor are: ')
-										print(shapes)
-										# Storing the detected x and y centroid in center_x and center_y variable repectively
-										center_x = shapes['Circle'][1]
-										center_y = shapes['Circle'][2]
-									elif(type(shapes) is not dict):
-										print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
-										print('Stop the CoppeliaSim simulation manually.')
-										print()
-										sys.exit()
+# 							if (type(warped_img) is np.ndarray):
+# 								# print("applyPerspectiveTransform()=",time.time()-x)
+# 								# x=time.time()
+# 								# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
+# 								try:
+# 									shapes = task_1a_part1.scan_image(warped_img)
+# 									# print("scan_image()=",time.time()-x)
+# 									# x=time.time()
+# 									if (type(shapes) is dict and shapes!={}):
+# 										print('\nShapes detected by Vision Sensor are: ')
+# 										print(shapes)
+# 										# Storing the detected x and y centroid in center_x and center_y variable repectively
+# 										center_x = shapes['Circle'][1]
+# 										center_y = shapes['Circle'][2]
+# 									elif(type(shapes) is not dict):
+# 										print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
+# 										print('Stop the CoppeliaSim simulation manually.')
+# 										print()
+# 										sys.exit()
 								
-								except Exception:
-									print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
-									print('Stop the CoppeliaSim simulation manually.\n')
-									traceback.print_exc(file=sys.stdout)
-									print()
-									sys.exit()
+# 								except Exception:
+# 									print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
+# 									print('Stop the CoppeliaSim simulation manually.\n')
+# 									traceback.print_exc(file=sys.stdout)
+# 									print()
+# 									sys.exit()
 							
-							else:
-								print('\n[ERROR] applyPerspectiveTransform function is not configured correctly, check the code.')
-								print('Stop the CoppeliaSim simulation manually.')
-								print()
-								sys.exit()
+# 							else:
+# 								print('\n[ERROR] applyPerspectiveTransform function is not configured correctly, check the code.')
+# 								print('Stop the CoppeliaSim simulation manually.')
+# 								print()
+# 								sys.exit()
 						
-						except Exception:
-							print('\n[ERROR] Your applyPerspectiveTransform function in task_1b.py throwed an Exception. Kindly debug your code!')
-							print('Stop the CoppeliaSim simulation manually.\n')
-							traceback.print_exc(file=sys.stdout)
-							print()
-							sys.exit()
+# 						except Exception:
+# 							print('\n[ERROR] Your applyPerspectiveTransform function in task_1b.py throwed an Exception. Kindly debug your code!')
+# 							print('Stop the CoppeliaSim simulation manually.\n')
+# 							traceback.print_exc(file=sys.stdout)
+# 							print()
+# 							sys.exit()
 
-					else:
-						print('\n[ERROR] transform_vision_sensor_image function in task_2a.py is not configured correctly, check the code.')
-						print('Stop the CoppeliaSim simulation manually.')
-						print()
-						sys.exit()
+# 					else:
+# 						print('\n[ERROR] transform_vision_sensor_image function in task_2a.py is not configured correctly, check the code.')
+# 						print('Stop the CoppeliaSim simulation manually.')
+# 						print()
+# 						sys.exit()
 
-				except Exception:
-					print('\n[ERROR] Your transform_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
-					print('Stop the CoppeliaSim simulation manually.\n')
-					traceback.print_exc(file=sys.stdout)
-					print()
-					sys.exit()
+# 				except Exception:
+# 					print('\n[ERROR] Your transform_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
+# 					print('Stop the CoppeliaSim simulation manually.\n')
+# 					traceback.print_exc(file=sys.stdout)
+# 					print()
+# 					sys.exit()
 			
-			try:
-				# control_logic(center_x,center_y)
-				if(flag):
-					control_logic(center_x,center_y)
-				else:
-					lastInput=coordinateTransform([center_x,center_y])
-					flag=True
-			except:
-				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
-				print('Stop the CoppeliaSim simulation manually.\n')
-				traceback.print_exc(file=sys.stdout)
-				print()
-				sys.exit()
+# 			try:
+# 				# control_logic(center_x,center_y)
+# 				if(flag):
+# 					control_logic(center_x,center_y)
+# 				else:
+# 					lastInput=coordinateTransform([center_x,center_y])
+# 					flag=True
+# 			except:
+# 				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
+# 				print('Stop the CoppeliaSim simulation manually.\n')
+# 				traceback.print_exc(file=sys.stdout)
+# 				print()
+# 				sys.exit()
 
-		except Exception:
-			print('\n[ERROR] Your get_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
-			print('Stop the CoppeliaSim simulation manually.\n')
-			traceback.print_exc(file=sys.stdout)
-			print()
-			sys.exit()
+# 		except Exception:
+# 			print('\n[ERROR] Your get_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
+# 			print('Stop the CoppeliaSim simulation manually.\n')
+# 			traceback.print_exc(file=sys.stdout)
+# 			print()
+# 			sys.exit()
 
-	# Ending the Simulation
-	try:
-		return_code = task_2a.stop_simulation()
+# 	# Ending the Simulation
+# 	try:
+# 		return_code = task_2a.stop_simulation()
 		
-		if (return_code == sim.simx_return_novalue_flag):
-			print('\nSimulation stopped correctly.')
+# 		if (return_code == sim.simx_return_novalue_flag):
+# 			print('\nSimulation stopped correctly.')
 
-			# Stop the Remote API connection with CoppeliaSim server
-			try:
-				task_2a.exit_remote_api_server()
+# 			# Stop the Remote API connection with CoppeliaSim server
+# 			try:
+# 				task_2a.exit_remote_api_server()
 
-				if (task_2a.start_simulation() == sim.simx_return_initialize_error_flag):
-					print('\nDisconnected successfully from Remote API Server in CoppeliaSim!')
+# 				if (task_2a.start_simulation() == sim.simx_return_initialize_error_flag):
+# 					print('\nDisconnected successfully from Remote API Server in CoppeliaSim!')
 
-				else:
-					print('\n[ERROR] Failed disconnecting from Remote API server!')
-					print('[ERROR] exit_remote_api_server function in task_2a.py is not configured correctly, check the code!')
+# 				else:
+# 					print('\n[ERROR] Failed disconnecting from Remote API server!')
+# 					print('[ERROR] exit_remote_api_server function in task_2a.py is not configured correctly, check the code!')
 
-			except Exception:
-				print('\n[ERROR] Your exit_remote_api_server function in task_2a.py throwed an Exception. Kindly debug your code!')
-				print('Stop the CoppeliaSim simulation manually.\n')
-				traceback.print_exc(file=sys.stdout)
-				print()
-				sys.exit()
+# 			except Exception:
+# 				print('\n[ERROR] Your exit_remote_api_server function in task_2a.py throwed an Exception. Kindly debug your code!')
+# 				print('Stop the CoppeliaSim simulation manually.\n')
+# 				traceback.print_exc(file=sys.stdout)
+# 				print()
+# 				sys.exit()
 		
-		else:
-			print('\n[ERROR] Failed stopping the simulation in CoppeliaSim server!')
-			print('[ERROR] stop_simulation function in task_2a.py is not configured correctly, check the code!')
-			print('Stop the CoppeliaSim simulation manually.')
+# 		else:
+# 			print('\n[ERROR] Failed stopping the simulation in CoppeliaSim server!')
+# 			print('[ERROR] stop_simulation function in task_2a.py is not configured correctly, check the code!')
+# 			print('Stop the CoppeliaSim simulation manually.')
 		
-		print()
-		sys.exit()
+# 		print()
+# 		sys.exit()
 
-	except Exception:
-		print('\n[ERROR] Your stop_simulation function in task_2a.py throwed an Exception. Kindly debug your code!')
-		print('Stop the CoppeliaSim simulation manually.\n')
-		traceback.print_exc(file=sys.stdout)
-		print()
-		sys.exit()
+# 	except Exception:
+# 		print('\n[ERROR] Your stop_simulation function in task_2a.py throwed an Exception. Kindly debug your code!')
+# 		print('Stop the CoppeliaSim simulation manually.\n')
+# 		traceback.print_exc(file=sys.stdout)
+# 		print()
+# 		sys.exit()

@@ -201,28 +201,28 @@ def colorMask(imgHsv):
 
 
 
-def calibrateCentroid(cX,cY):
-    #storing of sgnX is grater than or less that zero
-    #1 implies greater than zero and vice versa
-    sgnX=-1
-    sgnY=-1
-    eX=(cX-640)
-    eY=(cY-640)
-    if(eX<0):
-        sgnX=1
-    if(eY<0):
-        sgnY=1
-    #finding error in calibrate matrix
-    for c in calibrate:
-        #max gap between any two points is 66 ,we need to find the closest match
-        if(abs(abs(eX)-c[0][0])<33)and(abs(abs(eY)-c[0][1])<33):
-            cX=cX+sgnX*c[1][0]
-            cY=cY+sgnY*c[1][1]
-            #print("Match= ",c)
-    #print(calibrate)
-    #print("End Calibrate")
+# def calibrateCentroid(cX,cY):
+#     #storing of sgnX is grater than or less that zero
+#     #1 implies greater than zero and vice versa
+#     sgnX=-1
+#     sgnY=-1
+#     eX=(cX-640)
+#     eY=(cY-640)
+#     if(eX<0):
+#         sgnX=1
+#     if(eY<0):
+#         sgnY=1
+#     #finding error in calibrate matrix
+#     for c in calibrate:
+#         #max gap between any two points is 66 ,we need to find the closest match
+#         if(abs(abs(eX)-c[0][0])<33)and(abs(abs(eY)-c[0][1])<33):
+#             cX=cX+sgnX*c[1][0]
+#             cY=cY+sgnY*c[1][1]
+#             #print("Match= ",c)
+#     #print(calibrate)
+#     #print("End Calibrate")
     
-    return cX,cY
+#     return cX,cY
 
 def getShape4(cnt):
     #print(cnt)
@@ -357,89 +357,89 @@ def scan_image(wraped_img):
 #                   of colored (non-white) shapes present in 'Sample1.png', it then asks the user whether
 #                   to repeat the same on all images present in 'Samples' folder or not
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    curr_dir_path = os.getcwd()
-    print('Currently working in '+ curr_dir_path)
+#     curr_dir_path = os.getcwd()
+#     print('Currently working in '+ curr_dir_path)
 
-    # path directory of images in 'Samples' folder
-    img_dir_path = curr_dir_path + '/Samples/'
+#     # path directory of images in 'Samples' folder
+#     img_dir_path = curr_dir_path + '/Samples/'
     
-    # path to 'Sample1.png' image file
-    file_num = 1
-    img_file_path = img_dir_path + 'Sample' + str(file_num) + '.png'
+#     # path to 'Sample1.png' image file
+#     file_num = 1
+#     img_file_path = img_dir_path + 'Sample' + str(file_num) + '.png'
 
-    print('\n============================================')
-    print('\nLooking for Sample' + str(file_num) + '.png')
+#     print('\n============================================')
+#     print('\nLooking for Sample' + str(file_num) + '.png')
 
-    if os.path.exists('Samples/Sample' + str(file_num) + '.png'):
-        print('\nFound Sample' + str(file_num) + '.png')
+#     if os.path.exists('Samples/Sample' + str(file_num) + '.png'):
+#         print('\nFound Sample' + str(file_num) + '.png')
     
-    else:
-        print('\n[ERROR] Sample' + str(file_num) + '.png not found. Make sure "Samples" folder has the selected file.')
-        exit()
+#     else:
+#         print('\n[ERROR] Sample' + str(file_num) + '.png not found. Make sure "Samples" folder has the selected file.')
+#         exit()
     
-    print('\n============================================')
+#     print('\n============================================')
 
-    try:
-        print('\nRunning scan_image function with ' + img_file_path + ' as an argument')
-        shapes = scan_image(img_file_path)
+#     try:
+#         print('\nRunning scan_image function with ' + img_file_path + ' as an argument')
+#         shapes = scan_image(img_file_path)
 
-        if type(shapes) is dict:
-            print(shapes)
-            print('\nOutput generated. Please verify.')
+#         if type(shapes) is dict:
+#             print(shapes)
+#             print('\nOutput generated. Please verify.')
         
-        else:
-            print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.\n')
-            exit()
+#         else:
+#             print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.\n')
+#             exit()
 
-    except Exception:
-        print('\n[ERROR] scan_image function is throwing an error. Please debug scan_image function')
-        exit()
+#     except Exception:
+#         print('\n[ERROR] scan_image function is throwing an error. Please debug scan_image function')
+#         exit()
 
-    print('\n============================================')
+#     print('\n============================================')
 
-    choice = input('\nWant to run your script on all the images in Samples folder ? ==>> "y" or "n": ')
+#     choice = input('\nWant to run your script on all the images in Samples folder ? ==>> "y" or "n": ')
 
-    if choice == 'y':
+#     if choice == 'y':
 
-        file_count = 2
+#         file_count = 2
         
-        for file_num in range(file_count):
+#         for file_num in range(file_count):
 
-            # path to image file
-            img_file_path = img_dir_path + 'Sample' + str(file_num + 1) + '.png'
+#             # path to image file
+#             img_file_path = img_dir_path + 'Sample' + str(file_num + 1) + '.png'
 
-            print('\n============================================')
-            print('\nLooking for Sample' + str(file_num + 1) + '.png')
+#             print('\n============================================')
+#             print('\nLooking for Sample' + str(file_num + 1) + '.png')
 
-            if os.path.exists('Samples/Sample' + str(file_num + 1) + '.png'):
-                print('\nFound Sample' + str(file_num + 1) + '.png')
+#             if os.path.exists('Samples/Sample' + str(file_num + 1) + '.png'):
+#                 print('\nFound Sample' + str(file_num + 1) + '.png')
             
-            else:
-                print('\n[ERROR] Sample' + str(file_num + 1) + '.png not found. Make sure "Samples" folder has the selected file.')
-                exit()
+#             else:
+#                 print('\n[ERROR] Sample' + str(file_num + 1) + '.png not found. Make sure "Samples" folder has the selected file.')
+#                 exit()
             
-            print('\n============================================')
+#             print('\n============================================')
 
-            try:
-                print('\nRunning scan_image function with ' + img_file_path + ' as an argument')
-                shapes = scan_image(img_file_path)
+#             try:
+#                 print('\nRunning scan_image function with ' + img_file_path + ' as an argument')
+#                 shapes = scan_image(img_file_path)
 
-                if type(shapes) is dict:
-                    print(shapes)
-                    print('\nOutput generated. Please verify.')
+#                 if type(shapes) is dict:
+#                     print(shapes)
+#                     print('\nOutput generated. Please verify.')
                 
-                else:
-                    print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.\n')
-                    exit()
+#                 else:
+#                     print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.\n')
+#                     exit()
 
-            except Exception:
-                print('\n[ERROR] scan_image function is throwing an error. Please debug scan_image function')
-                exit()
+#             except Exception:
+#                 print('\n[ERROR] scan_image function is throwing an error. Please debug scan_image function')
+#                 exit()
 
-            print('\n============================================')
+#             print('\n============================================')
 
-    else:
-        print('')
+#     else:
+#         print('')
 

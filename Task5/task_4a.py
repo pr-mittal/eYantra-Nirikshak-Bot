@@ -496,108 +496,108 @@ def read_start_end_coordinates(file_name, maze_name):
 # 					find_path function. It then asks the user whether to repeat the same on all maze images
 # 					present in 'test_cases' folder or not. Write your solution ONLY in the space provided in the above
 # 					read_start_end_coordinates and find_path functions.
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-	# path directory of images in 'test_cases' folder
-	img_dir_path = 'test_cases/'
+# 	# path directory of images in 'test_cases' folder
+# 	img_dir_path = 'test_cases/'
 
-	file_num = 0
+# 	file_num = 0
 
-	maze_name = 'maze0' + str(file_num)
+# 	maze_name = 'maze0' + str(file_num)
 
-	# path to 'maze00.jpg' image file
-	img_file_path = img_dir_path + maze_name + '.jpg'
+# 	# path to 'maze00.jpg' image file
+# 	img_file_path = img_dir_path + maze_name + '.jpg'
 
-	# read start and end coordinates from json file
-	start_coord, end_coord = read_start_end_coordinates("start_end_coordinates.json", maze_name)
+# 	# read start and end coordinates from json file
+# 	start_coord, end_coord = read_start_end_coordinates("start_end_coordinates.json", maze_name)
 
-	print('\n============================================')
-	print('\nFor maze0' + str(file_num) + '.jpg')
+# 	print('\n============================================')
+# 	print('\nFor maze0' + str(file_num) + '.jpg')
 	
-	# read the 'maze00.jpg' image file
-	input_img = cv2.imread(img_file_path)
+# 	# read the 'maze00.jpg' image file
+# 	input_img = cv2.imread(img_file_path)
 
-	# get the resultant warped maze image after applying Perspective Transform
-	warped_img = task_1b.applyPerspectiveTransform(input_img)
+# 	# get the resultant warped maze image after applying Perspective Transform
+# 	warped_img = task_1b.applyPerspectiveTransform(input_img)
 
-	if type(warped_img) is np.ndarray:
+# 	if type(warped_img) is np.ndarray:
 
-		# get the encoded maze in the form of a 2D array
-		maze_array = task_1b.detectMaze(warped_img)
+# 		# get the encoded maze in the form of a 2D array
+# 		maze_array = task_1b.detectMaze(warped_img)
 
-		if (type(maze_array) is list) and (len(maze_array) == 10):
+# 		if (type(maze_array) is list) and (len(maze_array) == 10):
 
-			print('\nEncoded Maze Array = %s' % (maze_array))
-			print('\n============================================')
+# 			print('\nEncoded Maze Array = %s' % (maze_array))
+# 			print('\n============================================')
 
-			path = find_path(maze_array, start_coord, end_coord)
+# 			path = find_path(maze_array, start_coord, end_coord)
 
-			if (type(path) is list):
+# 			if (type(path) is list):
 
-				print('\nPath calculated between %s and %s is %s' % (start_coord, end_coord, path))
-				print('\n============================================')
+# 				print('\nPath calculated between %s and %s is %s' % (start_coord, end_coord, path))
+# 				print('\n============================================')
 
-			else:
-				print('\n Path does not exist between %s and %s' %(start_coord, end_coord))
+# 			else:
+# 				print('\n Path does not exist between %s and %s' %(start_coord, end_coord))
 		
-		else:
-			print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
-			exit()
+# 		else:
+# 			print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
+# 			exit()
 	
-	else:
-		print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
-		exit()
+# 	else:
+# 		print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
+# 		exit()
 	
-	choice = input('\nDo you want to run your script on all maze images ? => "y" or "n": ')
+# 	choice = input('\nDo you want to run your script on all maze images ? => "y" or "n": ')
 
-	if choice == 'y':
+# 	if choice == 'y':
 
-		for file_num in range(1,10):
+# 		for file_num in range(1,10):
 
-			maze_name = 'maze0' + str(file_num)
+# 			maze_name = 'maze0' + str(file_num)
 
-			img_file_path = img_dir_path + maze_name + '.jpg'
+# 			img_file_path = img_dir_path + maze_name + '.jpg'
 
-			# read start and end coordinates from json file
-			start_coord, end_coord = read_start_end_coordinates("start_end_coordinates.json", maze_name)
+# 			# read start and end coordinates from json file
+# 			start_coord, end_coord = read_start_end_coordinates("start_end_coordinates.json", maze_name)
 
-			print('\n============================================')
-			print('\nFor maze0' + str(file_num) + '.jpg')
+# 			print('\n============================================')
+# 			print('\nFor maze0' + str(file_num) + '.jpg')
 	
-			# read the 'maze00.jpg' image file
-			input_img = cv2.imread(img_file_path)
+# 			# read the 'maze00.jpg' image file
+# 			input_img = cv2.imread(img_file_path)
 
-			# get the resultant warped maze image after applying Perspective Transform
-			warped_img = task_1b.applyPerspectiveTransform(input_img)
+# 			# get the resultant warped maze image after applying Perspective Transform
+# 			warped_img = task_1b.applyPerspectiveTransform(input_img)
 
-			if type(warped_img) is np.ndarray:
+# 			if type(warped_img) is np.ndarray:
 
-				# get the encoded maze in the form of a 2D array
-				maze_array = task_1b.detectMaze(warped_img)
+# 				# get the encoded maze in the form of a 2D array
+# 				maze_array = task_1b.detectMaze(warped_img)
 
-				if (type(maze_array) is list) and (len(maze_array) == 10):
+# 				if (type(maze_array) is list) and (len(maze_array) == 10):
 
-					print('\nEncoded Maze Array = %s' % (maze_array))
-					print('\n============================================')
+# 					print('\nEncoded Maze Array = %s' % (maze_array))
+# 					print('\n============================================')
 
-					path = find_path(maze_array, start_coord, end_coord)
+# 					path = find_path(maze_array, start_coord, end_coord)
 
-					if (type(path) is list):
+# 					if (type(path) is list):
 
-						print('\nPath calculated between %s and %s is %s' % (start_coord, end_coord, path))
-						print('\n============================================')
+# 						print('\nPath calculated between %s and %s is %s' % (start_coord, end_coord, path))
+# 						print('\n============================================')
 
-					else:
-						print('\n Path does not exist between %s and %s' %(start_coord, end_coord))
+# 					else:
+# 						print('\n Path does not exist between %s and %s' %(start_coord, end_coord))
 
-				else:
-					print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
-					exit()
+# 				else:
+# 					print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
+# 					exit()
 
-			else:				
-				print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
-				exit()
+# 			else:				
+# 				print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
+# 				exit()
 	
-	else:
-		print()
+# 	else:
+#		print()
 
