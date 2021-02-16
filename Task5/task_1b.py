@@ -1192,105 +1192,105 @@ def writeToCsv(csv_file_path, maze_array):
 # 					present in 'test_cases' folder or not. Write your solution ONLY in the space provided in the above
 # 					applyPerspectiveTransform and detectMaze functions.
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-	# path directory of images in 'test_cases' folder
-	img_dir_path = 'test_cases/'
+# 	# path directory of images in 'test_cases' folder
+# 	img_dir_path = 'test_cases/'
 
-	# path to 'maze00.jpg' image file
-	file_num = 0
-	img_file_path = img_dir_path + 'maze0' + str(file_num) + '.jpg'
+# 	# path to 'maze00.jpg' image file
+# 	file_num = 0
+# 	img_file_path = img_dir_path + 'maze0' + str(file_num) + '.jpg'
 
-	print('\n============================================')
-	print('\nFor maze0' + str(file_num) + '.jpg')
+# 	print('\n============================================')
+# 	print('\nFor maze0' + str(file_num) + '.jpg')
 
-	# path for 'maze00.csv' output file
-	csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
+# 	# path for 'maze00.csv' output file
+# 	csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
 	
-	# read the 'maze00.jpg' image file
-	input_img = cv2.imread(img_file_path)
+# 	# read the 'maze00.jpg' image file
+# 	input_img = cv2.imread(img_file_path)
 
-	# get the resultant warped maze image after applying Perspective Transform
-	warped_img = applyPerspectiveTransform(input_img)
+# 	# get the resultant warped maze image after applying Perspective Transform
+# 	warped_img = applyPerspectiveTransform(input_img)
 
-	if type(warped_img) is np.ndarray:
+# 	if type(warped_img) is np.ndarray:
 
-		# get the encoded maze in the form of a 2D array
-		maze_array = detectMaze(warped_img)
+# 		# get the encoded maze in the form of a 2D array
+# 		maze_array = detectMaze(warped_img)
 
-		if (type(maze_array) is list) and (len(maze_array) == 10):
+# 		if (type(maze_array) is list) and (len(maze_array) == 10):
 
-			print('\nEncoded Maze Array = %s' % (maze_array))
-			print('\n============================================')
+# 			print('\nEncoded Maze Array = %s' % (maze_array))
+# 			print('\n============================================')
 			
-			# writes the encoded maze array to the csv file
-			writeToCsv(csv_file_path, maze_array)
+# 			# writes the encoded maze array to the csv file
+# 			writeToCsv(csv_file_path, maze_array)
 
-			cv2.imshow('warped_img_0' + str(file_num), warped_img)
-			cv2.waitKey(0)
-			cv2.destroyAllWindows()
+# 			cv2.imshow('warped_img_0' + str(file_num), warped_img)
+# 			cv2.waitKey(0)
+# 			cv2.destroyAllWindows()
 		
-		else:
+# 		else:
 
-			print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
-			exit()
+# 			print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
+# 			exit()
 	
-	else:
+# 	else:
 
-		print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
-		exit()
+# 		print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
+# 		exit()
 	
-	choice = input('\nDo you want to run your script on all maze images ? => "y" or "n": ')
+# 	choice = input('\nDo you want to run your script on all maze images ? => "y" or "n": ')
 
-	if choice == 'y':
+# 	if choice == 'y':
 
-		for file_num in range(1, 10):
+# 		for file_num in range(1, 10):
 			
-			# path to image file
-			img_file_path = img_dir_path + 'maze0' + str(file_num) + '.jpg'
+# 			# path to image file
+# 			img_file_path = img_dir_path + 'maze0' + str(file_num) + '.jpg'
 
-			print('\n============================================')
-			print('\nFor maze0' + str(file_num) + '.jpg')
+# 			print('\n============================================')
+# 			print('\nFor maze0' + str(file_num) + '.jpg')
 
-			# path for csv output file
-			csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
+# 			# path for csv output file
+# 			csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
 			
-			# read the image file
-			input_img = cv2.imread(img_file_path)
+# 			# read the image file
+# 			input_img = cv2.imread(img_file_path)
 
-			# get the resultant warped maze image after applying Perspective Transform
-			warped_img = applyPerspectiveTransform(input_img)
+# 			# get the resultant warped maze image after applying Perspective Transform
+# 			warped_img = applyPerspectiveTransform(input_img)
             
-			if type(warped_img) is np.ndarray:
+# 			if type(warped_img) is np.ndarray:
 
-				# get the encoded maze in the form of a 2D array
-				maze_array = detectMaze(warped_img)
+# 				# get the encoded maze in the form of a 2D array
+# 				maze_array = detectMaze(warped_img)
 
-				if (type(maze_array) is list) and (len(maze_array) == 10):
+# 				if (type(maze_array) is list) and (len(maze_array) == 10):
 
-					print('\nEncoded Maze Array = %s' % (maze_array))
-					print('\n============================================')
+# 					print('\nEncoded Maze Array = %s' % (maze_array))
+# 					print('\n============================================')
 					
-					# writes the encoded maze array to the csv file
-					writeToCsv(csv_file_path, maze_array)
+# 					# writes the encoded maze array to the csv file
+# 					writeToCsv(csv_file_path, maze_array)
 
-					cv2.imshow('warped_img_0' + str(file_num), warped_img)
-					cv2.waitKey(0)
-					cv2.destroyAllWindows()
+# 					cv2.imshow('warped_img_0' + str(file_num), warped_img)
+# 					cv2.waitKey(0)
+# 					cv2.destroyAllWindows()
 				
-				else:
+# 				else:
 
-					print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
-					exit()
+# 					print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
+# 					exit()
 			
-			else:
+# 			else:
 
-				print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
-				exit()
+# 				print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
+# 				exit()
 
-	else:
+# 	else:
 
-		print('')
+# 		print('')
 
 
 

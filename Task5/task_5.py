@@ -19,13 +19,17 @@
 *****************************************************************************************
 '''
 
-# Team ID:          [ Team-ID ]
-# Author List:      [ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Team ID:          2182
+# Author List:      Yatharth Bhargava,Priyank Sisodia,Aman Kumar,Pranav Mittal
 # Filename:         task_5.py
 # Functions:        
 #                   [ Comma separated list of functions in this file ]
+#                   send_color_and_collection_box_identified,calculateMazeArrays,send_mazeData,getBallInfo,setup_maze_for_ball
+#                   ,vs_conveyer,stopStreaming,stopSimulation,delete_path,read_ball_details,processMaze,main
 # Global variables: 
 # 					[ List of global variables defined in this file ]
+#                   maze_all,vs_handle,totB,totM,client_id,ball_details
+
 
 # NOTE: Make sure you do NOT call sys.exit() in this code.
 
@@ -201,7 +205,7 @@ totB=1#check , total number of balls expected
 totM=[1,4]#check , list of all maze numbers
 client_id=-1
 ball_details={}
-processX=[]
+#processX=[]
 ############################################################################
 
 
@@ -286,7 +290,8 @@ def send_mazeData():
                 #return_code = task_2b.send_data(client_id,maze_array,table_number)
                 #print()
                 #sys.exit()
-
+            else:
+                print("Successfully sent maze data to ",table_number)
     except Exception:
         print('\n[ERROR] Your send_data function throwed an Exception, kindly debug your code!')
         #traceback.print_exc(file=sys.stdout)
@@ -332,6 +337,8 @@ def getBallInfo(ball_color):
     else:
         #remove that collection box from list
         ball_details[ball_color].pop(0)
+    print("Ball details New: ",ball_details)
+
     table = int(collection_box_name[1])
     box =int(collection_box_name[-1])
     print("Finding path to "+collection_box_name+" via table "+str(table)+" to box "+str(box))
@@ -339,48 +346,63 @@ def getBallInfo(ball_color):
     start_coord = (0,5)
     if(table==1):
         end_coord = (5,9)
+        out_coord=(5,9.6)
     if(table==2):
         end_coord = (9,4)
+        out_coord=(9.6,4)
     if(table==3):
         end_coord = (4,0)
+        out_coord=(4,-0.6)
                 
     #from table 4 to exit and storing in ball_info at index1
     #print(maze_all[4],start_coord, end_coord)
     ball_info[1] = task_4a.find_path(maze_all[4],start_coord, end_coord)
-    print("Path in table 4:"+str(ball_info[1]))
+    ball_info[1].append(out_coord)
     
+    print("Path in table 4:"+str(ball_info[1]))
+
     if(table==1):
         start_coord = (5,0)
         if(box==1):
             end_coord = (0,4)
+            out_coord=(-0.6,4)
         if(box==2):
             end_coord = (4,9)
+            out_coord=(4,9.6)
         if(box==3):
             end_coord = (9,5)
+            out_coord=(9.6,5)
     if(table==2):
         start_coord = (0,4)
         if(box==1):
             end_coord = (4,9)
+            out_coord=(4,9.6)
         if(box==2):
             end_coord = (9,5)
+            out_coord=(9.6,5)
         if(box==3):
             end_coord = (5,0)
+            out_coord=(5,-0.6)
     if(table==3):
         start_coord = (4,9)
         if(box==1):
             end_coord = (9,5)
+            out_coord=(9.6,5)
         if(box==2):
             end_coord = (5,0)
+            out_coord=(5,-0.6)
         if(box==3):
             end_coord = (0,4)
+            out_coord=(-0.6,4)
     ball_info[2]=table
     #from table 4 to exit and storing in ball_info at index1
-    print(maze_all[table],start_coord, end_coord)
+    #print(maze_all[table],start_coord, end_coord)
     ball_info[3] = task_4a.find_path(maze_all[table],start_coord, end_coord)
+    ball_info[3].append(out_coord)
     print("Path in table "+str(table)+":"+str(ball_info[3]))
     
     #calling for grading app
-    # send_color_and_collection_box_identified(ball_color, collection_box_name)
+    send_color_and_collection_box_identified(ball_color, collection_box_name)
     return ball_info
 ##############################################################
 
@@ -419,14 +441,16 @@ def vs_conveyer():
     global client_id,vs_handle,totM
     for table_number in totM:
         _,vs_handle[table_number]=sim.simxGetObjectHandle(client_id, 'vision_sensor_'+str(table_number), sim.simx_opmode_blocking)
+        _, _, _ = sim.simxGetVisionSensorImage(client_id,vs_handle[table_number], 0, sim.simx_opmode_discontinue)
     _, vs_handle[5] = sim.simxGetObjectHandle(client_id, 'vision_sensor_5', sim.simx_opmode_blocking)
     _, _, _ = sim.simxGetVisionSensorImage(client_id,vs_handle[5], 0, sim.simx_opmode_streaming)
-    rCode,pingTime= sim.simxGetPingTime(client_id)
+    _,_= sim.simxGetPingTime(client_id)
+
 ####################################################################################################
 def stopStreaming(vision_sensor_handle):
     #vision_sensor_handle=vs_handle[vs_number]
     _, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_discontinue)
-    rCode,pingTime= sim.simxGetPingTime(client_id)
+    _,_= sim.simxGetPingTime(client_id)
 #######################################################################################################
 
 
@@ -473,6 +497,12 @@ def delete_path(rec_client_id,table_number,handle):
     client_id = rec_client_id
     inputBuffer = bytearray()
     return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'deletePath', [handle],[], [], inputBuffer, sim.simx_opmode_blocking)
+    if(return_code!=sim.simx_return_ok):
+        print('\n[ERROR] Your delete_path() function throwed an Exception. Kindly debug your code!')
+        #print('Stop the CoppeliaSim simulation manually.\n')
+        #traceback.print_exc(file=sys.stdout)
+        #print()
+        #sys.exit()
     return retInts[0]
 ##################################################
 
@@ -485,6 +515,7 @@ def read_ball_details(file_name):
     global ball_details
     f=open(file_name,)
     ball_details=json.load(f)
+    print("Ball Details:",ball_details)
 ##############################################################################################
 def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle):
     try:
@@ -502,14 +533,15 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_ha
                 continue
             if(len(shapes)!=0):
             #if ball detected , start pid
-                print("\nBall detected in table "+str(ball_info[0]))
+                print("\nBall detected in table "+str(ball_info[0]),"  shapes:",shapes)
                 try:
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
                     #print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))
                     #print('\n============================================')
                     print("Started traversing table :"+str(ball_info[0]))
                     try:
-                        task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle)
+                        time.sleep(5)
+                        #task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,ball_info[0])
                     except Exception:
                         print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
                         #print('Stop the CoppeliaSim simulation manually.\n')
@@ -554,7 +586,6 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_ha
         #print()
         #sys.exit()
         
-
 
 # In[10]:
 
@@ -626,72 +657,56 @@ def main(rec_client_id):
         # print(" . ",end="")
         # shapes=task_4b.getBallData(client_id,vs_handle[5],False)        
         vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vs_handle[5])
-        if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
-            #print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
-            pass
-        else:
-            #start loop again
-            # return None
+        if ((return_code != sim.simx_return_ok) or (len(image_resolution) != 2) or (len(vision_sensor_image) <= 0)):
+            #print('\n[ERROR] Your get_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
+            #print('Stop the CoppeliaSim simulation manually.\n')
+            #traceback.print_exc(file=sys.stdout)
+            #print()
+            #sys.exit()
             continue
-
-
         # Get the transformed vision sensor image captured in correct format
         try:
             transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image, image_resolution)
             if (type(transformed_image) is np.ndarray):
                 warped_img = transformed_image
+                warped_img = cv2.resize(warped_img, (1280, 1280))
                 try:
                     shapes = task_1a_part1.scan_image(warped_img)
-                    cv2.imshow("warped",warped_img)
-                    cv2.waitKey(0)
-                    cv2.destroyAllWindows()
                     if (type(shapes) is dict and shapes!={}):
-                        print(shapes)
-                        #print('\nShapes detected by Vision Sensor are: ')
-                        # print(shapes)
-                        # Storing the detected x and y centroid in center_x and center_y variable repectively
-                        # return shapes
-                        if( len(shapes['Circle'])>1 ):
+                        #print(shapes)
+                        if( type(shapes['Circle'][0]) is list ):
                             continue
-                        else:
-                            pass
-                            # return shapes
+                        #print("Found")
                     elif(type(shapes) is not dict):
-                        #print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
-                        #print('Stop the CoppeliaSim simulation manually.')
                         continue
-
                 except Exception:
                     print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
-                    print('Stop the CoppeliaSim simulation manually.\n')
-                    traceback.print_exc(file=sys.stdout)
-                    print()
-                    sys.exit()
+                    #print('Stop the CoppeliaSim simulation manually.\n')
+                    #traceback.print_exc(file=sys.stdout)
+                    #print()
+                    #sys.exit()
             else:
                 print('\n[ERROR] transform_vision_sensor_image function in task_2a.py is not configured correctly, check the code.')
-                print('Stop the CoppeliaSim simulation manually.')
+                #print('Stop the CoppeliaSim simulation manually.')
                 #print()
                 #sys.exit()
 
         except Exception:
             print('\n[ERROR] Your transform_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
-            print('Stop the CoppeliaSim simulation manually.\n')
+            #print('Stop the CoppeliaSim simulation manually.\n')
             #traceback.print_exc(file=sys.stdout)
-            print()
+            #print()
             #sys.exit()
-        # return None
-        if(shapes==None):
-            continue
+        # print(shapes)
         if((len(shapes)!=0) and newBall):
             #if ball found,add 1 to number of ball
-            print(shapes)
+            # print(shapes)
             curB+=1
             newBall=False
             count=0
-            # color=shapes['Circle'][0]
-            color = 'green'
-            
-            # print("\nFound "+color+" ball in vision coveyer")
+
+            color=shapes['Circle'][0]
+            print("\nFound "+color+" ball in vision coveyer")
             #get info of ball from ball_details [current table number,path in table 4,table x,path in table x]
             #differentiate balls based on color
             ball_info=getBallInfo(color)
@@ -719,10 +734,11 @@ def main(rec_client_id):
             count+=1
             if(count>threshCount):
                 newBall=True
+    time.sleep(3)
     #for process in processX:
     #    process.join()
     #end simulation
-    stopSimulation(client_id)
+    # stopSimulation(client_id)
     ##################################################
 
 
