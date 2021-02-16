@@ -352,7 +352,7 @@ def getBallInfo(ball_color):
         out_coord=(9.6,4)
     if(table==3):
         end_coord = (4,0)
-        out_coord=(3.4,0)
+        out_coord=(4,-0.6)
                 
     #from table 4 to exit and storing in ball_info at index1
     #print(maze_all[4],start_coord, end_coord)
@@ -371,7 +371,7 @@ def getBallInfo(ball_color):
             out_coord=(4,9.6)
         if(box==3):
             end_coord = (9,5)
-            out_coord=(9,5.6)
+            out_coord=(9.6,5)
     if(table==2):
         start_coord = (0,4)
         if(box==1):
@@ -540,8 +540,8 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_ha
                     #print('\n============================================')
                     print("Started traversing table :"+str(ball_info[0]))
                     try:
-                        #pass
-                        task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,ball_info[0])
+                        time.sleep(5)
+                        #task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,ball_info[0])
                     except Exception:
                         print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
                         #print('Stop the CoppeliaSim simulation manually.\n')
