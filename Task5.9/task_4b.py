@@ -478,11 +478,12 @@ def send_data_to_draw_path(rec_client_id, path,table_number):
 	print('\n============================================')
 	print('\nPath sent to drawPath function of Lua script is \n')
 	print(coppelia_sim_coord_path)
-
+	
+	_,_ = sim.simxGetPingTime(client_id)
 	inputBuffer = bytearray()
-
 	return_code,retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id,'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'drawPath', [],coppelia_sim_coord_path,[str(table_number)],inputBuffer,sim.simx_opmode_blocking)
 	#print(retInts,retFloats, retStrings, retBuffer)
+	_,_ = sim.simxGetPingTime(client_id)
 	return retInts[0]
 	##################################################
 
@@ -588,6 +589,15 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 	for that we have to use the previous pixel coordinates(i-1) and just future coordinates(i+1) and 
 	if both the pixel coordinates do not match completely this implies that there is a turn at i.
 	'''
+	_,_ = sim.simxGetPingTime(client_id)
+	return_code_signal,start=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+	if(return_code_signal== 0):
+		try:
+			now=float(now)
+		except Exception:
+			start=0
+
+
 	if(len(prev_pixel_path)>=1):
 		pixel_path = [[prev_pixel_path[0][0]-1,prev_pixel_path[0][1]-1]]
 	for i in range(len(prev_pixel_path)):
@@ -603,7 +613,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 		# task_3.setAngles(client_id,revolute_handle,[-30,-30])
 		# time.sleep(2) 
 		# task_3.setAngles(client_id,revolute_handle,[30,30])
-		task_3.setAngles(client_id,revolute_handle,[0,0])
+		# task_3.setAngles(client_id,revolute_handle,[0,0])
 		time.sleep(1.5) 
 		z=1	
 		setpoint=[0,0]
@@ -656,7 +666,15 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 					lastInput=task_3.coordinateTransform([center_x,center_y])
 					z=0
 				return_code_signal,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-				now=float(now)
+				if(return_code_signal== 0):
+					try:
+						now=float(now)
+					except Exception:
+						continue
+					#print("Now=",now)
+				else:
+					continue
+				#now=float(now)
 				if((center_x-dst[0])**2+(center_y-dst[1])**2 < thresh):
 					if(pixel_path[len(pixel_path)-1]==setpoint):
 						#no time for last
@@ -691,7 +709,17 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 		#print()
 		#sys.exit()
 	setTiltInTable(client_id,revolute_handle,setpoint)
+	
 	print("Finished Traversing ",table_number)
+	_,_ = sim.simxGetPingTime(client_id)
+	return_code_signal,end=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+	if(return_code_signal== 0):
+		try:
+			end=float(end)
+			print("Total time taken to traverse Table "+str(table_number)+" is "+str(end-start))
+		except Exception:
+			pass
+	print("=====================================================================================")
 	##################################################
 def setTiltInTable(client_id,revolute_handle,out_coord):
 	

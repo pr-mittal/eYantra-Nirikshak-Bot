@@ -80,7 +80,7 @@ kp=np.array([0.03,0.03],dtype='float64')
 ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 kd=np.array([0.145,0.145],dtype='float64')#kd=kd/SampleTime
 lastTime=0
-SampleTime = 0.01 #0.01 sec
+SampleTime = 0.1 #0.01 sec
 ##############################################################
 
 
@@ -96,7 +96,7 @@ def setAngles(client_id,revolute_handle,Output):
 	# _=sim.simxPauseCommunication(client_id,True)
 	# Output[0]=(-1)*Output[0]
 	# Output[1]=(-1)*Output[1]
-	
+	_,_ = sim.simxGetPingTime(client_id)
 	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[7],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
@@ -115,7 +115,7 @@ def setAngles(client_id,revolute_handle,Output):
 	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[5],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[6],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
-
+	_,_ = sim.simxGetPingTime(client_id)
 	# print( -Output[0],"-Output[0]" )
 	# print( Output[0],"Output[0]" )
 	# print( Output[1],"Output[1]" )
@@ -216,6 +216,7 @@ def init_setup(rec_client_id,table_number):
 	#The function is blocking. While in synchronous operation mode, the client application is in charge of triggering the next simulation step.
 	#_=sim.simxSynchronous(client_id,1)
 	#saving andles to global variables
+	_,_ = sim.simxGetPingTime(client_id)
 	table_number=str(table_number)
 	_,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_1",sim.simx_opmode_blocking)
 	_,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_2",sim.simx_opmode_blocking)
@@ -229,26 +230,26 @@ def init_setup(rec_client_id,table_number):
 
 	# _=sim.simxPauseCommunication(client_id,True)
 	
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],0,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[7],0,sim.simx_opmode_oneshot)
+	#_=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],0,sim.simx_opmode_oneshot)
+	#_=sim.simxSetJointTargetPosition(client_id,revolute_handle[7],0,sim.simx_opmode_oneshot)
 	
 	
 	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],0,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],0,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[4],0,sim.simx_opmode_oneshot)
+	#_=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],0,sim.simx_opmode_oneshot)
+	#_=sim.simxSetJointTargetPosition(client_id,revolute_handle[4],0,sim.simx_opmode_oneshot)
 	
 	
 	
 	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],0,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],0,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],0,sim.simx_opmode_oneshot)
+	#_=sim.simxSetJointTargetPosition(client_id,revolute_handle[2],0,sim.simx_opmode_oneshot)
+	#_=sim.simxSetJointTargetPosition(client_id,revolute_handle[1],0,sim.simx_opmode_oneshot)
 
 
 	
 	
 	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],0,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[5],0,sim.simx_opmode_oneshot)
-	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[6],0,sim.simx_opmode_oneshot)
+	#_=sim.simxSetJointTargetPosition(client_id,revolute_handle[5],0,sim.simx_opmode_oneshot)
+	#_=sim.simxSetJointTargetPosition(client_id,revolute_handle[6],0,sim.simx_opmode_oneshot)
 	
 	# _=sim.simxPauseCommunication(client_id,False)
 	
@@ -321,11 +322,14 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 	#print(now)
 	return_code_signal,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 	
-	if(return_code_signal == 0):
-		now=float(now)
+	if(return_code_signal== 0):
+		try:
+			now=float(now)
+		except Exception:
+			return ITerm,lastInput,lastTime,Input,lastOutput,summation,Output
 		#print("Now=",now)
 	else:
-		return
+		return ITerm,lastInput,lastTime,Input,lastOutput,summation,Output
 	timeChange=now-lastTime 
 	#print("TimeChange=",timeChange," SampleTime=",SampleTime)
 	if(timeChange>=SampleTime):

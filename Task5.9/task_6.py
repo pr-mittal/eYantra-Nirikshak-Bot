@@ -711,7 +711,7 @@ def main(rec_client_id):
         prev_time=float(prev_time)
     else:
         prev_time=0.0
-    threshCount=20#ball missing from vision sensor for this time, means we can start waiting for next ball
+    threshCount=45#ball missing from vision sensor for this time, means we can start waiting for next ball
     
     print("Waiting for ball in vision sensor conveyer",end="")
     #while true
@@ -734,6 +734,7 @@ def main(rec_client_id):
 
         count_time=float(now)-prev_time
         if((count_time<threshCount) and (curB!=0)):
+            time.sleep(5)
             continue
         
 
@@ -773,6 +774,13 @@ def main(rec_client_id):
         if(len(shapes)!=0):
             #if ball found,add 1 to number of ball
             # print(shapes)
+            try:
+                color=shapes['Circle'][0]
+                if(color=="unknown"):
+                    continue
+            except Exception:
+                continue
+
             curB+=1
             count_time=0
             return_code,prev_time=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
@@ -780,7 +788,7 @@ def main(rec_client_id):
                 prev_time=float(prev_time)
                 #print("Now=",now)
 
-            color=shapes['Circle'][0]
+            
             print("\nFound "+color+" ball in vision coveyer")
             #get info of ball from ball_details [current table number,path in table 4,table x,path in table x]
             #differentiate balls based on color
