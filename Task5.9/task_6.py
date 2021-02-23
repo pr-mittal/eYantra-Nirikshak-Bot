@@ -207,6 +207,7 @@ totM=[1,2,3,4]#check , list of all maze numbers
 client_id=-1
 ball_details={}
 processX=[]
+table_handle=[-1,-1,-1,-1,-1]
 ############################################################################
 
 
@@ -431,10 +432,10 @@ def setup_maze_for_ball(client_id,table_number,path):
             path_handle=task_4b.send_data_to_draw_path(client_id, path,table_number)
         except Exception:
             print('\n[ERROR] Your send_data_to_draw_path() function throwed an Exception. Kindly debug your code!')
-            #print('Stop the CoppeliaSim simulation manually.\n')
-            #traceback.print_exc(file=sys.stdout)
-            #print()
-            #sys.exit()
+            print('Stop the CoppeliaSim simulation manually.\n')
+            traceback.print_exc(file=sys.stdout)
+            print()
+            sys.exit()
     except Exception:
         print('\n[ERROR] Your init_setup() function throwed an Exception. Kindly debug your code!')
         #print('Stop the CoppeliaSim simulation manually if started.\n')
@@ -449,7 +450,7 @@ def setup_maze_for_ball(client_id,table_number,path):
 
 
 def setup_scene():
-    global client_id,vs_handle,totM
+    global client_id,vs_handle,totM,table_handle
     for table_number in totM:
         
         _,vs_handle[table_number]=sim.simxGetObjectHandle(client_id, 'vision_sensor_'+str(table_number), sim.simx_opmode_blocking)
@@ -462,10 +463,12 @@ def setup_scene():
     for table_number in totM:
         #set all model non renderable
         return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
+        table_handle[table_number]=object_handle
         if(table_number!=4):
             return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
         else:
             return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
+
 ####################################################################################################
 def stopStreaming(vision_sensor_handle):
     #vision_sensor_handle=vs_handle[vs_number]
@@ -517,14 +520,12 @@ def delete_path(rec_client_id,table_number,handle):
     client_id = rec_client_id
     inputBuffer = bytearray()
     return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'deletePath', [handle],[], [], inputBuffer, sim.simx_opmode_blocking)
-    if(return_code!=sim.simx_return_ok):
-        print('\n[ERROR] Your delete_path() function throwed an Exception. Kindly debug your code!')
+    # if(return_code!=sim.simx_return_ok):
+        # print('\n[ERROR] Your delete_path() function throwed an Exception. Kindly debug your code!')
         #print('Stop the CoppeliaSim simulation manually.\n')
         #traceback.print_exc(file=sys.stdout)
         #print()
         #sys.exit()
-        return 0
-    return retInts[0]
 ##################################################
 
 
@@ -538,133 +539,21 @@ def read_ball_details(file_name):
     ball_details=json.load(f)
     print("Ball Details:",ball_details)
 ##############################################################################################
-def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle):
-    try:
-        import sim
-
-    except Exception:
-        print('\n[ERROR] It seems the sim.py OR simConst.py files are not found!')
-        print('\n[WARNING] Make sure to have following files in the directory:')
-        print('sim.py, simConst.py and appropriate library - remoteApi.dll (if on Windows), remoteApi.so (if on Linux) or remoteApi.dylib (if on Mac).\n')
-
-
-    #Import 'task_1b.py' file as module
-    try:
-        import task_1b
-
-    except ImportError:
-        print('\n[ERROR] task_1b.py file is not present in the current directory.')
-        print('Your current directory is: ', os.getcwd())
-        print('Make sure task_1b.py is present in this current directory.\n')
-
-
-    except Exception as e:
-        print('Your task_1b.py throwed an Exception. Kindly debug your code!\n')
-        traceback.print_exc(file=sys.stdout)
-
-
-
-    # Import 'task_1a_part1.py' file as module
-    try:
-        import task_1a_part1
-
-    except ImportError:
-        print('\n[ERROR] task_1a_part1.py file is not present in the current directory.')
-        print('Your current directory is: ', os.getcwd())
-        print('Make sure task_1a_part1.py is present in this current directory.\n')
-
-
-    except Exception as e:
-        print('Your task_1a_part1.py throwed an Exception. Kindly debug your code!\n')
-        traceback.print_exc(file=sys.stdout)
-
-
-
-    # Import 'task_2a.py' file as module
-    try:
-        import task_2a
-
-    except ImportError:
-        print('\n[ERROR] task_2a.py file is not present in the current directory.')
-        print('Your current directory is: ', os.getcwd())
-        print('Make sure task_2a.py is present in this current directory.\n')
-
-
-    except Exception as e:
-        print('Your task_2a.py throwed an Exception. Kindly debug your code!\n')
-        traceback.print_exc(file=sys.stdout)
-
-
-    # Import 'task_2b.py' file as module
-    try:
-        import task_2b
-
-    except ImportError:
-        print('\n[ERROR] task_2b.py file is not present in the current directory.')
-        print('Your current directory is: ', os.getcwd())
-        print('Make sure task_2b.py is present in this current directory.\n')
-
-
-    except Exception as e:
-        print('Your task_2b.py throwed an Exception. Kindly debug your code!\n')
-        traceback.print_exc(file=sys.stdout)
-
-
-    # Import 'task_3.py' file as module
-    try:
-        import task_3
-
-    except ImportError:
-        print('\n[ERROR] task_3.py file is not present in the current directory.')
-        print('Your current directory is: ', os.getcwd())
-        print('Make sure task_3.py is present in this current directory.\n')
-
-
-    except Exception as e:
-        print('Your task_3.py throwed an Exception. Kindly debug your code!\n')
-        traceback.print_exc(file=sys.stdout)
-
-
-
-    # Import 'task_4a.py' file as module
-    try:
-        import task_4a
-
-    except ImportError:
-        print('\n[ERROR] task_4a.py file is not present in the current directory.')
-        print('Your current directory is: ', os.getcwd())
-        print('Make sure task_4a.py is present in this current directory.\n')
-
-
-    except Exception as e:
-        print('Your task_4a.py throwed an Exception. Kindly debug your code!\n')
-        traceback.print_exc(file=sys.stdout)
-        
-    # Import 'task_4b.py' file as module
-    try:
-        import task_4b
-
-    except ImportError:
-        print('\n[ERROR] task_4b.py file is not present in the current directory.')
-        print('Your current directory is: ', os.getcwd())
-        print('Make sure task_4b.py is present in this current directory.\n')
-
-
-    except Exception as e:
-        print('Your task_4b.py throwed an Exception. Kindly debug your code!\n')
-        traceback.print_exc(file=sys.stdout)
-
+def processMaze(client_id,ball_info):
+    global processX,table_handle
     #print(vision_sensor_handle,client_id)
+    #start streaming of table 4 vision sensor
+    print("setup maze "+str(ball_info[0])+" for ball to come")
+    if(ball_info[0]!=4):
+        return_code = sim.simxSetModelProperty(client_id,table_handle[ball_info[0]],0,sim.simx_opmode_blocking)
+    revolute_handle,vision_sensor_handle,path_handle=setup_maze_for_ball(client_id,ball_info[0],ball_info[1])
+        
     try:
         #print(client_id,ball_info,revolute_handle,vision_sensor_handle)
-        #if this table is current table in dictionary of ball
-        #check if ball in vision sensor table 4
+        #if this table is current table in dictionary of ball#check if ball in vision sensor table 4
         print("Checking for ball in table "+str(ball_info[0]),end="")
         while(True):
-            #process 1
-            #check if ball in stream of vision sensor conveyer
-            # print(" . ",end="")
-            # print(client_id,vision_sensor_handle)
+            #process 1#check if ball in stream of vision sensor conveyer# print(client_id,vision_sensor_handle)
             shapes=task_4b.getBallData(client_id,vision_sensor_handle,True)
             # print(shapes)
             if(shapes==None):
@@ -673,81 +562,91 @@ def processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_ha
             #if ball detected , start pid
                 print("\nBall detected in table "+str(ball_info[0]),"  shapes:",shapes)
                 try:
+                    print("Calculating pixel path")
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
-                    #print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))
-                    #print('\n============================================')
-                    print("Started traversing table :"+str(ball_info[0]))
-                    try:
-                        time.sleep(15)
-                        # task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,ball_info[0])
-                    except Exception:
-                        print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
-                        #print('Stop the CoppeliaSim simulation manually.\n')
-                        #traceback.print_exc(file=sys.stdout)
-                        #print()
-                        #sys.exit()
+                    #print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))#print('\n============================================')
 
+                    #traverse Path and delete Path and discontinue vision sensor                    
+                    #with concurrent.futures.ProcessPoolExecutor() as executor:
+                    #    f1=executor.submit(processMaze(table_number),1)
+                    #print("Started a subprocess for this ball")
+                    
+                    # tableThread(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_handle[ball_info[0]],ball_info[0],path_handle)
+                    # print(client_id,revolute_handle,vision_sensor_handle)
+                    # process=Process(target=tableThread,args=(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_handle[ball_info[0]],ball_info[0],path_handle,))
+                    process=Thread(target=tableThread,args=(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_handle[ball_info[0]],ball_info[0],path_handle,))
+                    #processes are spawned by creating Process object and calling its start method
+                    process.start()
+                    
+                    #process.join()
+                    processX.append(process)
+
+                    break
                 except Exception:
                     print('\n[ERROR] Your convert_path_to_pixels() function throwed an Exception. Kindly debug your code!')
-                    print('Stop the CoppeliaSim simulation manually.\n')
+                    #print('Stop the CoppeliaSim simulation manually.\n')
                     #traceback.print_exc(file=sys.stdout)
                     #print()
                     #sys.exit()
-                    
-                #delete Path
-                print("Deleteing Path in table "+str(ball_info[0]))
-                delete_path(client_id,ball_info[0],path_handle)
-                #make table non respondable , non collidable etc.
-                
+    
                 #if this is not table 4 return, journey of ball is complete
-                if(ball_info[0]!=4):
-                    return
-                #start vision sensor for next ball from this table
-                #print(client_id,ball_info[2],ball_info[3])
-                revolute_handle,vision_sensor_handle,path_handle=setup_maze_for_ball(client_id,ball_info[2],ball_info[3])
-                #make the next table renderable
-                invert_model_properties(client_id,ball_info[2])
-
-                #process 3
-                #change currrent table in list ball_info
-                ball_info[0]=ball_info[2]
-                #changing current path
-                ball_info[1]=ball_info[3]
-
-                #start checking for ball in next table
-                #do same thing as in process 2
-                print("Starting setup for ball in table "+str(ball_info[0]))
-                processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle)
-                print("Sent ball to collection box in table "+str(ball_info[0]))
-                #stop streaming this vision sensor
-                stopStreaming(vision_sensor_handle)
-                #make this table non renderable
-                invert_model_properties(client_id,ball_info[0])
-                break
+        if(ball_info[0]!=4):
+            return
+        #process 2
+        #change currrent table in list ball_info
+        ball_info[0]=ball_info[2]
+        #changing current path
+        ball_info[1]=ball_info[3]
+        #start checking for ball in next table
+        #do same thing as in process 2
+        print("Starting setup for ball in table "+str(ball_info[0]))
+        processMaze(client_id,ball_info)
+                
     except Exception:
         print('\n[ERROR] Your processMaze function in task_5.py throwed an Exception. Kindly debug your code!')
-        print('Stop the CoppeliaSim simulation manually.\n')
-        traceback.print_exc(file=sys.stdout)
-        print()
-        sys.exit()
+        # print('Stop the CoppeliaSim simulation manually.\n')
+        # traceback.print_exc(file=sys.stdout)
+        # print()
+        # sys.exit()
 
-
+################################################################################################################################
+def tableThread(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_handle,table_number,path_handle):
+    print("Started traversing table :"+str(table_number))
+    try:
+        # time.sleep(5)
+        task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_number)
+    except Exception:
+        print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
+        #print('Stop the CoppeliaSim simulation manually.\n')
+        #traceback.print_exc(file=sys.stdout)
+        #print()
+        #sys.exit()
+        
+    #delete Path
+    print("Deleteing Path in table "+str(table_number))
+    delete_path(client_id,table_number,path_handle)
+    if(table_number!=4):
+        print("Sent ball to collection box in table "+str(table_number))
+        #stop streaming this vision sensor
+        stopStreaming(vision_sensor_handle)
+        return_code = sim.simxSetModelProperty(client_id,table_handle,1135,sim.simx_opmode_blocking)
+################################################################################################################################
 # In[10]:
-def invert_model_properties(client_id,table_number):
-    # NOTE: This function will be used to invert model properties such that the model which is not to be
-    # 		traversed in the current iteration can be partially disabled thereby saving the computational
-    #		resources.
-    return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
-    return_code, curr_model_prop = sim.simxGetModelProperty(client_id,object_handle,sim.simx_opmode_blocking)
-    #print(curr_model_prop)
-    if(curr_model_prop == 0):
-        # Overrides the required model props as NOT measureable, NOT dynamic, NOT collidable, NOT
-        # renderable, NOT detectable, NOT respondable and Invisible to other model's bounding boxes.
-        return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
-        print("Non renderable table ",table_number)
-    else:
-        return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
-        print("Renderable table ",table_number)
+# def invert_model_properties(client_id,table_number):
+#     # NOTE: This function will be used to invert model properties such that the model which is not to be
+#     # 		traversed in the current iteration can be partially disabled thereby saving the computational
+#     #		resources.
+#     return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
+#     return_code, curr_model_prop = sim.simxGetModelProperty(client_id,object_handle,sim.simx_opmode_blocking)
+#     #print(curr_model_prop)
+#     if(curr_model_prop == 0):
+#         # Overrides the required model props as NOT measureable, NOT dynamic, NOT collidable, NOT
+#         # renderable, NOT detectable, NOT respondable and Invisible to other model's bounding boxes.
+#         return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
+#         print("Non renderable table ",table_number)
+#     else:
+#         return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
+#         print("Renderable table ",table_number)
 def main(rec_client_id):
     """
     Purpose:
@@ -863,22 +762,13 @@ def main(rec_client_id):
                         continue
                 except Exception:
                     print('\n[ERROR] Your scan_image function in task_1a_part1.py throwed an Exception. Kindly debug your code!')
-                    #print('Stop the CoppeliaSim simulation manually.\n')
-                    #traceback.print_exc(file=sys.stdout)
-                    #print()
-                    #sys.exit()
+                    
             else:
                 print('\n[ERROR] transform_vision_sensor_image function in task_2a.py is not configured correctly, check the code.')
-                #print('Stop the CoppeliaSim simulation manually.')
-                #print()
-                #sys.exit()
 
         except Exception:
             print('\n[ERROR] Your transform_vision_sensor_image function in task_2a.py throwed an Exception. Kindly debug your code!')
-            #print('Stop the CoppeliaSim simulation manually.\n')
-            #traceback.print_exc(file=sys.stdout)
-            #print()
-            #sys.exit()
+            
         # print(shapes)
         if(len(shapes)!=0):
             #if ball found,add 1 to number of ball
@@ -897,30 +787,16 @@ def main(rec_client_id):
             ball_info=getBallInfo(color)
             if(ball_info==None):
                 continue
-            #start streaming of table 4 vision sensor
-            print("setup maze 4 for ball to come")
-            revolute_handle,vision_sensor_handle,path_handle=setup_maze_for_ball(client_id,4,ball_info[1])
-
-            #start task3 in multiprocessing
-            #with concurrent.futures.ProcessPoolExecutor() as executor:
-            #    f1=executor.submit(processMaze(table_number),1)
-            print("Started a subprocess for this ball")
-            #processMaze(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle)
-            # print(client_id,revolute_handle,vision_sensor_handle)
-            # process=Process(target=processMaze,args=(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle,))
-            process=Thread(target=processMaze,args=(client_id,ball_info,revolute_handle,vision_sensor_handle,path_handle,))
             
-            #processes are spawned by creating Process object and calling its start method
-            process.start()
-            #process.join()
-            #process.join()
-            processX.append(process)
-            #if this is last ball stop streaming vision conveyer
-            #print(curB,totB,curB==totB)
+            print("Executing process Maze for "+color+" ball ")
+            processMaze(client_id,ball_info)
+            
             if(curB==totB):
                 print("Max balls for this has passed , stopping vision sensor conveyer stream.")
                 stopStreaming(vs_handle[5])
                 break
+
+    
     for process in processX:
        process.join()
 

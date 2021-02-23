@@ -481,7 +481,8 @@ def send_data_to_draw_path(rec_client_id, path,table_number):
 
 	inputBuffer = bytearray()
 
-	return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 						'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'drawPath', [], 						coppelia_sim_coord_path, [str(table_number)], inputBuffer, sim.simx_opmode_blocking)
+	return_code,retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id,'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'drawPath', [],coppelia_sim_coord_path,[str(table_number)],inputBuffer,sim.simx_opmode_blocking)
+	#print(retInts,retFloats, retStrings, retBuffer)
 	return retInts[0]
 	##################################################
 
@@ -638,7 +639,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 			ITerm=np.array([0,0],dtype='float64')
 			# print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
 			temp=0
-			print (setpoint)
+			print ("Traversing to ",setpoint," in table ",table_number)
 			timechange = 0
 			while(True):				
 				
@@ -657,6 +658,9 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 				return_code_signal,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 				now=float(now)
 				if((center_x-dst[0])**2+(center_y-dst[1])**2 < thresh):
+					if(pixel_path[len(pixel_path)-1]==setpoint):
+						#no time for last
+						break
 					timechange=timechange+(now-temp)
 					# print (now)
 				else:
@@ -686,8 +690,20 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 		#traceback.print_exc(file=sys.stdout)
 		#print()
 		#sys.exit()
+	setTiltInTable(client_id,revolute_handle,setpoint)
+	print("Finished Traversing ",table_number)
 	##################################################
-
+def setTiltInTable(client_id,revolute_handle,out_coord):
+	
+	if((out_coord==(5,9.6)) or (out_coord==(4,9.6))):
+		Output=[45,-45]
+	if((out_coord==(9.6,4)) or (out_coord==(9.6,5))):
+		Output=[45,45]
+	if((out_coord==(4,-0.6))or (out_coord==(5,-0.6))):
+		Output=[-45,45]
+	if((out_coord==(-0.6,4)) or (out_coord==(-0.6,4))):
+		Output=[-45,-45]
+	task_3.setAngles(client_id,revolute_handle,Output)
 
 # In[ ]:
 
