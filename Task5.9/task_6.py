@@ -517,6 +517,7 @@ def stopSimulation(client_id):
 
 def delete_path(rec_client_id,table_number,handle):
     #global client_id
+    handle=-1
     client_id = rec_client_id
     inputBuffer = bytearray()
     return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'deletePath', [handle],[], [], inputBuffer, sim.simx_opmode_blocking)
@@ -539,8 +540,7 @@ def read_ball_details(file_name):
     ball_details=json.load(f)
     print("Ball Details:",ball_details)
 ##############################################################################################
-def processMaze(client_id,ball_info):
-    global processX,table_handle
+def processMaze(client_id,ball_info,table_handle):
     #print(vision_sensor_handle,client_id)
     #start streaming of table 4 vision sensor
     print("setup maze "+str(ball_info[0])+" for ball to come")
@@ -564,23 +564,26 @@ def processMaze(client_id,ball_info):
                 try:
                     print("Calculating pixel path")
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
-                    #print('\nPath calculated between %s and %s in pixels is = %s' % (start_coord, end_coord, pixel_path))#print('\n============================================')
-
-                    #traverse Path and delete Path and discontinue vision sensor                    
-                    #with concurrent.futures.ProcessPoolExecutor() as executor:
-                    #    f1=executor.submit(processMaze(table_number),1)
-                    #print("Started a subprocess for this ball")
+                    print("Started traversing table :"+str(ball_info[0]))
+                    try:
+                        time.sleep(5)
+                        # task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_number)
+                    except Exception:
+                        print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
+                        #print('Stop the CoppeliaSim simulation manually.\n')
+                        #traceback.print_exc(file=sys.stdout)
+                        #print()
+                        #sys.exit()
+                        
+                    #delete Path
+                    print("Deleteing Path in table "+str(ball_info[0]))
+                    delete_path(client_id,ball_info[0],path_handle)
+                    if(ball_info[0]!=4):
+                        print("Sent ball to collection box in table "+str(ball_info[0]))
+                        #stop streaming this vision sensor
+                        stopStreaming(vision_sensor_handle)
+                        return_code = sim.simxSetModelProperty(client_id,table_handle[ball_info[0]],1135,sim.simx_opmode_blocking)
                     
-                    # tableThread(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_handle[ball_info[0]],ball_info[0],path_handle)
-                    # print(client_id,revolute_handle,vision_sensor_handle)
-                    # process=Process(target=tableThread,args=(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_handle[ball_info[0]],ball_info[0],path_handle,))
-                    process=Thread(target=tableThread,args=(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_handle[ball_info[0]],ball_info[0],path_handle,))
-                    #processes are spawned by creating Process object and calling its start method
-                    process.start()
-                    
-                    #process.join()
-                    processX.append(process)
-
                     break
                 except Exception:
                     print('\n[ERROR] Your convert_path_to_pixels() function throwed an Exception. Kindly debug your code!')
@@ -600,7 +603,8 @@ def processMaze(client_id,ball_info):
         #start checking for ball in next table
         #do same thing as in process 2
         print("Starting setup for ball in table "+str(ball_info[0]))
-        processMaze(client_id,ball_info)
+        
+        processMaze(client_id,ball_info,table_handle)
                 
     except Exception:
         print('\n[ERROR] Your processMaze function in task_5.py throwed an Exception. Kindly debug your code!')
@@ -609,27 +613,6 @@ def processMaze(client_id,ball_info):
         # print()
         # sys.exit()
 
-################################################################################################################################
-def tableThread(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_handle,table_number,path_handle):
-    print("Started traversing table :"+str(table_number))
-    try:
-        # time.sleep(5)
-        task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_number)
-    except Exception:
-        print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
-        #print('Stop the CoppeliaSim simulation manually.\n')
-        #traceback.print_exc(file=sys.stdout)
-        #print()
-        #sys.exit()
-        
-    #delete Path
-    print("Deleteing Path in table "+str(table_number))
-    delete_path(client_id,table_number,path_handle)
-    if(table_number!=4):
-        print("Sent ball to collection box in table "+str(table_number))
-        #stop streaming this vision sensor
-        stopStreaming(vision_sensor_handle)
-        return_code = sim.simxSetModelProperty(client_id,table_handle,1135,sim.simx_opmode_blocking)
 ################################################################################################################################
 # In[10]:
 # def invert_model_properties(client_id,table_number):
@@ -797,7 +780,12 @@ def main(rec_client_id):
                 continue
             
             print("Executing process Maze for "+color+" ball ")
-            processMaze(client_id,ball_info)
+            # processMaze(client_id,ball_info,table_handle)
+            # process=Process(target=processMaze,args=(client_id,ball_info,table_handle,))
+            process=Thread(target=processMaze,args=(client_id,ball_info,table_handle,))
+            #processes are spawned by creating Process object and calling its start method
+            process.start()
+            processX.append(process)
             
             if(curB==totB):
                 print("Max balls for this has passed , stopping vision sensor conveyer stream.")

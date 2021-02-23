@@ -479,11 +479,13 @@ def send_data_to_draw_path(rec_client_id, path,table_number):
 	print('\nPath sent to drawPath function of Lua script is \n')
 	print(coppelia_sim_coord_path)
 	
-	_,_ = sim.simxGetPingTime(client_id)
+	# _,_ = sim.simxGetPingTime(client_id)
 	inputBuffer = bytearray()
 	return_code,retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id,'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'drawPath', [],coppelia_sim_coord_path,[str(table_number)],inputBuffer,sim.simx_opmode_blocking)
 	#print(retInts,retFloats, retStrings, retBuffer)
-	_,_ = sim.simxGetPingTime(client_id)
+	# _,_ = sim.simxGetPingTime(client_id)
+	if(len(retInts)==0):
+		return -1
 	return retInts[0]
 	##################################################
 
@@ -593,7 +595,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 	return_code_signal,start=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 	if(return_code_signal== 0):
 		try:
-			now=float(now)
+			now=float(start)
 		except Exception:
 			start=0
 

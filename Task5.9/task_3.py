@@ -93,10 +93,10 @@ SampleTime = 0.1 #0.01 sec
 def setAngles(client_id,revolute_handle,Output):
 	#setting output to joints/motors
 	#This can be useful if you need to send several values to CoppeliaSim that should be received and evaluated at the same time. 
-	# _=sim.simxPauseCommunication(client_id,True)
+	_=sim.simxPauseCommunication(client_id,True)
 	# Output[0]=(-1)*Output[0]
 	# Output[1]=(-1)*Output[1]
-	_,_ = sim.simxGetPingTime(client_id)
+	# _,_ = sim.simxGetPingTime(client_id)
 	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[0],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[7],-Output[0]*np.pi/180,sim.simx_opmode_oneshot)
@@ -115,13 +115,13 @@ def setAngles(client_id,revolute_handle,Output):
 	# _=sim.simxSetJointTargetPosition(client_id,revolute_handle[3],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[5],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
 	_=sim.simxSetJointTargetPosition(client_id,revolute_handle[6],-Output[1]*np.pi/180,sim.simx_opmode_oneshot)
-	_,_ = sim.simxGetPingTime(client_id)
+	# _,_ = sim.simxGetPingTime(client_id)
 	# print( -Output[0],"-Output[0]" )
 	# print( Output[0],"Output[0]" )
 	# print( Output[1],"Output[1]" )
 	# print( -Output[1],"-Output[1]" )
 	
-	# _=sim.simxPauseCommunication(client_id,False)
+	_=sim.simxPauseCommunication(client_id,False)
 	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[0],sim.simx_opmode_streaming)
 	# print(position*180/np.pi,"***0")
 	# returnCode,position=sim.simxGetJointPosition(client_id,revolute_handle[1],sim.simx_opmode_streaming)
@@ -216,7 +216,7 @@ def init_setup(rec_client_id,table_number):
 	#The function is blocking. While in synchronous operation mode, the client application is in charge of triggering the next simulation step.
 	#_=sim.simxSynchronous(client_id,1)
 	#saving andles to global variables
-	_,_ = sim.simxGetPingTime(client_id)
+	# _,_ = sim.simxGetPingTime(client_id)
 	table_number=str(table_number)
 	_,revolute_handle[0]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_1",sim.simx_opmode_blocking)
 	_,revolute_handle[1]=sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t"+table_number+"_2",sim.simx_opmode_blocking)
