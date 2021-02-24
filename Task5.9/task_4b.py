@@ -181,6 +181,7 @@ end_coord = (9,5)
 def getBallData(client_id,vision_sensor_handle,flag):
 	
 	vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vision_sensor_handle)
+	# print(client_id,vision_sensor_handle)
 	if ((return_code == sim.simx_return_ok) and (len(image_resolution) == 2) and (len(vision_sensor_image) > 0)):
 		# print('\nImage captured from Vision Sensor in CoppeliaSim successfully!')
 		pass
@@ -216,7 +217,7 @@ def getBallData(client_id,vision_sensor_handle,flag):
 					try:
 						shapes = task_1a_part1.scan_image(warped_img)
 						if (type(shapes) is dict and shapes!={}):
-							#print('\nShapes detected by Vision Sensor are: ')
+							# print('\nShapes detected by Vision Sensor are: ')
 							# print(shapes)
 							# Storing the detected x and y centroid in center_x and center_y variable repectively
 							# return shapes
@@ -616,7 +617,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 		# time.sleep(2) 
 		# task_3.setAngles(client_id,revolute_handle,[30,30])
 		# task_3.setAngles(client_id,revolute_handle,[0,0])
-		time.sleep(1.5) 
+		time.sleep(0.10) 
 		z=1	
 		setpoint=[0,0]
 		ITerm=np.array([0,0],dtype="float64")
@@ -688,13 +689,15 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 				temp=now
 				#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
 				# this help in stability of the ball while traversal. 
-				if(timechange>=0.5):
+				if(timechange>=0.7):
 					break
 				#print("Calling PID")
 				try:
+					# print("setpoint = ",setpoint,end=" ")
 					ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= task_3.control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output)
 					#print( "ITerm=", ITerm, "lastInput", lastInput, "lastTime", lastTime, "Input", Input, "lastOutput", lastOutput, "summation", summation, "Output", Output)
 					# Output = 
+					# print("revolute_handle = ",revolute_handle)
 					task_3.setAngles(client_id,revolute_handle,Output) 
 				except:
 					print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
@@ -725,14 +728,24 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 	##################################################
 def setTiltInTable(client_id,revolute_handle,out_coord):
 	
-	if((out_coord==(5,9.6)) or (out_coord==(4,9.6))):
-		Output=[45,-45]
-	if((out_coord==(9.6,4)) or (out_coord==(9.6,5))):
-		Output=[45,45]
-	if((out_coord==(4,-0.6))or (out_coord==(5,-0.6))):
-		Output=[-45,45]
-	if((out_coord==(-0.6,4)) or (out_coord==(-0.6,4))):
-		Output=[-45,-45]
+	# if((out_coord==(5,9.6)) or (out_coord==(4,9.6))):
+	# 	Output=[45,-45]
+	# if((out_coord==(9.6,4)) or (out_coord==(9.6,5))):
+	# 	Output=[45,45]
+	# if((out_coord==(4,-0.6))or (out_coord==(5,-0.6))):
+	# 	Output=[-45,45]
+	# if((out_coord[1]==576) or (out_coord==(-0.6,4))):
+	# 	Output=[-45,-45]
+	# task_3.setAngles(client_id,revolute_handle,Output)
+	Output=[0,0]
+	if(out_coord[0]<=70):
+		Output=[-45,45]#right
+	if(out_coord[0]>=1205):
+		Output=[45,45]#bottom
+	if(out_coord[1]>=1205):
+		Output=[45,-45]#left
+	if(out_coord[1]<=70):
+		Output=[-45,-45]#top
 	task_3.setAngles(client_id,revolute_handle,Output)
 
 # In[ ]:

@@ -358,18 +358,18 @@ def getBallInfo(ball_color):
     start_coord = (0,5)
     if(table==1):
         end_coord = (5,9)
-        out_coord=(5,9.6)
+        out_coord=(5,9.5)
     if(table==2):
         end_coord = (9,4)
-        out_coord=(9.6,4)
+        out_coord=(9.5,4)
     if(table==3):
         end_coord = (4,0)
-        out_coord=(4,-0.6)
+        out_coord=(4,-0.5)
                 
     #from table 4 to exit and storing in ball_info at index1
     #print(maze_all[4],start_coord, end_coord)
     ball_info[1] = task_4a.find_path(maze_all[4],start_coord, end_coord)
-    ball_info[1].append(out_coord)
+    # ball_info[1].append(out_coord)
     
     print("Path in table 4:"+str(ball_info[1]))
 
@@ -377,40 +377,40 @@ def getBallInfo(ball_color):
         start_coord = (5,0)
         if(box==1):
             end_coord = (0,4)
-            out_coord=(-0.6,4)
+            out_coord=(-0.5,4)
         if(box==2):
             end_coord = (4,9)
-            out_coord=(4,9.6)
+            out_coord=(4,9.5)
         if(box==3):
             end_coord = (9,5)
-            out_coord=(9.6,5)
+            out_coord=(9.5,5)
     if(table==2):
         start_coord = (0,4)
         if(box==1):
             end_coord = (4,9)
-            out_coord=(4,9.6)
+            out_coord=(4,9.5)
         if(box==2):
             end_coord = (9,5)
-            out_coord=(9.6,5)
+            out_coord=(9.5,5)
         if(box==3):
             end_coord = (5,0)
-            out_coord=(5,-0.6)
+            out_coord=(5,-0.5)
     if(table==3):
         start_coord = (4,9)
         if(box==1):
             end_coord = (9,5)
-            out_coord=(9.6,5)
+            out_coord=(9.5,5)
         if(box==2):
             end_coord = (5,0)
-            out_coord=(5,-0.6)
+            out_coord=(5,-0.5)
         if(box==3):
             end_coord = (0,4)
-            out_coord=(-0.6,4)
+            out_coord=(-0.5,4)
     ball_info[2]=table
     #from table 4 to exit and storing in ball_info at index1
     #print(maze_all[table],start_coord, end_coord)
     ball_info[3] = task_4a.find_path(maze_all[table],start_coord, end_coord)
-    ball_info[3].append(out_coord)
+    # ball_info[3].append(out_coord)
     print("Path in table "+str(table)+":"+str(ball_info[3]))
     
     #calling for grading app
@@ -517,7 +517,7 @@ def stopSimulation(client_id):
 
 def delete_path(rec_client_id,table_number,handle):
     #global client_id
-    handle=-1
+    # handle=-1
     client_id = rec_client_id
     inputBuffer = bytearray()
     return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, 'top_plate_respondable_t'+str(table_number)+'_1', sim.sim_scripttype_customizationscript, 'deletePath', [handle],[], [], inputBuffer, sim.simx_opmode_blocking)
@@ -547,13 +547,27 @@ def processMaze(client_id,ball_info,table_handle):
     if(ball_info[0]!=4):
         return_code = sim.simxSetModelProperty(client_id,table_handle[ball_info[0]],0,sim.simx_opmode_blocking)
     revolute_handle,vision_sensor_handle,path_handle=setup_maze_for_ball(client_id,ball_info[0],ball_info[1])
-        
+    prev_now = 0
     try:
         #print(client_id,ball_info,revolute_handle,vision_sensor_handle)
         #if this table is current table in dictionary of ball#check if ball in vision sensor table 4
         print("Checking for ball in table "+str(ball_info[0]),end="")
         while(True):
             #process 1#check if ball in stream of vision sensor conveyer# print(client_id,vision_sensor_handle)
+            # return_code,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+            # if(return_code== 0):
+            #     try:
+            #         now=float(now)
+                    
+            #         if(now-prev_now < 1):
+            #             continue
+            #         prev_now=now
+            #         print(now)
+            #     except Exception:
+            #         continue
+            #     #print("Now=",now)
+            # else:
+            #     continue
             shapes=task_4b.getBallData(client_id,vision_sensor_handle,True)
             # print(shapes)
             if(shapes==None):
@@ -566,14 +580,14 @@ def processMaze(client_id,ball_info,table_handle):
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
                     print("Started traversing table :"+str(ball_info[0]))
                     try:
-                        time.sleep(5)
-                        # task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,table_number)
+                        # time.sleep(5)
+                        task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,ball_info[0])
                     except Exception:
                         print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
-                        #print('Stop the CoppeliaSim simulation manually.\n')
-                        #traceback.print_exc(file=sys.stdout)
-                        #print()
-                        #sys.exit()
+                        print('Stop the CoppeliaSim simulation manually.\n')
+                        traceback.print_exc(file=sys.stdout)
+                        print()
+                        sys.exit()
                         
                     #delete Path
                     print("Deleteing Path in table "+str(ball_info[0]))
@@ -581,7 +595,7 @@ def processMaze(client_id,ball_info,table_handle):
                     if(ball_info[0]!=4):
                         print("Sent ball to collection box in table "+str(ball_info[0]))
                         #stop streaming this vision sensor
-                        stopStreaming(vision_sensor_handle)
+                        # stopStreaming(vision_sensor_handle)
                         return_code = sim.simxSetModelProperty(client_id,table_handle[ball_info[0]],1135,sim.simx_opmode_blocking)
                     
                     break
@@ -605,7 +619,7 @@ def processMaze(client_id,ball_info,table_handle):
         print("Starting setup for ball in table "+str(ball_info[0]))
         
         processMaze(client_id,ball_info,table_handle)
-                
+        sim.simxFinish(client_id)        
     except Exception:
         print('\n[ERROR] Your processMaze function in task_5.py throwed an Exception. Kindly debug your code!')
         # print('Stop the CoppeliaSim simulation manually.\n')
@@ -695,7 +709,8 @@ def main(rec_client_id):
     else:
         prev_time=0.0
     threshCount=45#ball missing from vision sensor for this time, means we can start waiting for next ball
-    
+    prev_now=0
+    # task_3.setAngles(0 , [436, 443, 457, 450, 471, 464, 485, 478], np.array([45,45],dtype='float64'))
     print("Waiting for ball in vision sensor conveyer",end="")
     #while true
     while(True):
@@ -709,12 +724,17 @@ def main(rec_client_id):
         if(return_code== 0):
             try:
                 now=float(now)
+                
+                # if(now-prev_now < 1):
+                #     continue
+                # prev_now=now
+                # # print(now)
             except Exception:
                 continue
             #print("Now=",now)
         else:
             continue
-
+        
         count_time=float(now)-prev_time
         if((count_time<threshCount) and (curB!=0)):
             time.sleep(5)
@@ -782,7 +802,9 @@ def main(rec_client_id):
             print("Executing process Maze for "+color+" ball ")
             # processMaze(client_id,ball_info,table_handle)
             # process=Process(target=processMaze,args=(client_id,ball_info,table_handle,))
-            process=Thread(target=processMaze,args=(client_id,ball_info,table_handle,))
+            rem = task_2a.init_remote_api_server(2000-curB)
+
+            process=Thread(target=processMaze,args=(rem,ball_info,table_handle,))
             #processes are spawned by creating Process object and calling its start method
             process.start()
             processX.append(process)
@@ -813,7 +835,7 @@ def main(rec_client_id):
 
 # NOTE: Write your solution ONLY in the space provided in the above functions. This function should not be edited.
 if __name__ == "__main__":
-
-    client_id = task_2a.init_remote_api_server()
+    sim.simxFinish(-1)
+    client_id = task_2a.init_remote_api_server(19997)
     main(client_id)
 

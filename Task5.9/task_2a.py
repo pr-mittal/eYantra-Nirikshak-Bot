@@ -127,7 +127,7 @@ except Exception:
 
 
 
-def init_remote_api_server():
+def init_remote_api_server(PORT):
     """
     Purpose:
     ---
@@ -153,9 +153,9 @@ def init_remote_api_server():
     NOTE: This function will be automatically called by test_task_2a executable before starting the simulation.
     """
     ##############	ADD YOUR CODE HERE	##############
-    sim.simxFinish(-1)
+    # sim.simxFinish(-1)
     IP = '127.0.0.1'
-    PORT = 19997
+    # PORT = 19997
     client_id = sim.simxStart(IP, PORT, True, True, 5000, 5)
 
     ##################################################
@@ -239,6 +239,8 @@ def get_vision_sensor_image(client_id,vision_sensor_handle):
     ##############	ADD YOUR CODE HERE	##############
 
     return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(client_id, vision_sensor_handle, 0, sim.simx_opmode_buffer)
+    # print("return code = ", return_code)
+    # print(client_id,vision_sensor_handle)
     # cv2.imshow("wraped",vision_sensor_image)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
