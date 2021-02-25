@@ -596,6 +596,7 @@ def processMaze(client_id,ball_info,table_handle):
                         print("Sent ball to collection box in table "+str(ball_info[0]))
                         #stop streaming this vision sensor
                         # stopStreaming(vision_sensor_handle)
+                        time.sleep(5)
                         return_code = sim.simxSetModelProperty(client_id,table_handle[ball_info[0]],1135,sim.simx_opmode_blocking)
                     
                     break

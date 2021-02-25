@@ -316,7 +316,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 	
 	#global variables
 	global outMin,outMax,SampleTime
-	kp=np.array([0.04,0.04],dtype='float64')
+	kp=np.array([0.032,0.032],dtype='float64')
 	ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 	kd=np.array([0.145,0.145],dtype='float64')#kd=kd/SampleTime
 	#IMPORTANT: most of the variables here are a list having two elements 
@@ -363,8 +363,8 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 		if(error[0]*error[0]+error[1]*error[1]<8000):
 			ITerm= ki*(summation)*timeChange
 			summation+=error
-			kd=np.array([0.12,0.12],dtype='float64')
-		if(error[0]*error[0]+error[1]*error[1]<3000):
+			kd=np.array([0.135,0.135],dtype='float64')
+		if(error[0]*error[0]+error[1]*error[1]<2600):
 			kd=np.array([0.28,0.28],dtype='float64')
 
 		dInput = (Input - lastInput)

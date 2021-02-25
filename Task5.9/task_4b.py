@@ -613,6 +613,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 	try:
 		#print( "client_id=", client_id, "pixel_path" , pixel_path, "vision_sensor_handle", vision_sensor_handle, "revolute_handle", revolute_handle )
 		thresh=1000
+		# setTiltInTable(client_id,revolute_handle,setpoint)
 		# task_3.setAngles(client_id,revolute_handle,[-30,-30])
 		# time.sleep(2) 
 		# task_3.setAngles(client_id,revolute_handle,[30,30])
@@ -728,22 +729,14 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 	##################################################
 def setTiltInTable(client_id,revolute_handle,out_coord):
 	
-	# if((out_coord==(5,9.6)) or (out_coord==(4,9.6))):
-	# 	Output=[45,-45]
-	# if((out_coord==(9.6,4)) or (out_coord==(9.6,5))):
-	# 	Output=[45,45]
-	# if((out_coord==(4,-0.6))or (out_coord==(5,-0.6))):
-	# 	Output=[-45,45]
-	# if((out_coord[1]==576) or (out_coord==(-0.6,4))):
-	# 	Output=[-45,-45]
-	# task_3.setAngles(client_id,revolute_handle,Output)
 	Output=[0,0]
+	print("out_coord = ",out_coord)
 	if(out_coord[0]<=70):
 		Output=[-45,45]#right
 	if(out_coord[0]>=1205):
-		Output=[45,45]#bottom
+		Output=[45,-45]#bottom
 	if(out_coord[1]>=1205):
-		Output=[45,-45]#left
+		Output=[45,45]#left
 	if(out_coord[1]<=70):
 		Output=[-45,-45]#top
 	task_3.setAngles(client_id,revolute_handle,Output)
