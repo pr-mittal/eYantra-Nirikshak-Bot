@@ -548,6 +548,10 @@ def processMaze(client_id,ball_info,table_handle):
         return_code = sim.simxSetModelProperty(client_id,table_handle[ball_info[0]],0,sim.simx_opmode_blocking)
     revolute_handle,vision_sensor_handle,path_handle=setup_maze_for_ball(client_id,ball_info[0],ball_info[1])
     prev_now = 0
+    task_3.setAngles(client_id,revolute_handle,Output=[40, 40])
+    time.sleep(5)
+    task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
+    time.sleep(1)
     try:
         #print(client_id,ball_info,revolute_handle,vision_sensor_handle)
         #if this table is current table in dictionary of ball#check if ball in vision sensor table 4
