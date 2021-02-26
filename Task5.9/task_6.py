@@ -414,7 +414,7 @@ def getBallInfo(ball_color):
     print("Path in table "+str(table)+":"+str(ball_info[3]))
     
     #calling for grading app
-    #send_color_and_collection_box_identified(ball_color, collection_box_name)
+    send_color_and_collection_box_identified(ball_color, collection_box_name)
     return ball_info
 ##############################################################
 
@@ -432,10 +432,10 @@ def setup_maze_for_ball(client_id,table_number,path):
             path_handle=task_4b.send_data_to_draw_path(client_id, path,table_number)
         except Exception:
             print('\n[ERROR] Your send_data_to_draw_path() function throwed an Exception. Kindly debug your code!')
-            print('Stop the CoppeliaSim simulation manually.\n')
-            traceback.print_exc(file=sys.stdout)
-            print()
-            sys.exit()
+            # print('Stop the CoppeliaSim simulation manually.\n')
+            # traceback.print_exc(file=sys.stdout)
+            # print()
+            # sys.exit()
     except Exception:
         print('\n[ERROR] Your init_setup() function throwed an Exception. Kindly debug your code!')
         #print('Stop the CoppeliaSim simulation manually if started.\n')
@@ -470,10 +470,10 @@ def setup_scene():
             return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
 
 ####################################################################################################
-def stopStreaming(vision_sensor_handle):
-    #vision_sensor_handle=vs_handle[vs_number]
-    _, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_discontinue)
-    _,_= sim.simxGetPingTime(client_id)
+# def stopStreaming(vision_sensor_handle):
+#     #vision_sensor_handle=vs_handle[vs_number]
+#     _, _, _ = sim.simxGetVisionSensorImage(client_id,vision_sensor_handle, 0, sim.simx_opmode_discontinue)
+#     _,_= sim.simxGetPingTime(client_id)
 #######################################################################################################
 
 
@@ -548,10 +548,7 @@ def processMaze(client_id,ball_info,table_handle):
         return_code = sim.simxSetModelProperty(client_id,table_handle[ball_info[0]],0,sim.simx_opmode_blocking)
     revolute_handle,vision_sensor_handle,path_handle=setup_maze_for_ball(client_id,ball_info[0],ball_info[1])
     prev_now = 0
-    task_3.setAngles(client_id,revolute_handle,Output=[40, 40])
-    time.sleep(5)
-    task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
-    time.sleep(1)
+    
     try:
         #print(client_id,ball_info,revolute_handle,vision_sensor_handle)
         #if this table is current table in dictionary of ball#check if ball in vision sensor table 4
@@ -573,25 +570,39 @@ def processMaze(client_id,ball_info,table_handle):
             # else:
             #     continue
             shapes=task_4b.getBallData(client_id,vision_sensor_handle,True)
+            #blocking ball in pipe
+            task_3.setAngles(client_id,revolute_handle,Output=[40, 40])
             # print(shapes)
             if(shapes==None):
                 continue
             if(len(shapes)!=0):
             #if ball detected , start pid
-                print("\nBall detected in table "+str(ball_info[0]),"  shapes:",shapes)
+                print("\nBall detected in table "+str(ball_info[0]),"  shapes:",shapes)                
                 try:
                     print("Calculating pixel path")
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
+                    #set tilt accorfding to direction in which it has to go
+                    vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
+                    
+                    if(vector[1]>0):#go straight , so bottom decrease
+                        task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
+                    elif(vector[1]<0):#go back ,so top decrease
+                        task_3.setAngles(client_id,revolute_handle,Output=[-5, -5])
+                    elif(vector[0]>0):#go right , so right decrease
+                        task_3.setAngles(client_id,revolute_handle,Output=[5, -5])
+                    elif(vector[0]<0):#go left ,so left decrease
+                        task_3.setAngles(client_id,revolute_handle,Output=[-5, 5])
+                        
                     print("Started traversing table :"+str(ball_info[0]))
                     try:
                         # time.sleep(5)
                         task_4b.traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,ball_info[0])
                     except Exception:
                         print('\n[ERROR] Your traverse_path() function throwed an Exception. Kindly debug your code!')
-                        print('Stop the CoppeliaSim simulation manually.\n')
-                        traceback.print_exc(file=sys.stdout)
-                        print()
-                        sys.exit()
+                        # print('Stop the CoppeliaSim simulation manually.\n')
+                        # traceback.print_exc(file=sys.stdout)
+                        # print()
+                        # sys.exit()
                         
                     #delete Path
                     print("Deleteing Path in table "+str(ball_info[0]))
@@ -657,7 +668,8 @@ def main(rec_client_id):
     Teams are free to design their code in this task.
     The test executable will only call this function of task_5.py.
     init_remote_api_server() and exit_remote_api_server() functions are already defined
-    in the executable and hence should not be called by the teams.
+    in the executabl
+    e and hence should not be called by the teams.
     The obtained client_id is passed to this function so that teams can use it in their code.
 
     However NOTE:
@@ -816,7 +828,7 @@ def main(rec_client_id):
             
             if(curB==totB):
                 print("Max balls for this has passed , stopping vision sensor conveyer stream.")
-                stopStreaming(vs_handle[5])
+                # stopStreaming(vs_handle[5])
                 break
 
     

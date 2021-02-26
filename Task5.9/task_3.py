@@ -274,7 +274,7 @@ def coordinateTransform(xy):
 	transformed=[np.cos(theta)*xy[0]+np.sin(theta)*xy[1],-np.sin(theta)*xy[0]+np.cos(theta)*xy[1]]
 	return np.array(transformed,dtype='float64')
 
-def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output):
+def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output,kp,ki,kd):
 	"""
 	Purpose:
 	---
@@ -316,9 +316,6 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 	
 	#global variables
 	global outMin,outMax,SampleTime
-	kp=np.array([0.030,0.030],dtype='float64')
-	ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-	kd=np.array([0.15,0.15],dtype='float64')#kd=kd/SampleTime
 	#IMPORTANT: most of the variables here are a list having two elements 
 	# representing 2 independent linear unit
 	#now = time.time()
@@ -341,7 +338,7 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 
 		# We ahve divide the 2D plane problem 2 independent linear problems 
 		# and then applied pid independently on them
-		print (center_x,"  ",center_y,"set= ",setpoint,end = " ** ")
+		# print (center_x,"  ",center_y,"set= ",setpoint,end = " ** ")
 		# print(center_x,"  ",center_y)
 		Input=coordinateTransform([center_x,center_y])
 		#calculation of error
@@ -363,9 +360,9 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 		if(error[0]*error[0]+error[1]*error[1]<8000):
 			ITerm= ki*(summation)*timeChange
 			summation+=error
-			kd=np.array([0.135,0.135],dtype='float64')
-		if(error[0]*error[0]+error[1]*error[1]<2600):
-			kd=np.array([0.28,0.28],dtype='float64')
+		# 	kd=np.array([0.135,0.135],dtype='float64')
+		# if(error[0]*error[0]+error[1]*error[1]<2600):
+		# 	kd=np.array([0.28,0.28],dtype='float64')
 
 		dInput = (Input - lastInput)
 		for i in range(2):
@@ -381,14 +378,14 @@ def control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,
 				Output[i] = outMax
 			elif(Output[i] < outMin):
 				Output[i] = outMin
-		print("Output=",Output)	  
+		# print("Output=",Output)	  
 		#Remember some variables for next time
 		lastInput = Input
 		lastTime = now
 		lastOutput=Output
 		
 		#  In case value of kd has changed
-		kd=np.array([0.145,0.145],dtype='float64')
+		# kd=np.array([0.145,0.145],dtype='float64')
 	return ITerm,lastInput,lastTime,Input,lastOutput,summation,Output
 	##################################################
 

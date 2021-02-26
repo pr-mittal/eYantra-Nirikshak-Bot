@@ -606,19 +606,19 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 	for i in range(len(prev_pixel_path)):
 		pixel_path.append(prev_pixel_path[i])		
 	# pixel_path.append([1292.8, 704.0])
+	pixel_path=shortenPath(pixel_path)
+	pixel_path=customizePixelPath(pixel_path)
 	print("Final Path in Table ",table_number,": ",pixel_path)
 
 	# loop from start to a point less than end,as dst=src+1
 
 	try:
 		#print( "client_id=", client_id, "pixel_path" , pixel_path, "vision_sensor_handle", vision_sensor_handle, "revolute_handle", revolute_handle )
-		thresh=1000
 		# setTiltInTable(client_id,revolute_handle,setpoint)
 		# task_3.setAngles(client_id,revolute_handle,[-30,-30])
 		# time.sleep(2) 
 		# task_3.setAngles(client_id,revolute_handle,[30,30])
 		# task_3.setAngles(client_id,revolute_handle,[0,0])
-		time.sleep(0.10) 
 		z=1	
 		setpoint=[0,0]
 		ITerm=np.array([0,0],dtype="float64")
@@ -628,7 +628,6 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 		lastOutput=np.array([0,0],dtype="float64")
 		summation=np.array([0,0],dtype="float64")
 		Output=np.array([0,0],dtype="float64")
-		
 		# this is a kind of flag variable which will help in setting the last coordinates of ball for the first frame of run, 
 		# which is used in the calculation of derivative term in PID calculation.
 		prev_x=pixel_path[0][0]
@@ -637,23 +636,40 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 		#print("prev-y=",prev_y)
 		for i in range(len(pixel_path)-1):
 			#true loop until ball reached destination
-			if( (i+2)<(len(pixel_path))and(pixel_path[i+2][0]==prev_x or pixel_path[i+2][1]==prev_y)):
-				prev_x=pixel_path[i+1][0]
-				prev_y=pixel_path[i+1][1]
-				# print("prev-x=",prev_x)
-				# print("prev-y=",prev_y)
-				continue
+			# if( (i+2)<(len(pixel_path))and(pixel_path[i+2][0]==prev_x or pixel_path[i+2][1]==prev_y)):
+			# 	prev_x=pixel_path[i+1][0]
+			# 	prev_y=pixel_path[i+1][1]
+			# 	# print("prev-x=",prev_x)
+			# 	# print("prev-y=",prev_y)
+			# 	continue
 			src=pixel_path[i]
 			dst=pixel_path[i+1]
+
 			# print(dst)
 			prev_x=pixel_path[i+1][0]
 			prev_y=pixel_path[i+1][1]
-			setpoint=dst
+			setpoint=[dst[0],dst[1]]
 			summation=np.array([0,0],dtype='float64')
 			ITerm=np.array([0,0],dtype='float64')
 			# print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
 			temp=0
-			print ("Traversing to ",setpoint," in table ",table_number)
+			print ("Traversing to ",setpoint," in table ",table_number,end="")
+			if((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<128*128) or (dst[2]==0)):
+				#normal kp ,ki,kd
+				print(" in slow mode")
+				dst[2]=0
+				kp=np.array([0.030,0.030],dtype='float64')
+				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+				kd=np.array([0.15,0.15],dtype='float64')#kd=kd/SampleTime
+			else:
+				#fast kp,ki,kd
+				print(" in fast mode")
+				dst[2]=1
+				kp=np.array([0.030,0.030],dtype='float64')
+				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+				kd=np.array([0.15,0.15],dtype='float64')#kd=kd/SampleTime
+				
+			
 			timechange = 0
 			while(True):				
 				
@@ -666,6 +682,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 				#print("center_x = ",center_x,"center_y",center_y)
 				if((center_x==None) or (center_y==None)):
 					continue
+
 				if(z==1):
 					lastInput=task_3.coordinateTransform([center_x,center_y])
 					z=0
@@ -679,25 +696,31 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 				else:
 					continue
 				#now=float(now)
-				if((center_x-dst[0])**2+(center_y-dst[1])**2 < thresh):
-					if(pixel_path[len(pixel_path)-1]==setpoint):
-						#no time for last
-						break
-					timechange=timechange+(now-temp)
-					# print (now)
-				else:
-					timechange=0
-				temp=now
-				#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
-				# this help in stability of the ball while traversal. 
-				if(timechange>=0.7):
+				dist=(center_x-dst[0])**2+(center_y-dst[1])**2
+				if((dst[2]==1) and (dist<1000)):
+					#fast mode simply pass to next setpoint
 					break
+				elif(dst[2]==0):
+					#might have to slow down or stop here
+					if(dist<8000):
+						kd=np.array([0.135,0.135],dtype='float64')
+					elif(dist<2600):
+						kd=np.array([0.28,0.28],dtype='float64')
+					elif( dist< 1000):
+						timechange=timechange+(now-temp)
+						# print (now)
+					temp=now
+					timechange=0
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					# this help in stability of the ball while traversal. 
+					if(timechange>=0.7):
+						break
+
 				#print("Calling PID")
 				try:
 					# print("setpoint = ",setpoint,end=" ")
-					ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= task_3.control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output)
+					ITerm,lastInput,lastTime,Input,lastOutput,summation,Output= task_3.control_logic(setpoint,client_id,center_x,center_y,ITerm,lastInput,lastTime,Input,lastOutput,summation,Output,kp,ki,kd)
 					#print( "ITerm=", ITerm, "lastInput", lastInput, "lastTime", lastTime, "Input", Input, "lastOutput", lastOutput, "summation", summation, "Output", Output)
-					# Output = 
 					# print("revolute_handle = ",revolute_handle)
 					task_3.setAngles(client_id,revolute_handle,Output) 
 				except:
@@ -732,14 +755,86 @@ def setTiltInTable(client_id,revolute_handle,out_coord):
 	Output=[0,0]
 	print("out_coord = ",out_coord)
 	if(out_coord[0]<=70):
-		Output=[-45,45]#right
+		Output=[-45,45]#left decrease
 	if(out_coord[0]>=1205):
-		Output=[45,-45]#bottom
+		Output=[45,-45]#right decreacre
 	if(out_coord[1]>=1205):
-		Output=[45,45]#left
+		Output=[45,45]#bottom decrease
 	if(out_coord[1]<=70):
-		Output=[-45,-45]#top
+		Output=[-45,-45]#top decrease
 	task_3.setAngles(client_id,revolute_handle,Output)
+def customizePixelPath(pixel_path):
+	copy=[[pixel_path[0][0],pixel_path[0][1],0]]
+	ratio=[5,1]
+	for i in range(1,len(pixel_path)-1):
+		copy.append([pixel_path[i][0],pixel_path[i][1],0])
+		coord=[-1,-1,1]
+		#getting an extra setpoint before destination
+		coord[0]=(ratio[0]*pixel_path[i+1][0]+ratio[1]*pixel_path[i][0])/(ratio[0]+ratio[1])
+		coord[1]=(ratio[0]*pixel_path[i+1][1]+ratio[1]*pixel_path[i][1])/(ratio[0]+ratio[1])
+		copy.append(coord)
+	# copy.append([pixel_path[len(pixel_path)-2][0],pixel_path[len(pixel_path)-2][1],0])
+	copy.append([pixel_path[len(pixel_path)-1][0],pixel_path[len(pixel_path)-1][1],0])
+	#in starting check if it is closer to first point or secnd point , if second then simply pass
+	# if((((pixel_path[i+1][0]-pixel_path[i][0])**2+(pixel_path[i+1][1]-pixel_path[i][1])**2)<128*128) or (pixel_path[i+1][2]==0)):
+	# 	#normal kp ,ki,kd
+	# 	pass
+	# else:
+	# 	#fast kp,ki,kd
+	# 	pass
+	return copy
+def shortenPath(pixel_path):
+	path=pixel_path.copy()
+    #storing the previous index
+	prev_x=-1
+	#count the number of x that have had the same value as x, till present existing in the path
+	#if count=1 and x==prev_x,meaning now 3 consecutive times x has been same
+	#we delete the prev_node , so the cnt stays 1
+	cnt_x=0#number of x that have been common
+	prev_y=-1
+	cnt_y=0
+	#print(prev_x,prev_y)
+	n=len(path)
+	i=0
+	while(i<n):
+
+		x=path[i][0]
+		y=path[i][1]
+		#see if there are coordinates such that x are same in continuation
+		if(x==prev_x):
+			if(cnt_x==1):
+				#remove the coodrdinate before
+				#as this coordinate(x,y) and (prev_prev_x,prev_prev_y) are sufficient for this line
+				#print((prev_x,prev_y))
+				#print("deleted ",prev_x," ",prev_y)
+				path.remove([prev_x,prev_y])
+				i-=1#we dont want ncrement in i so to neutralise i+=1 in future
+			else:
+				cnt_x=1#if x is same and xnt_x==0, cnt_x=1 , for next time
+		else:
+			cnt_x=0#if x are not same
+			
+		#see if there are coordinates such that y are same in continuation
+		#for documentation see x above
+		if(y==prev_y):
+			if(cnt_y==1):
+				#more 
+				#remove the coodrdinate before
+				#print("deleted ",prev_x," ",prev_y)
+				path.remove([prev_x,prev_y])
+				i-=1
+			else:
+				cnt_y=1
+			
+		else:
+			cnt_y=0
+		#storing the previous coordinates
+		prev_x=x
+		prev_y=y
+		i+=1#moving to the next node
+		n=len(path)#as we keep on deleting the nodes , we need to update the n
+		#print(x," ",y," ",cnt_x," ",cnt_y)
+	return path
 
 # In[ ]:
 
