@@ -75,152 +75,152 @@ client_id = -1
 ##############################################################
 
 
-# def init_remote_api_server():
+def init_remote_api_server():
 
-# 	"""
-# 	Purpose:
-# 	---
-# 	This function should first close any open connections and then start
-# 	communication thread with server i.e. CoppeliaSim.
+	"""
+	Purpose:
+	---
+	This function should first close any open connections and then start
+	communication thread with server i.e. CoppeliaSim.
 
-# 	NOTE: In this Task, do not call the exit_remote_api_server function in case of failed connection to the server.
-# 	The test_task_2a executable script will handle that condition.
+	NOTE: In this Task, do not call the exit_remote_api_server function in case of failed connection to the server.
+	The test_task_2a executable script will handle that condition.
 	
-# 	Input Arguments:
-# 	---
-# 	None
+	Input Arguments:
+	---
+	None
 	
-# 	Returns:
-# 	---
-# 	`client_id` 	:  [ integer ]
-# 		the client_id generated from start connection remote API, it should be stored in a global variable
+	Returns:
+	---
+	`client_id` 	:  [ integer ]
+		the client_id generated from start connection remote API, it should be stored in a global variable
 	
-# 	Example call:
-# 	---
-# 	client_id = init_remote_api_server()
+	Example call:
+	---
+	client_id = init_remote_api_server()
 	
-# 	NOTE: This function will be automatically called by test_task_2a executable before starting the simulation.
-# 	"""
-# 	##############	ADD YOUR CODE HERE	##############
-# 	sim.simxFinish(-1) #stop and previously running processes
-# 	ip = '127.0.0.1'
-# 	port = 19997
-# 	client_id = sim.simxStart(ip, port, True, True, 5000, 5)
+	NOTE: This function will be automatically called by test_task_2a executable before starting the simulation.
+	"""
+	##############	ADD YOUR CODE HERE	##############
+	sim.simxFinish(-1) #stop and previously running processes
+	ip = '127.0.0.1'
+	port = 19997
+	client_id = sim.simxStart(ip, port, True, True, 5000, 5)
 
-#     #if client_id!=-1:
-#         #print("client_id is not -1 and first function is working")
+    #if client_id!=-1:
+        #print("client_id is not -1 and first function is working")
 
-# 	##################################################
+	##################################################
 
-# 	return client_id
+	return client_id
 
-# def get_vision_sensor_image(client_id,sensor_handle):
+def get_vision_sensor_image(client_id,sensor_handle):
 	
-# 	"""
-# 	Purpose:
-# 	---
-# 	This function should first get the handle of the Vision Sensor object from the scene.
-# 	After that it should get the Vision Sensor's image array from the CoppeliaSim scene.
+	"""
+	Purpose:
+	---
+	This function should first get the handle of the Vision Sensor object from the scene.
+	After that it should get the Vision Sensor's image array from the CoppeliaSim scene.
 
-# 	Input Arguments:
-# 	---
-# 	None
+	Input Arguments:
+	---
+	None
 	
-# 	Returns:
-# 	---
-# 	`vision_sensor_image` 	:  [ list ]
-# 		the image array returned from the get vision sensor image remote API
-# 	`image_resolution` 		:  [ list ]
-# 		the image resolution returned from the get vision sensor image remote API
-# 	`return_code` 			:  [ integer ]
-# 		the return code generated from the remote API
+	Returns:
+	---
+	`vision_sensor_image` 	:  [ list ]
+		the image array returned from the get vision sensor image remote API
+	`image_resolution` 		:  [ list ]
+		the image resolution returned from the get vision sensor image remote API
+	`return_code` 			:  [ integer ]
+		the return code generated from the remote API
 	
-# 	Example call:
-# 	---
-# 	vision_sensor_image, image_resolution, return_code = get_vision_sensor_image()
+	Example call:
+	---
+	vision_sensor_image, image_resolution, return_code = get_vision_sensor_image()
 
-# 	NOTE: This function will be automatically called by test_task_2a executable at regular intervals.
-# 	"""
+	NOTE: This function will be automatically called by test_task_2a executable at regular intervals.
+	"""
 
-# 	vision_sensor_image = []
-# 	image_resolution = []
-# 	return_code = 0
+	vision_sensor_image = []
+	image_resolution = []
+	return_code = 0
 
-# 	##############	ADD YOUR CODE HERE	##############
+	##############	ADD YOUR CODE HERE	##############
 	
-# 	#_, sensor_handle = sim.simxGetObjectHandle(   client_id, 'Vision_sensor', sim.simx_opmode_blocking)
-#     # print(sensor_handle, "sensor_handle")
+	#_, sensor_handle = sim.simxGetObjectHandle(   client_id, 'Vision_sensor', sim.simx_opmode_blocking)
+    # print(sensor_handle, "sensor_handle")
 
-# 	return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
-#         client_id, sensor_handle, 0, sim.simx_opmode_streaming)  # streamig may need change
+	return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
+        client_id, sensor_handle, 0, sim.simx_opmode_streaming)  # streamig may need change
 
-# 	rCode, pingTime = sim.simxGetPingTime(client_id)
+	rCode, pingTime = sim.simxGetPingTime(client_id)
 
-# 	return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
-#         client_id, sensor_handle, 0, sim.simx_opmode_buffer)	
-# 	# print(image_resolution)
-#     # print(return_code)
-#     # print((vision_sensor_image))
-# 	##################################################
+	return_code, image_resolution, vision_sensor_image = sim.simxGetVisionSensorImage(
+        client_id, sensor_handle, 0, sim.simx_opmode_buffer)	
+	# print(image_resolution)
+    # print(return_code)
+    # print((vision_sensor_image))
+	##################################################
 
-# 	return vision_sensor_image, image_resolution, return_code
+	return vision_sensor_image, image_resolution, return_code
 
 
-# def transform_vision_sensor_image(vision_sensor_image, image_resolution):
+def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 
-# 	"""
-# 	Purpose:
-# 	---
-# 	Transforms the image data returned by simxGetVisionSensorImage into a numpy
-# 	array that is possible to process using OpenCV library.
+	"""
+	Purpose:
+	---
+	Transforms the image data returned by simxGetVisionSensorImage into a numpy
+	array that is possible to process using OpenCV library.
 
-# 	This function should:
-# 	1. First convert the vision_sensor_image list to a NumPy array with data-type as uint8.
-# 	2. Since the image returned from Vision Sensor is in the form of a 1-D (one dimensional) array,
-# 	the new NumPy array should then be resized to a 3-D (three dimensional) NumPy array.
-# 	3. Change the color of the new image array from BGR to RGB.
-# 	4. Flip the resultant image array about the X-axis.
-# 	The resultant image NumPy array should be returned.
+	This function should:
+	1. First convert the vision_sensor_image list to a NumPy array with data-type as uint8.
+	2. Since the image returned from Vision Sensor is in the form of a 1-D (one dimensional) array,
+	the new NumPy array should then be resized to a 3-D (three dimensional) NumPy array.
+	3. Change the color of the new image array from BGR to RGB.
+	4. Flip the resultant image array about the X-axis.
+	The resultant image NumPy array should be returned.
 	
-# 	Input Arguments:
-# 	---
-# 	`vision_sensor_image` 	:  [ list ]
-# 		the image array returned from the get vision sensor image remote API
-# 	`image_resolution` 		:  [ list ]
-# 		the image resolution returned from the get vision sensor image remote API
+	Input Arguments:
+	---
+	`vision_sensor_image` 	:  [ list ]
+		the image array returned from the get vision sensor image remote API
+	`image_resolution` 		:  [ list ]
+		the image resolution returned from the get vision sensor image remote API
 	
-# 	Returns:
-# 	---
-# 	`transformed_image` 	:  [ numpy array ]
-# 		the resultant transformed image array after performing above 4 steps
-# 		that can be processed further using OpenCV library
+	Returns:
+	---
+	`transformed_image` 	:  [ numpy array ]
+		the resultant transformed image array after performing above 4 steps
+		that can be processed further using OpenCV library
 	
-# 	Example call:
-# 	---
-# 	transformed_image = transform_vision_sensor_image(vision_sensor_image, image_resolution)
+	Example call:
+	---
+	transformed_image = transform_vision_sensor_image(vision_sensor_image, image_resolution)
 	
-# 	NOTE: This function will be automatically called by test_task_2a executable at regular intervals.
-# 	"""
+	NOTE: This function will be automatically called by test_task_2a executable at regular intervals.
+	"""
 
-# 	transformed_image = None
+	transformed_image = None
 
-# 	##############	ADD YOUR CODE HERE	##############
-# 	vision_sensor_np_array = np.array(vision_sensor_image, dtype=np.uint8)
+	##############	ADD YOUR CODE HERE	##############
+	vision_sensor_np_array = np.array(vision_sensor_image, dtype=np.uint8)
 
-# 	vision_sensor_np_array.resize(
-#         [image_resolution[0], image_resolution[1], 3])
+	vision_sensor_np_array.resize(
+        [image_resolution[0], image_resolution[1], 3])
 
-# 	transformed_image = cv2.cvtColor(vision_sensor_np_array, cv2.COLOR_BGR2RGB)
+	transformed_image = cv2.cvtColor(vision_sensor_np_array, cv2.COLOR_BGR2RGB)
 
-# 	transformed_image = np.flip(transformed_image, 0)
+	transformed_image = np.flip(transformed_image, 0)
     
-#     # print(type(transformed_image))
-#     # print(transformed_image.shape)
+    # print(type(transformed_image))
+    # print(transformed_image.shape)
 	
 
-# 	##################################################
+	##################################################
 	
-# 	return transformed_image
+	return transformed_image
 
 
 def send_data(client_id,maze_array,table_number):
@@ -270,36 +270,36 @@ def send_data(client_id,maze_array,table_number):
     return return_code
 
 
-# def exit_remote_api_server(client_id):
+def exit_remote_api_server(client_id):
 	
-# 	"""
-# 	Purpose:
-# 	---
-# 	This function should wait for the last command sent to arrive at the Coppeliasim server
-# 	before closing the connection and then end the communication thread with server
-# 	i.e. CoppeliaSim using simxFinish Remote API.
+	"""
+	Purpose:
+	---
+	This function should wait for the last command sent to arrive at the Coppeliasim server
+	before closing the connection and then end the communication thread with server
+	i.e. CoppeliaSim using simxFinish Remote API.
 
-# 	Input Arguments:
-# 	---
-# 	None
+	Input Arguments:
+	---
+	None
 	
-# 	Returns:
-# 	---
-# 	None
+	Returns:
+	---
+	None
 	
-# 	Example call:
-# 	---
-# 	exit_remote_api_server()
+	Example call:
+	---
+	exit_remote_api_server()
 	
-# 	NOTE: This function will be automatically called by test_task_2a executable after ending the simulation.
-# 	"""
-# 	##############	ADD YOUR CODE HERE	##############
+	NOTE: This function will be automatically called by test_task_2a executable after ending the simulation.
+	"""
+	##############	ADD YOUR CODE HERE	##############
 	
-# 	#This function should wait for the last command sent to arrive at the CoppeliaSim server 
-#     #before closing the connection #may be this fun needs an edit
-# 	_,time = sim.simxGetPingTime(client_id)
-# 	sim.simxFinish(client_id)
-# 	##################################################
+	#This function should wait for the last command sent to arrive at the CoppeliaSim server 
+    #before closing the connection #may be this fun needs an edit
+	_,time = sim.simxGetPingTime(client_id)
+	sim.simxFinish(client_id)
+	##################################################
 	
 
 

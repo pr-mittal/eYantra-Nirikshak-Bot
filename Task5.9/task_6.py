@@ -842,7 +842,7 @@ def main(rec_client_id):
             print("Executing process Maze for "+color+" ball ")
             # processMaze(client_id,ball_info,table_handle)
             # process=Process(target=processMaze,args=(client_id,ball_info,table_handle,))
-            rem = task_2a.init_remote_api_server(2000-curB)
+            rem = task_2a.init_remote_api_server(1500-curB)
 
             process=Thread(target=processMaze,args=(rem,ball_info,table_handle,))
             #processes are spawned by creating Process object and calling its start method

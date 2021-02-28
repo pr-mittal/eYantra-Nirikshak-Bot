@@ -1699,7 +1699,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 				#normal kp ,ki,kd
 				print(" in slow mode")
 				dst[2]=0
-				kp=np.array([0.050,0.040],dtype='float64')
+				kp=np.array([0.0350,0.0350],dtype='float64')
 				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
 			else:
