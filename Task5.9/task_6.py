@@ -454,20 +454,20 @@ def setup_scene():
     for table_number in totM:
         
         _,vs_handle[table_number]=sim.simxGetObjectHandle(client_id, 'vision_sensor_'+str(table_number), sim.simx_opmode_blocking)
-        _, _, _ = sim.simxGetVisionSensorImage(client_id,vs_handle[table_number], 0, sim.simx_opmode_discontinue)
+        # _, _, _ = sim.simxGetVisionSensorImage(client_id,vs_handle[table_number], 0, sim.simx_opmode_discontinue)
 
     _, vs_handle[5] = sim.simxGetObjectHandle(client_id, 'vision_sensor_5', sim.simx_opmode_blocking)
     _, _, _ = sim.simxGetVisionSensorImage(client_id,vs_handle[5], 0, sim.simx_opmode_streaming)
     _,_= sim.simxGetPingTime(client_id)
     
-    for table_number in totM:
-        #set all model non renderable
-        return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
-        table_handle[table_number]=object_handle
-        if(table_number!=4):
-            return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
-        else:
-            return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
+    # for table_number in totM:
+    #     #set all model non renderable
+    #     return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
+    #     table_handle[table_number]=object_handle
+    #     if(table_number!=4):
+    #         return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
+    #     else:
+    #         return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
 
 ####################################################################################################
 # def stopStreaming(vision_sensor_handle):
@@ -571,7 +571,15 @@ def processMaze(client_id,ball_info,table_handle):
             #     continue
             shapes=task_4b.getBallData(client_id,vision_sensor_handle,True)
             #blocking ball in pipe
-            task_3.setAngles(client_id,revolute_handle,Output=[40, 40])
+            if(ball_info[0]==4 or ball_info[0]==2):
+                # print("ball_info[0] = ",ball_info[0],[40,40])
+                task_3.setAngles(client_id,revolute_handle,Output=[40, 40])
+            elif(ball_info[0]==3):
+                # print("ball_info[0] = ",ball_info[0],[-40,40])
+                task_3.setAngles(client_id,revolute_handle,Output=[-40, 40])
+            else:
+                # print("ball_info[0] = ",ball_info[0],[40,-40])
+                task_3.setAngles(client_id,revolute_handle,Output=[40, -40])
             # print(shapes)
             if(shapes==None):
                 continue
@@ -582,16 +590,22 @@ def processMaze(client_id,ball_info,table_handle):
                     print("Calculating pixel path")
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
                     #set tilt accorfding to direction in which it has to go
-                    vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
-                    
-                    if(vector[1]>0):#go straight , so bottom decrease
+                    # vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
+                    time.sleep(1.5)
+                    if(ball_info[0]==4 or ball_info[0]==2):
                         task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
-                    elif(vector[1]<0):#go back ,so top decrease
-                        task_3.setAngles(client_id,revolute_handle,Output=[-5, -5])
-                    elif(vector[0]>0):#go right , so right decrease
-                        task_3.setAngles(client_id,revolute_handle,Output=[5, -5])
-                    elif(vector[0]<0):#go left ,so left decrease
+                    elif(ball_info[0]==3):
                         task_3.setAngles(client_id,revolute_handle,Output=[-5, 5])
+                    else:
+                        task_3.setAngles(client_id,revolute_handle,Output=[5, -5])
+                    # if(vector[1]>0):#go straight , so bottom decrease
+                    #     task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
+                    # elif(vector[1]<0):#go back ,so top decrease
+                    #     task_3.setAngles(client_id,revolute_handle,Output=[-5, -5])
+                    # elif(vector[0]>0):#go right , so right decrease
+                    #     task_3.setAngles(client_id,revolute_handle,Output=[5, -5])
+                    # elif(vector[0]<0):#go left ,so left decrease
+                    #     task_3.setAngles(client_id,revolute_handle,Output=[-5, 5])
                         
                     print("Started traversing table :"+str(ball_info[0]))
                     try:
@@ -635,7 +649,7 @@ def processMaze(client_id,ball_info,table_handle):
         print("Starting setup for ball in table "+str(ball_info[0]))
         
         processMaze(client_id,ball_info,table_handle)
-        sim.simxFinish(client_id)        
+        # sim.simxFinish(client_id)        
     except Exception:
         print('\n[ERROR] Your processMaze function in task_5.py throwed an Exception. Kindly debug your code!')
         # print('Stop the CoppeliaSim simulation manually.\n')
@@ -690,9 +704,8 @@ def main(rec_client_id):
 
     """
     ##############	ADD YOUR CODE HERE	##############
-    global maze_all,vs_handle,client_id,ball,totB,totM,processX
+    global maze_all,vs_handle,client_id,ball,totB,totM,processX,table_handle
     client_id=rec_client_id
-
     if (client_id != -1):
         print('\nConnected successfully to Remote API Server in CoppeliaSim!')
     else:
@@ -725,7 +738,7 @@ def main(rec_client_id):
         prev_time=float(prev_time)
     else:
         prev_time=0.0
-    threshCount=45#ball missing from vision sensor for this time, means we can start waiting for next ball
+    threshCount=65#ball missing from vision sensor for this time, means we can start waiting for next ball
     prev_now=0
     # task_3.setAngles(0 , [436, 443, 457, 450, 471, 464, 485, 478], np.array([45,45],dtype='float64'))
     print("Waiting for ball in vision sensor conveyer",end="")
@@ -756,6 +769,8 @@ def main(rec_client_id):
         if((count_time<threshCount) and (curB!=0)):
             time.sleep(5)
             continue
+        # else:
+        #     time.sleep(0.05)
         
 
         vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vs_handle[5])
@@ -800,7 +815,15 @@ def main(rec_client_id):
                     continue
             except Exception:
                 continue
-
+            if(curB==0):
+                for table_number in totM:
+                    #set all model non renderable
+                    return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
+                    table_handle[table_number]=object_handle
+                    if(table_number!=4):
+                        return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
+                    else:
+                        return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
             curB+=1
             count_time=0
             return_code,prev_time=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
@@ -834,9 +857,16 @@ def main(rec_client_id):
     
     for process in processX:
        process.join()
+    
+    # for table_number in totM:
+    #     #set all model non renderable
+    #     return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
+    #     table_handle[table_number]=object_handle
+    #     return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
 
-    #end simulation
-    time.sleep(3)
+    # #end simulation
+    # time.sleep(3)
+    returnCode=sim.simxStopSimulation( client_id,sim.simx_opmode_oneshot)
     # stopSimulation(client_id)
     ##################################################
 

@@ -334,33 +334,33 @@ def stop_simulation(client_id):
     return return_code
 
 
-def exit_remote_api_server(client_id):
-    """
-    Purpose:
-    ---
-    This function should wait for the last command sent to arrive at the Coppeliasim server
-    before closing the connection and then end the communication thread with server
-    i.e. CoppeliaSim using simxFinish Remote API.
+# def exit_remote_api_server(client_id):
+#     """
+#     Purpose:
+#     ---
+#     This function should wait for the last command sent to arrive at the Coppeliasim server
+#     before closing the connection and then end the communication thread with server
+#     i.e. CoppeliaSim using simxFinish Remote API.
 
-    Input Arguments:
-    ---
-    None
+#     Input Arguments:
+#     ---
+#     None
 
-    Returns:
-    ---
-    None
+#     Returns:
+#     ---
+#     None
 
-    Example call:
-    ---
-    exit_remote_api_server()
+#     Example call:
+#     ---
+#     exit_remote_api_server()
 
-    NOTE: This function will be automatically called by test_task_2a executable after ending the simulation.
-    """
+#     NOTE: This function will be automatically called by test_task_2a executable after ending the simulation.
+#     """
 
-    ##############	ADD YOUR CODE HERE	##############
-    rCode,pingTime= sim.simxGetPingTime(client_id)
-    sim.simxFinish(client_id)
-    ##################################################
+#     ##############	ADD YOUR CODE HERE	##############
+#     rCode,pingTime= sim.simxGetPingTime(client_id)
+#     sim.simxFinish(client_id)
+#     ##################################################
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
