@@ -25,7 +25,7 @@
 # Functions:        
 #                   [ Comma separated list of functions in this file ]
 #                   send_color_and_collection_box_identified,calculateMazeArrays,send_mazeData,getBallInfo,setup_maze_for_ball
-#                   ,vs_conveyer,stopSimulation,delete_path,read_ball_details,processMaze,main
+#                   ,vs_conveyer,stopStreaming,stopSimulation,delete_path,read_ball_details,processMaze,main
 # Global variables: 
 # 					[ List of global variables defined in this file ]
 #                   maze_all,vs_handle,totB,totM,client_id,ball_details
@@ -44,7 +44,7 @@ import time
 import math
 import json
 ###############################################################
-# from multiprocessing import Process
+from multiprocessing import Process
 from threading import Thread
 #import matplotlib.pyplot as plt
 #import concurrent.futures
@@ -58,7 +58,7 @@ except Exception:
     print('\n[ERROR] It seems the sim.py OR simConst.py files are not found!')
     print('\n[WARNING] Make sure to have following files in the directory:')
     print('sim.py, simConst.py and appropriate library - remoteApi.dll (if on Windows), remoteApi.so (if on Linux) or remoteApi.dylib (if on Mac).\n')
-    sys.exit()
+
 
 #Import 'task_1b.py' file as module
 try:
@@ -68,12 +68,14 @@ except ImportError:
     print('\n[ERROR] task_1b.py file is not present in the current directory.')
     print('Your current directory is: ', os.getcwd())
     print('Make sure task_1b.py is present in this current directory.\n')
-    sys.exit()
+
 
 except Exception as e:
     print('Your task_1b.py throwed an Exception. Kindly debug your code!\n')
     traceback.print_exc(file=sys.stdout)
-    sys.exit()
+
+
+
 # Import 'task_1a_part1.py' file as module
 try:
     import task_1a_part1
@@ -82,12 +84,14 @@ except ImportError:
     print('\n[ERROR] task_1a_part1.py file is not present in the current directory.')
     print('Your current directory is: ', os.getcwd())
     print('Make sure task_1a_part1.py is present in this current directory.\n')
-    sys.exit()
+
 
 except Exception as e:
     print('Your task_1a_part1.py throwed an Exception. Kindly debug your code!\n')
     traceback.print_exc(file=sys.stdout)
-    sys.exit()
+
+
+
 # Import 'task_2a.py' file as module
 try:
     import task_2a
@@ -96,12 +100,12 @@ except ImportError:
     print('\n[ERROR] task_2a.py file is not present in the current directory.')
     print('Your current directory is: ', os.getcwd())
     print('Make sure task_2a.py is present in this current directory.\n')
-    sys.exit()
+
 
 except Exception as e:
     print('Your task_2a.py throwed an Exception. Kindly debug your code!\n')
     traceback.print_exc(file=sys.stdout)
-    sys.exit()
+
 
 # Import 'task_2b.py' file as module
 try:
@@ -111,12 +115,12 @@ except ImportError:
     print('\n[ERROR] task_2b.py file is not present in the current directory.')
     print('Your current directory is: ', os.getcwd())
     print('Make sure task_2b.py is present in this current directory.\n')
-    sys.exit()
+
 
 except Exception as e:
     print('Your task_2b.py throwed an Exception. Kindly debug your code!\n')
     traceback.print_exc(file=sys.stdout)
-    sys.exit()
+
 
 # Import 'task_3.py' file as module
 try:
@@ -126,12 +130,12 @@ except ImportError:
     print('\n[ERROR] task_3.py file is not present in the current directory.')
     print('Your current directory is: ', os.getcwd())
     print('Make sure task_3.py is present in this current directory.\n')
-    sys.exit()
+
 
 except Exception as e:
     print('Your task_3.py throwed an Exception. Kindly debug your code!\n')
     traceback.print_exc(file=sys.stdout)
-    sys.exit()
+
 
 
 # Import 'task_4a.py' file as module
@@ -142,12 +146,12 @@ except ImportError:
     print('\n[ERROR] task_4a.py file is not present in the current directory.')
     print('Your current directory is: ', os.getcwd())
     print('Make sure task_4a.py is present in this current directory.\n')
-    sys.exit()
+
 
 except Exception as e:
     print('Your task_4a.py throwed an Exception. Kindly debug your code!\n')
     traceback.print_exc(file=sys.stdout)
-    sys.exit()
+    
 # Import 'task_4b.py' file as module
 try:
     import task_4b
@@ -156,12 +160,12 @@ except ImportError:
     print('\n[ERROR] task_4b.py file is not present in the current directory.')
     print('Your current directory is: ', os.getcwd())
     print('Make sure task_4b.py is present in this current directory.\n')
-    sys.exit()
+
 
 except Exception as e:
     print('Your task_4b.py throwed an Exception. Kindly debug your code!\n')
     traceback.print_exc(file=sys.stdout)
-    sys.exit()
+
 ##############################################################
 
 
@@ -196,21 +200,13 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-# maze_all: stores all the maze arrays
 maze_all=[-1,-1,-1,-1,-1]#we use maze_all starting from 1
-#vs_handle:stores all the vision sendor handles
 vs_handle=[-1,-1,-1,-1,-1,-1]##we use vs_handle starting from 1
-#totB:total number of balls comign in this task
 totB=3#check , total number of balls expected
-#totM:the table numbers being used in this task
 totM=[1,2,3,4]#check , list of all maze numbers
-#clent id
 client_id=-1
-# ball_details:the ball details imported from ball_details.json
 ball_details={}
-#processX:araay of all the processes called , using threading
 processX=[]
-#table_handle:all the table handles to be used
 table_handle=[-1,-1,-1,-1,-1]
 ############################################################################
 
@@ -219,21 +215,6 @@ table_handle=[-1,-1,-1,-1,-1]
 
 
 def calculateMazeArrays():
-    '''
-    Purpose:
-    ---
-    Calculates all the maze arrays and stores them in the global vriable maze_all
-    Input Arguments:
-    ---
-    None
-    Returns:
-    ---
-    None
-    Example call:
-    ---
-    calculateMazeArrays():
-
-    '''
     global totM,maze_all
     # path directory of images in 'test_cases' folder
     #img_dir_path = 'test_cases/'
@@ -297,22 +278,6 @@ def calculateMazeArrays():
 
 
 def send_mazeData():
-    '''
-    Purpose:
-    ---
-    send maze data to coppeliasim for all the tables and start the simulation
-
-    Input Arguments:
-    ---
-    None
-
-    Returns:
-    ---
-    None
-    Example call:
-    ---
-    send_mazeData
-    '''
     global totM,maze_all,client_id
     try:
         # Send maze array data to CoppeliaSim via Remote API
@@ -362,23 +327,6 @@ def send_mazeData():
 #########################################################################################################
 #get all info of journey of ball
 def getBallInfo(ball_color):
-    '''
-    Purpose:
-    ---
-    store the whole journey of ball
-    1.get collection box based on ball_details global dectionary and delete the extracted table
-    2.calculate path in table 4
-    2.calculate path in table x
-    Input Arguments:
-    'ball_color':[string]
-        colour of ball used
-    Returns:
-    'ball_info':[list]
-        [4,path in table 4,table x,path in table x]
-    Example call:
-    ball_info=getBallInfo(ball_color)
-    ---
-    '''
     global ball_details,maze_all,vs_handle
     ball_info=[4,[],-1,[]]
     #current table number,path in table 4,[path,vision_sensor_handle,revolute_handle],table x,[path in x,vision_sensor_handle,revolute_handle]
@@ -475,30 +423,6 @@ def getBallInfo(ball_color):
 
 
 def setup_maze_for_ball(client_id,table_number,path):
-    '''
-    Purpose:
-    ---
-    init_setup,send_data_to_draw_path
-    Input Arguments:
-    ---
-    'client_id':[int]
-        id of the client
-    'table_number':[int]
-        number of the table for which this function is called
-    'path':[list]
-        path to be drawn on the table_number table, it is a list of points
-    Returns:
-    ---
-    'revolute_handle':[int]
-        the handle of all the revolute joins of the servos for table_number table
-    'vision_sensor_handle':[int]
-        the handle of the vision sensor for table_number table
-    'path_handle':[int]
-        the handle of the drawing object of the path on this table
-    Example call:
-    ---
-    revolute_handle,vision_sensor_handle,path_handle=setup_maze_for_ball(client_id,table_number,path)
-    '''
     #start checking for ball on table_number
     path_handle=-1
     #if found start pid
@@ -526,20 +450,6 @@ def setup_maze_for_ball(client_id,table_number,path):
 
 
 def setup_scene():
-    '''
-    Purpose:
-    ---
-    1.gets the handle of all the vision sensors and also vision sensor conveyer
-    2.set all tables to be respondable
-    Input Arguments:
-    ---
-    None
-    Returns:
-    None
-    Example call:
-    ---
-    setup_scene()
-    '''
     global client_id,vs_handle,totM,table_handle
     for table_number in totM:
         
@@ -567,46 +477,32 @@ def setup_scene():
 #######################################################################################################
 
 
+# In[8]:
+
 
 def stopSimulation(client_id):
-    '''
-    Purpose:
-    ---
-    stop the simulation,exit remote api server
-    ---------------------------not used----------------------------------
-    Input Arguments:
-    ---
-    'client_id':[int]
-        id of the client
-    Returns:
-    ---
-    None
-    Example call:
-    ---
-    stopSimulation(client_id)
-    '''
     try:
         return_code = task_2a.stop_simulation(client_id)
 
-        # if (return_code == sim.simx_return_novalue_flag):
-        #     print('\nSimulation stopped correctly.')
+        if (return_code == sim.simx_return_novalue_flag):
+            print('\nSimulation stopped correctly.')
 
-        #     # Stop the Remote API connection with CoppeliaSim server
-        #     try:
-        #         task_2a.exit_remote_api_server(client_id)
-        #     except Exception:
-        #         print('\n[ERROR] Your exit_remote_api_server function in task_2a.py throwed an Exception. Kindly debug your code!')
-        #         print('Stop the CoppeliaSim simulation manually.\n')
-        #         #traceback.print_exc(file=sys.stdout)
-        #         #print()
-        #         #sys.exit()
+            # Stop the Remote API connection with CoppeliaSim server
+            try:
+                task_2a.exit_remote_api_server(client_id)
+            except Exception:
+                print('\n[ERROR] Your exit_remote_api_server function in task_2a.py throwed an Exception. Kindly debug your code!')
+                print('Stop the CoppeliaSim simulation manually.\n')
+                #traceback.print_exc(file=sys.stdout)
+                #print()
+                #sys.exit()
 
-        # else:
-        #     print('\n[ERROR] Failed stopping the simulation in CoppeliaSim server!')
-        #     print('[ERROR] stop_simulation function in task_2a.py is not configured correctly, check the code!')
-        #     print('Stop the CoppeliaSim simulation manually.')
-        #     #print()
-        #     #sys.exit()
+        else:
+            print('\n[ERROR] Failed stopping the simulation in CoppeliaSim server!')
+            print('[ERROR] stop_simulation function in task_2a.py is not configured correctly, check the code!')
+            print('Stop the CoppeliaSim simulation manually.')
+            #print()
+            #sys.exit()
 
     except Exception:
         print('\n[ERROR] Your stop_simulation function in task_2a.py throwed an Exception. Kindly debug your code!')
@@ -620,25 +516,6 @@ def stopSimulation(client_id):
 
 
 def delete_path(rec_client_id,table_number,handle):
-    '''
-    Purpose:
-    ---
-    delete the path in table_number
-    Input Arguments:
-    ---
-    'rec_client_id':[int]
-        the id of client
-    'table_number':[int]
-        the number of the tablein which path has to be deleted
-    'handle':[int]
-        handle of the path
-    Returns:
-    ---
-    None
-    Example call:
-    ---
-    < Example of how to call this function >
-    '''
     #global client_id
     # handle=-1
     client_id = rec_client_id
@@ -658,55 +535,12 @@ def delete_path(rec_client_id,table_number,handle):
 
 ###################################################################################################
 def read_ball_details(file_name):
-    '''
-    Purpose:
-    ---
-    read ball details dictionary from ball_details.json
-    Input Arguments:
-    ---
-    'file_name':[string]
-    the path of the ball_details.json file
-    Returns:
-    ---
-    'ball_details':[dictionary]
-    the dictionary of all the ball details that will come in this simulation
-    Example call:
-    ---
-    ball_details=read_ball_details(file_name)
-    '''
+    global ball_details
     f=open(file_name,)
     ball_details=json.load(f)
     print("Ball Details:",ball_details)
-    return ball_details
 ##############################################################################################
-def processMaze(client_id,ball_info):
-    '''
-    Purpose:
-    ---
-    execute all the processes after the ball has been seen in the vision conveyer
-    1.Path should be drawn on top of the maze just before the ball is about to traverse it.
-    2.Path drawn on table should be traversed.
-    3.Path should be deleted after the ball has traversed the maze.
-    4.Ball should be deposited in the designated collection box.
-    5.Points 3 to 8 should be repeated for all the balls.
-
-    Input Arguments:
-    ---
-    'client_id':[int]
-        id of client
-    'ball_info':[list]
-        list of details i.e table number and the path that the ball has to travel
-    
-    Returns:
-    ---
-    None
-    Example call:
-    ---
-    Call using thread
-    process=Thread(target=processMaze,args=(client_id,ball_info,))
-    Function call
-    processMaze(client_id,ball_info)
-    '''
+def processMaze(client_id,ball_info,table_handle):
     #print(vision_sensor_handle,client_id)
     #start streaming of table 4 vision sensor
     print("setup maze "+str(ball_info[0])+" for ball to come")
@@ -721,7 +555,20 @@ def processMaze(client_id,ball_info):
         print("Checking for ball in table "+str(ball_info[0]),end="")
         while(True):
             #process 1#check if ball in stream of vision sensor conveyer# print(client_id,vision_sensor_handle)
-            
+            # return_code,now=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+            # if(return_code== 0):
+            #     try:
+            #         now=float(now)
+                    
+            #         if(now-prev_now < 1):
+            #             continue
+            #         prev_now=now
+            #         print(now)
+            #     except Exception:
+            #         continue
+            #     #print("Now=",now)
+            # else:
+            #     continue
             shapes=task_4b.getBallData(client_id,vision_sensor_handle,True)
             #blocking ball in pipe
             if(ball_info[0]==4 or ball_info[0]==2):
@@ -799,8 +646,9 @@ def processMaze(client_id,ball_info):
         ball_info[1]=ball_info[3]
         #start checking for ball in next table
         #do same thing as in process 2
-        #print("Starting setup for ball in table "+str(ball_info[0]))
-        processMaze(client_id,ball_info)
+        print("Starting setup for ball in table "+str(ball_info[0]))
+        
+        processMaze(client_id,ball_info,table_handle)
         # sim.simxFinish(client_id)        
     except Exception:
         print('\n[ERROR] Your processMaze function in task_5.py throwed an Exception. Kindly debug your code!')
@@ -831,11 +679,13 @@ def main(rec_client_id):
     Purpose:
     ---
 
-    1.Maze array of all the tables should be transferred to the lua's customization scripts.
-    2.Maze should be generated on top of all the tables in the CoppeliaSim scene.
-    3.Color of the ball should be determined from vision_sensor_5, as soon as the ball is detected.
-    4.Color of the ball should now be compared with the contents of the ball_details.json to find the correct Collection Box.
-    
+    Teams are free to design their code in this task.
+    The test executable will only call this function of task_5.py.
+    init_remote_api_server() and exit_remote_api_server() functions are already defined
+    in the executabl
+    e and hence should not be called by the teams.
+    The obtained client_id is passed to this function so that teams can use it in their code.
+
     However NOTE:
     Teams will have to call start_simulation() and stop_simulation() function on their own. 
 
@@ -854,7 +704,7 @@ def main(rec_client_id):
 
     """
     ##############	ADD YOUR CODE HERE	##############
-    global maze_all,vs_handle,client_id,ball,totB,totM,processX,table_handle,ball_details
+    global maze_all,vs_handle,client_id,ball,totB,totM,processX,table_handle
     client_id=rec_client_id
     if (client_id != -1):
         print('\nConnected successfully to Remote API Server in CoppeliaSim!')
@@ -877,7 +727,7 @@ def main(rec_client_id):
     setup_scene()
     print("Vision Sensor handles ",vs_handle)
     #read json file for ball details
-    ball_details=read_ball_details("ball_details.json")
+    read_ball_details("ball_details.json")
     
     ############check maze,will be seen at last################################
     curB=0
@@ -967,15 +817,13 @@ def main(rec_client_id):
                 continue
             if(curB==0):
                 for table_number in totM:
-                    #set all model non renderable expect table 4
+                    #set all model non renderable
                     return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
                     table_handle[table_number]=object_handle
                     if(table_number!=4):
                         return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
                     else:
                         return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
-
-
             curB+=1
             count_time=0
             return_code,prev_time=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
@@ -994,10 +842,9 @@ def main(rec_client_id):
             print("Executing process Maze for "+color+" ball ")
             # processMaze(client_id,ball_info,table_handle)
             # process=Process(target=processMaze,args=(client_id,ball_info,table_handle,))
-            #making a new communication server for this ball
             rem = task_2a.init_remote_api_server(1500-curB)
 
-            process=Thread(target=processMaze,args=(rem,ball_info,))
+            process=Thread(target=processMaze,args=(rem,ball_info,table_handle,))
             #processes are spawned by creating Process object and calling its start method
             process.start()
             processX.append(process)
@@ -1019,7 +866,8 @@ def main(rec_client_id):
 
     # #end simulation
     # time.sleep(3)
-    stopSimulation(client_id)
+    returnCode=sim.simxStopSimulation( client_id,sim.simx_opmode_oneshot)
+    # stopSimulation(client_id)
     ##################################################
 
 
