@@ -704,9 +704,6 @@ def convert_path_to_pixels(path):
 	return pixel_path
 
 
-# In[ ]:
-
-
 def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle,table_number):
 
 	"""
@@ -770,7 +767,7 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 		pixel_path.append(prev_pixel_path[i])		
 	# pixel_path.append([1292.8, 704.0])
 	pixel_path=shortenPath(pixel_path)
-	pixel_path=customizePixelPath(pixel_path)
+	# pixel_path=customizePixelPath(pixel_path)
 	print("Final Path in Table ",table_number,": ",pixel_path)
 
 	# loop from start to a point less than end,as dst=src+1
@@ -790,8 +787,8 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 		summation=np.array([0,0],dtype="float64")
 		# this is a kind of flag variable which will help in setting the last coordinates of ball for the first frame of run, 
 		# which is used in the calculation of derivative term in PID calculation.
-		prev_x=pixel_path[0][0]
-		prev_y=pixel_path[0][1]
+		# prev_x=pixel_path[0][0]
+		# prev_y=pixel_path[0][1]
 		#print("prev-x=",prev_x)
 		#print("prev-y=",prev_y)
 		for i in range(len(pixel_path)-1):
@@ -806,25 +803,75 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 			dst=pixel_path[i+1]
 
 			# print(dst)
-			prev_x=pixel_path[i+1][0]
-			prev_y=pixel_path[i+1][1]
+			# prev_x=pixel_path[i+1][0]
+			# prev_y=pixel_path[i+1][1]
 			setpoint=[dst[0],dst[1]]
 			summation=np.array([0,0],dtype='float64')
 			# print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
 			temp=0
 			print ("Traversing to ",setpoint," in table ",table_number,end="")
-			if((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<128*128) or (dst[2]==0)):
-				#normal kp ,ki,kd
-				print(" in slow mode")
-				dst[2]=0
-				kp=np.array([0.0350,0.0350],dtype='float64')
+			flag = 0
+			if((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<130*130)):
+				# type 1
+				print(" in 1 mode")
+				flag= 1
+				kp=np.array([0.095,0.095],dtype='float64')
+				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<260*260)):
+				# type 2
+				print(" in 2 mode")
+				flag= 2
+				kp=np.array([0.072,0.072],dtype='float64')
+				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<390*390)):
+				# type 3
+				print(" in 3 mode")
+				flag= 3
+				kp=np.array([0.057,0.057],dtype='float64')
+				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<520*520)):
+				# type 4
+				print(" in 4 mode")
+				flag= 4
+				kp=np.array([0.054,0.054],dtype='float64')
+				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<650*650)):
+				# type 5
+				print(" in 5 mode")
+				flag= 5
+				kp=np.array([0.052,0.052],dtype='float64')
+				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<780*780)):
+				# type 6
+				print(" in 6 mode")
+				flag= 6
+				kp=np.array([0.05,0.05],dtype='float64')
+				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<910*910)):
+				# type 7
+				print(" in 7 mode")
+				flag= 7
+				kp=np.array([0.047,0.047],dtype='float64')
+				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<1040*1040)):
+				# type 8
+				print(" in 8 mode")
+				flag= 8
+				kp=np.array([0.048,0.048],dtype='float64')
 				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
 			else:
-				#fast kp,ki,kd
-				print(" in fast mode")
-				dst[2]=1
-				kp=np.array([0.030,0.030],dtype='float64')
+				# type 9
+				print(" in 9 mode")
+				flag = 9
+				kp=np.array([0.05,0.05],dtype='float64')
 				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 				kd=np.array([0.145,0.145],dtype='float64')#kd=kd/SampleTime
 				
@@ -856,16 +903,26 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 					continue
 				#now=float(now)
 				dist=(center_x-dst[0])**2+(center_y-dst[1])**2
-				if((dst[2]==1) and (dist<1000)):
-					#fast mode simply pass to next setpoint
-					break
-				elif(dst[2]==0):
+				if(flag==1):
 					#might have to slow down or stop here
-					if(dist<8000):
-						kd=np.array([0.135,0.135],dtype='float64')
-					if(dist<2500):
-						kd=np.array([0.3,0.3],dtype='float64')
-					if( dist< 1000):
+					if(dist<1000):
+						kd=np.array([0.4,0.4],dtype='float64')
+					if( dist< 700):
+						timechange=timechange+(now-temp)
+						# print (now)
+					temp=now
+					# timechange=0
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					# this help in stability of the ball while traversal. 
+					if(timechange>=0.7):
+						break
+				elif(flag==2):
+					#might have to slow down or stop here
+					if(dist<3000):
+						kd=np.array([0.32,0.32],dtype='float64')
+					if(dist<800):
+						kd=np.array([0.36,0.36],dtype='float64')
+					if( dist< 500):
 						timechange=timechange+(now-temp)
 						# print (now)
 					temp=now
@@ -874,7 +931,112 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 					# this help in stability of the ball while traversal. 
 					if(timechange>=1):
 						break
-
+				elif(flag==3):
+					#might have to slow down or stop here
+					if(dist<5000):
+						kd=np.array([0.27,0.27],dtype='float64')
+					if(dist<1000):
+						kd=np.array([0.4,0.4],dtype='float64')
+					if( dist< 700):
+						timechange=timechange+(now-temp)
+						# print (now)
+					temp=now
+					# timechange=0
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					# this help in stability of the ball while traversal. 
+					if(timechange>=0.9):
+						break
+				elif(flag==4):
+					#might have to slow down or stop here
+					if(dist<7000):
+						kd=np.array([0.32,0.32],dtype='float64')
+					if(dist<1000):
+						kd=np.array([0.4,0.4],dtype='float64')
+					if( dist< 700):
+						timechange=timechange+(now-temp)
+						# print (now)
+					temp=now
+					# timechange=0
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					# this help in stability of the ball while traversal. 
+					if(timechange>=1):
+						break
+				elif(flag==5):
+					#might have to slow down or stop here
+					if(dist<8000):
+						kd=np.array([0.32,0.32],dtype='float64')
+					if(dist<1100):
+						kd=np.array([0.4,0.4],dtype='float64')
+					if( dist< 700):
+						timechange=timechange+(now-temp)
+						# print (now)
+					temp=now
+					# timechange=0
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					# this help in stability of the ball while traversal. 
+					if(timechange>=1):
+						break
+				elif(flag==6):
+					#might have to slow down or stop here
+					if(dist<10000):
+						kd=np.array([0.34,0.34],dtype='float64')
+					if(dist<1200):
+						kd=np.array([0.4,0.4],dtype='float64')
+					if( dist< 700):
+						timechange=timechange+(now-temp)
+						# print (now)
+					temp=now
+					# timechange=0
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					# this help in stability of the ball while traversal. 
+					if(timechange>=1):
+						break
+				elif(flag==7):
+					#might have to slow down or stop here
+					if(dist<10000):
+						kd=np.array([0.36,0.36],dtype='float64')
+					if(dist<1200):
+						kd=np.array([0.4,0.4],dtype='float64')
+					if( dist< 700):
+						timechange=timechange+(now-temp)
+						# print (now)
+					temp=now
+					# timechange=0
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					# this help in stability of the ball while traversal. 
+					if(timechange>=1):
+						break
+				elif(flag==8):
+					#might have to slow down or stop here
+					if(dist<12000):
+						kd=np.array([0.38,0.38],dtype='float64')
+					if(dist<1200):
+						kd=np.array([0.42,0.42],dtype='float64')
+					if( dist< 700):
+						timechange=timechange+(now-temp)
+						# print (now)
+					temp=now
+					# timechange=0
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					# this help in stability of the ball while traversal. 
+					if(timechange>=1):
+						break
+				elif(flag==9):
+					#might have to slow down or stop here
+					if(dist<14000):
+						kd=np.array([0.38,0.38],dtype='float64')
+					if(dist<1000):
+						kd=np.array([0.45,0.45],dtype='float64')
+					if( dist< 700):
+						timechange=timechange+(now-temp)
+						# print (now)
+					temp=now
+					# timechange=0
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					# this help in stability of the ball while traversal. 
+					if(timechange>=1):
+						break
+						
 				#print("Calling PID")
 				try:
 					# print("setpoint = ",setpoint,end=" ")
@@ -886,17 +1048,17 @@ def traverse_path(client_id,prev_pixel_path,vision_sensor_handle,revolute_handle
 				except:
 					print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
 					print('Stop the CoppeliaSim simulation manually.\n')
-					#traceback.print_exc(file=sys.stdout)
-					#print()
-					#sys.exit()
+					traceback.print_exc(file=sys.stdout)
+					print()
+					sys.exit()
 				lastInput = task_3.coordinateTransform([center_x,center_y])
 			
 	except:
 		print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
 		print('Stop the CoppeliaSim simulation manually.\n')
-		#traceback.print_exc(file=sys.stdout)
-		#print()
-		#sys.exit()
+		traceback.print_exc(file=sys.stdout)
+		print()
+		sys.exit()
 	setTiltInTable(client_id,revolute_handle,setpoint)
 	
 	print("Finished Traversing ",table_number)

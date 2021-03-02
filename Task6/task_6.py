@@ -44,10 +44,7 @@ import time
 import math
 import json
 ###############################################################
-# from multiprocessing import Process
 from threading import Thread
-#import matplotlib.pyplot as plt
-#import concurrent.futures
 ##############################################################
 
 # Importing the sim module for Remote API connection with CoppeliaSim
@@ -164,20 +161,15 @@ except Exception as e:
     sys.exit()
 ##############################################################
 
-
-# In[2]:
-
-
-
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
 # 
 # Function Name:    send_color_and_collection_box_identified
-#        Inputs:    ball_color and collection_box_name
+#       Inputs:       ball_color and collection_box_name
 #       Outputs:    None
 #       Purpose:    1. This function should only be called when the task is being evaluated using
-# 					   test executable.
-#					2. The format to send the data is as follows:
-#					   'color::collection_box_name'				   
+# 					    test executable.
+#					    2. The format to send the data is as follows:
+#					    'color::collection_box_name'				   
 def send_color_and_collection_box_identified(ball_color, collection_box_name):
 
     global client_id
@@ -186,10 +178,6 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
     inputBuffer = bytearray()
     return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id,'evaluation_screen_respondable_1',
                             sim.sim_scripttype_childscript,'color_and_cb_identification',[],[],color_and_cb,inputBuffer,sim.simx_opmode_blocking)
-
-
-# In[3]:
-
 
 ################# ADD UTILITY FUNCTIONS HERE #################
 ## You can define any utility functions for your code.      ##
@@ -213,9 +201,6 @@ processX=[]
 #table_handle:all the table handles to be used
 table_handle=[-1,-1,-1,-1,-1]
 ############################################################################
-
-
-# In[5]:
 
 
 def calculateMazeArrays():
@@ -550,14 +535,13 @@ def setup_scene():
     _, _, _ = sim.simxGetVisionSensorImage(client_id,vs_handle[5], 0, sim.simx_opmode_streaming)
     _,_= sim.simxGetPingTime(client_id)
     
-    # for table_number in totM:
-    #     #set all model non renderable
-    #     return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
-    #     table_handle[table_number]=object_handle
-    #     if(table_number!=4):
-    #         return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
-    #     else:
-    #         return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
+    for table_number in totM:
+        return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
+        table_handle[table_number]=object_handle
+        if(table_number!=4):
+            return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
+        else:
+            return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
 
 ####################################################################################################
 # def stopStreaming(vision_sensor_handle):
@@ -744,13 +728,14 @@ def processMaze(client_id,ball_info):
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
                     #set tilt accorfding to direction in which it has to go
                     # vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
-                    time.sleep(1.5)
+                    time.sleep(1)
                     if(ball_info[0]==4 or ball_info[0]==2):
                         task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
                     elif(ball_info[0]==3):
                         task_3.setAngles(client_id,revolute_handle,Output=[-5, 5])
                     else:
                         task_3.setAngles(client_id,revolute_handle,Output=[5, -5])
+                    time.sleep(0.5)
                     # if(vector[1]>0):#go straight , so bottom decrease
                     #     task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
                     # elif(vector[1]<0):#go back ,so top decrease
@@ -759,7 +744,7 @@ def processMaze(client_id,ball_info):
                     #     task_3.setAngles(client_id,revolute_handle,Output=[5, -5])
                     # elif(vector[0]<0):#go left ,so left decrease
                     #     task_3.setAngles(client_id,revolute_handle,Output=[-5, 5])
-                        
+                    
                     print("Started traversing table :"+str(ball_info[0]))
                     try:
                         # time.sleep(5)
@@ -965,15 +950,15 @@ def main(rec_client_id):
                     continue
             except Exception:
                 continue
-            if(curB==0):
-                for table_number in totM:
-                    #set all model non renderable expect table 4
-                    return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
-                    table_handle[table_number]=object_handle
-                    if(table_number!=4):
-                        return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
-                    else:
-                        return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
+            # if(curB==0):
+            #     for table_number in totM:
+            #         #set all model non renderable expect table 4
+            #         return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
+            #         table_handle[table_number]=object_handle
+            #         if(table_number!=4):
+            #             return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
+            #         else:
+            #             return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
 
 
             curB+=1
@@ -1011,14 +996,7 @@ def main(rec_client_id):
     for process in processX:
        process.join()
     
-    # for table_number in totM:
-    #     #set all model non renderable
-    #     return_code,object_handle=sim.simxGetObjectHandle(client_id,"base_plate_respondable_t"+str(table_number)+"_1",sim.simx_opmode_blocking)
-    #     table_handle[table_number]=object_handle
-    #     return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
-
-    # #end simulation
-    # time.sleep(3)
+    # for table_num
     stopSimulation(client_id)
     ##################################################
 

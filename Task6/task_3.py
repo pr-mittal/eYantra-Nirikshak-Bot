@@ -70,7 +70,7 @@ outMax=60
 # outMin:min angle of servo that is allowed
 outMin=-60
 # time after whuch each sample is taken
-SampleTime = 0.1 #0.01 sec
+SampleTime = 0.05 #0.01 sec
 ##############################################################
 
 
@@ -317,6 +317,7 @@ def control_logic(setpoint,client_id,center_x,center_y,lastInput,lastTime,lastOu
 		return  lastInput,lastTime,lastOutput,summation
 	timeChange=now-lastTime
 	#print("TimeChange=",timeChange," SampleTime=",SampleTime)
+	Input=coordinateTransform([center_x,center_y])
 	if(timeChange>=SampleTime):
 		#Compute all the working error variables
 		#transform of coordinates
@@ -341,7 +342,7 @@ def control_logic(setpoint,client_id,center_x,center_y,lastInput,lastTime,lastOu
 		# print(timeChange)
 		# here summation means the summation of all previous error
 		# we are adding the ITerm only when the ball is close to setpoint
-
+		ITerm = np.array([0,0],dtype='float64')
 		if(error[0]*error[0]+error[1]*error[1]<8000):
 			ITerm= ki*(summation)
 			summation+=error*timeChange
@@ -371,7 +372,9 @@ def control_logic(setpoint,client_id,center_x,center_y,lastInput,lastTime,lastOu
 		
 		#  In case value of kd has changed
 		# kd=np.array([0.145,0.145],dtype='float64')
-	return  Input,now,Output,summation
+		return  Input,now,Output,summation
+	return lastInput,lastTime,lastOutput,summation
+
 	##################################################
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
