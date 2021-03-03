@@ -438,6 +438,99 @@ def shortenPath(pixel_path):
 		#print(x," ",y," ",cnt_x," ",cnt_y)
 	return path
 
+def get_parameters_start(src,dst):
+	'''
+    Purpose:
+    ---
+    Get the values of kp,ki,kd based on the src point and dst point
+	We want that as destination is far we want fast ball's movement but it shold also stop at right time 
+    ---
+	'src':[list]
+		the starting point
+	'dst':[list]
+		the destination point 
+    Returns:
+	'flag':[int]
+		the mode in which the ball will run , will be used to decide how to stop the ball in the end
+	'kp':[list]
+		the propotional value of pid in the start
+	'ki':[list]
+		the integral value of pid in the start
+	'kd':[list]
+		the derivative value of pid in the start
+    ---
+	Example call:
+    ---
+    flag,kp,ki,kd=get_parameters_start(src,dst)
+    '''
+	dist=((dst[0]-src[0])**2+(dst[1]-src[1])**2)
+	if(dist<130*130):
+		# type 1 (distance is less than 130 pexels [basically it is for 
+		# 128 pixels  but for safer side we have taken 130 pixels.])
+		# similar thought process is used in all the below case
+		print(" in 1 mode of distance ",dist)
+		flag= 1
+		kp=np.array([0.123,0.123],dtype='float64')
+		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+	elif(dist<260*260):
+		# type 2
+		print(" in 2 mode of distance ",dist)
+		flag= 2
+		kp=np.array([0.080,0.080],dtype='float64')
+		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+	elif(dist<390*390):
+		# type 3
+		print(" in 3 mode of distance ",dist)
+		flag= 3
+		kp=np.array([0.0645,0.0645],dtype='float64')
+		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+	elif(dist<520*520):
+		# type 4
+		print(" in 4 mode of distance ",dist)
+		flag= 4
+		kp=np.array([0.0652,0.0652],dtype='float64')
+		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+	elif(dist<650*650):
+		# type 5
+		print(" in 5 mode of distance ",dist)
+		flag= 5
+		kp=np.array([0.058,0.058],dtype='float64')
+		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+	elif(dist<780*780):
+		# type 6
+		print(" in 6 mode of distance ",dist)
+		flag= 6
+		kp=np.array([0.055,0.055],dtype='float64')
+		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+	elif(dist<910*910):
+		# type 7
+		print(" in 7 mode of distance ",dist)
+		flag= 7
+		kp=np.array([0.052,0.052],dtype='float64')
+		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+	elif(dist<1040*1040):
+		# type 8
+		print(" in 8 mode of distance ",dist)
+		flag= 8
+		kp=np.array([0.05,0.05],dtype='float64')
+		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
+	else:
+		# type 9
+		print(" in 9 mode of distance ",dist)
+		flag = 9
+		kp=np.array([0.05,0.05],dtype='float64')
+		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
+		kd=np.array([0.145,0.145],dtype='float64')#kd=kd/SampleTime
+	return flag,kp,ki,kd
+
 ##############################################################
 
 
@@ -753,13 +846,46 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 
 	##############	ADD YOUR CODE HERE	#############
 	_,_ = sim.simxGetPingTime(client_id)
+	#to calculate total traversal time during debugging
 	return_code_signal,start=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 	if(return_code_signal== 0):
 		try:
 			now=float(start)
 		except Exception:
 			start=0
+
+	#set tilt accorfding to direction in which it has to go in starting
+	vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
+	# time.sleep(1)
+	# if(table_number==2):
+	# 	task_3.setAngles(client_id,revolute_handle,Output=[7, 7])
+	# elif(table_number==4):
+	# 	task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])
+	# elif(table_number==3):
+	# 	task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])
+	# else:
+	# 	task_3.setAngles(client_id,revolute_handle,Output=[7, -7])
+	# time.sleep(0.5)
+
+	if(vector[1]>0):#go straight , so bottom decrease
+	    task_3.setAngles(client_id,revolute_handle,Output=[7, 7])
+	elif(vector[1]<0):#go back ,so top decrease
+	    task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])
+	elif(vector[0]>0):#go right , so right decrease
+	    task_3.setAngles(client_id,revolute_handle,Output=[7, -7])
+	elif(vector[0]<0):#go left ,so left decrease
+	    task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])
+
+	# if(out_coord[0]<=70):
+	# 	Output=[-45,45]#left decrease
+	# if(out_coord[0]>=1205):
+	# 	Output=[45,-45]#right decreacre
+	# if(out_coord[1]>=1205):
+	# 	Output=[45,45]#bottom decrease
+	# if(out_coord[1]<=70):
+	# 	Output=[-45,-45]#top decrease
 	
+
 	# This function should remove the unneccessary setpoint from the pixel_path	
 	pixel_path=shortenPath(pixel_path)
 	print("Final Path in Table ",table_number,": ",pixel_path)
@@ -784,7 +910,7 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 		lastTime=0
 		lastOutput=np.array([0,0],dtype="float64")
 		summation_of_errors=np.array([0,0],dtype="float64")
-
+		
 		for i in range(len(pixel_path)-1):
 
 			src=pixel_path[i]#source setoint
@@ -807,77 +933,22 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 			'''
 			# print("STARTING JOURNEY TO:",(dst[0]-640)/1280,(dst[1]-640)/1280)
 			print ("Traversing to ",setpoint," in table ",table_number,end="")
+			#to calculate total traversal time during debugging
+			return_code_signal,start_path=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+			if(return_code_signal== 0):
+				try:
+					start_path=float(start_path)
+					print(" time for previous path was ",start_path-lastTime,end=" ")
+				except Exception:
+					start_path=0
+
+			
 			flag = 0
 			'''
 			flag :: variable:: integer:: This variable is used to characterise different
 			kind of paths according to the distance between the source and the desitination.
 			'''
-			if((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<130*130)):
-				# type 1 (distance is less than 130 pexels [basically it is for 
-				# 128 pixels  but for safer side we have taken 130 pixels.])
-				# similar thought process is used in all the below case
-				print(" in 1 mode")
-				flag= 1
-				kp=np.array([0.123,0.123],dtype='float64')
-				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
-			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<260*260)):
-				# type 2
-				print(" in 2 mode")
-				flag= 2
-				kp=np.array([0.080,0.080],dtype='float64')
-				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
-			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<390*390)):
-				# type 3
-				print(" in 3 mode")
-				flag= 3
-				kp=np.array([0.0645,0.0645],dtype='float64')
-				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
-			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<520*520)):
-				# type 4
-				print(" in 4 mode")
-				flag= 4
-				kp=np.array([0.0652,0.0652],dtype='float64')
-				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
-			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<650*650)):
-				# type 5
-				print(" in 5 mode")
-				flag= 5
-				kp=np.array([0.058,0.058],dtype='float64')
-				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
-			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<780*780)):
-				# type 6
-				print(" in 6 mode")
-				flag= 6
-				kp=np.array([0.055,0.055],dtype='float64')
-				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
-			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<910*910)):
-				# type 7
-				print(" in 7 mode")
-				flag= 7
-				kp=np.array([0.052,0.052],dtype='float64')
-				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
-			elif((((dst[0]-src[0])**2+(dst[1]-src[1])**2)<1040*1040)):
-				# type 8
-				print(" in 8 mode")
-				flag= 8
-				kp=np.array([0.05,0.05],dtype='float64')
-				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-				kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
-			else:
-				# type 9
-				print(" in 9 mode")
-				flag = 9
-				kp=np.array([0.05,0.05],dtype='float64')
-				ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
-				kd=np.array([0.145,0.145],dtype='float64')#kd=kd/SampleTime
-				
+			flag,kp,ki,kd=get_parameters_start(src,dst)
 			
 			timechange = 0
 			'''
@@ -886,6 +957,7 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 			Making ball stay in the Thresold for a while helps to to increase the stability
 			at the time of traversal.
 			'''
+
 			while(True):			
 				
 				shapes= getBallData(client_id,vision_sensor_handle,True) 
@@ -899,6 +971,12 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 					continue
 
 				if(flag_variable_to_set_lastInput==1):
+					#this is the first setpoint
+					#wait for ball to get little bit far from first setpoint
+					dist=(center_x-dst[0])**2+(center_y-dst[1])**2
+					if(dist<100):
+						continue
+					#it is sufficirntly far from first input let the ball start traversing now
 					lastInput=task_3.coordinateTransform([center_x,center_y])
 					flag_variable_to_set_lastInput=0
 				
@@ -924,7 +1002,6 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
-					prev_Thresold_time=now
 					# Ball has to stay at each optimized set point under the threshold value for 
 					# some time 
 					# this help in stability of the ball while traversal. 
@@ -940,7 +1017,6 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
-					prev_Thresold_time=now
 					#  Ball has to stay at each optimized set point under the threshold value for 
 					# some time 
 					# this help in stability of the ball while traversal. 
@@ -956,7 +1032,6 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
-					prev_Thresold_time=now
 					# timechange=0
 					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
 					# this help in stability of the ball while traversal. 
@@ -972,7 +1047,6 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
-					prev_Thresold_time=now
 					# timechange=0
 					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
 					# this help in stability of the ball while traversal. 
@@ -988,7 +1062,6 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
-					prev_Thresold_time=now
 					# timechange=0
 					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
 					# this help in stability of the ball while traversal. 
@@ -1004,7 +1077,6 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
-					prev_Thresold_time=now
 					# timechange=0
 					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
 					# this help in stability of the ball while traversal. 
@@ -1020,7 +1092,6 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
-					prev_Thresold_time=now
 					# timechange=0
 					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
 					# this help in stability of the ball while traversal. 
@@ -1036,7 +1107,6 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
-					prev_Thresold_time=now
 					# timechange=0
 					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
 					# this help in stability of the ball while traversal. 
@@ -1052,13 +1122,12 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
-					prev_Thresold_time=now
 					# timechange=0
 					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
 					# this help in stability of the ball while traversal. 
 					if(timechange>=0.9):
 						break
-						
+				prev_Thresold_time=now	
 				#print("Calling PID")
 				try:
 					# print("setpoint = ",setpoint,end=" ")
@@ -1083,6 +1152,7 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 		sys.exit()
 	setTiltInTable(client_id,revolute_handle,setpoint)
 	
+	#print total time taken for ball to traverse
 	print("Finished Traversing ",table_number)
 	_,_ = sim.simxGetPingTime(client_id)
 	return_code_signal,end=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)

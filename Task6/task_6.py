@@ -726,26 +726,6 @@ def processMaze(client_id,ball_info):
                 try:
                     print("Calculating pixel path")
                     pixel_path = task_4b.convert_path_to_pixels(ball_info[1])
-                    #set tilt accorfding to direction in which it has to go
-                    # vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
-                    time.sleep(1)
-                    if(ball_info[0]==2):
-                        task_3.setAngles(client_id,revolute_handle,Output=[7, 7])
-                    elif(ball_info[0]==4):
-                        task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])
-                    elif(ball_info[0]==3):
-                        task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])
-                    else:
-                        task_3.setAngles(client_id,revolute_handle,Output=[7, -7])
-                    time.sleep(0.5)
-                    # if(vector[1]>0):#go straight , so bottom decrease
-                    #     task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
-                    # elif(vector[1]<0):#go back ,so top decrease
-                    #     task_3.setAngles(client_id,revolute_handle,Output=[-5, -5])
-                    # elif(vector[0]>0):#go right , so right decrease
-                    #     task_3.setAngles(client_id,revolute_handle,Output=[5, -5])
-                    # elif(vector[0]<0):#go left ,so left decrease
-                    #     task_3.setAngles(client_id,revolute_handle,Output=[-5, 5])
                     
                     print("Started traversing table :"+str(ball_info[0]))
                     try:
