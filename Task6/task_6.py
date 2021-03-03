@@ -189,7 +189,7 @@ maze_all=[-1,-1,-1,-1,-1]#we use maze_all starting from 1
 #vs_handle:stores all the vision sendor handles
 vs_handle=[-1,-1,-1,-1,-1,-1]##we use vs_handle starting from 1
 #totB:total number of balls comign in this task
-totB=3#check , total number of balls expected
+totB=5#check , total number of balls expected
 #totM:the table numbers being used in this task
 totM=[1,2,3,4]#check , list of all maze numbers
 #clent id
@@ -710,13 +710,13 @@ def processMaze(client_id,ball_info):
             #blocking ball in pipe
             if(ball_info[0]==4 or ball_info[0]==2):
                 # print("ball_info[0] = ",ball_info[0],[40,40])
-                task_3.setAngles(client_id,revolute_handle,Output=[40, 40])
+                task_3.setAngles(client_id,revolute_handle,Output=[60, 60])
             elif(ball_info[0]==3):
                 # print("ball_info[0] = ",ball_info[0],[-40,40])
-                task_3.setAngles(client_id,revolute_handle,Output=[-40, 40])
+                task_3.setAngles(client_id,revolute_handle,Output=[-60, 60])
             else:
                 # print("ball_info[0] = ",ball_info[0],[40,-40])
-                task_3.setAngles(client_id,revolute_handle,Output=[40, -40])
+                task_3.setAngles(client_id,revolute_handle,Output=[60, -60])
             # print(shapes)
             if(shapes==None):
                 continue
@@ -729,12 +729,14 @@ def processMaze(client_id,ball_info):
                     #set tilt accorfding to direction in which it has to go
                     # vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
                     time.sleep(1)
-                    if(ball_info[0]==4 or ball_info[0]==2):
-                        task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
+                    if(ball_info[0]==2):
+                        task_3.setAngles(client_id,revolute_handle,Output=[7, 7])
+                    elif(ball_info[0]==4):
+                        task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])
                     elif(ball_info[0]==3):
-                        task_3.setAngles(client_id,revolute_handle,Output=[-5, 5])
+                        task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])
                     else:
-                        task_3.setAngles(client_id,revolute_handle,Output=[5, -5])
+                        task_3.setAngles(client_id,revolute_handle,Output=[7, -7])
                     time.sleep(0.5)
                     # if(vector[1]>0):#go straight , so bottom decrease
                     #     task_3.setAngles(client_id,revolute_handle,Output=[5, 5])
