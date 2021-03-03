@@ -717,6 +717,7 @@ def processMaze(client_id,ball_info):
             else:
                 # print("ball_info[0] = ",ball_info[0],[40,-40])
                 task_3.setAngles(client_id,revolute_handle,Output=[60, -60])
+            time.sleep(1)
             # print(shapes)
             if(shapes==None):
                 continue

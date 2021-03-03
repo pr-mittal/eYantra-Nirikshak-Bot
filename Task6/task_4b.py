@@ -491,42 +491,48 @@ def get_parameters_start(src,dst):
 		# type 4
 		print(" in 4 mode of distance ",dist)
 		flag= 4
-		kp=np.array([0.0652,0.0652],dtype='float64')
+		kp=np.array([0.072,0.072],dtype='float64')
+		# kp=np.array([0.0652,0.0652],dtype='float64')
 		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
 	elif(dist<650*650):
 		# type 5
 		print(" in 5 mode of distance ",dist)
 		flag= 5
-		kp=np.array([0.058,0.058],dtype='float64')
+		kp=np.array([0.072,0.072],dtype='float64')
+		# kp=np.array([0.058,0.058],dtype='float64')
 		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
 	elif(dist<780*780):
 		# type 6
 		print(" in 6 mode of distance ",dist)
 		flag= 6
-		kp=np.array([0.055,0.055],dtype='float64')
+		kp=np.array([0.0575,0.0575],dtype='float64')
+		# kp=np.array([0.055,0.055],dtype='float64')
 		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
 	elif(dist<910*910):
 		# type 7
 		print(" in 7 mode of distance ",dist)
 		flag= 7
-		kp=np.array([0.052,0.052],dtype='float64')
+		kp=np.array([0.0545,0.0545],dtype='float64')
+		# kp=np.array([0.052,0.052],dtype='float64')
 		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
 	elif(dist<1040*1040):
 		# type 8
 		print(" in 8 mode of distance ",dist)
 		flag= 8
-		kp=np.array([0.05,0.05],dtype='float64')
+		kp=np.array([0.055,0.055],dtype='float64')
+		# kp=np.array([0.05,0.05],dtype='float64')
 		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 		kd=np.array([0.14,0.14],dtype='float64')#kd=kd/SampleTime
 	else:
 		# type 9
 		print(" in 9 mode of distance ",dist)
 		flag = 9
-		kp=np.array([0.05,0.05],dtype='float64')
+		kp=np.array([0.053,0.053],dtype='float64')
+		# kp=np.array([0.05,0.05],dtype='float64')
 		ki=np.array([0.001,0.001],dtype='float64')#ki=ki*SampleTime
 		kd=np.array([0.145,0.145],dtype='float64')#kd=kd/SampleTime
 	return flag,kp,ki,kd
@@ -855,36 +861,43 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 			start=0
 
 	#set tilt accorfding to direction in which it has to go in starting
-	vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
-	# time.sleep(1)
-	# if(table_number==2):
-	# 	task_3.setAngles(client_id,revolute_handle,Output=[7, 7])
-	# elif(table_number==4):
-	# 	task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])
-	# elif(table_number==3):
-	# 	task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])
-	# else:
-	# 	task_3.setAngles(client_id,revolute_handle,Output=[7, -7])
-	# time.sleep(0.5)
-
-	if(vector[1]>0):#go straight , so bottom decrease
-	    task_3.setAngles(client_id,revolute_handle,Output=[7, 7])
-	elif(vector[1]<0):#go back ,so top decrease
-	    task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])
-	elif(vector[0]>0):#go right , so right decrease
-	    task_3.setAngles(client_id,revolute_handle,Output=[7, -7])
-	elif(vector[0]<0):#go left ,so left decrease
-	    task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])
-
-	# if(out_coord[0]<=70):
-	# 	Output=[-45,45]#left decrease
-	# if(out_coord[0]>=1205):
-	# 	Output=[45,-45]#right decreacre
-	# if(out_coord[1]>=1205):
-	# 	Output=[45,45]#bottom decrease
-	# if(out_coord[1]<=70):
-	# 	Output=[-45,-45]#top decrease
+	# vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
+	'''
+	This if else statements have different meaning for different conditions. 
+	I will seperately explain each condition. 
 	
+	CASE - 1 : If first path straight so we provide a small angle 
+	so that ball comes out from the trap of the down pipe as if we dont provide 
+	small angle for a while then ball will stay trapped inside the down pipe 
+	because large angle will make the same condition which we used for trapping 
+	the ball inside the down pipe(task_6.py line 711 to 720).
+	
+	CASE - 2 : But we have also dealt with the case when the path is not straight(i.e. it has 
+	to move right or left), in such case we if we manage to keep the ball at the centre of 
+	down pipe(angle = 0 degrees(approx)) but this time not trapped in downpipe 
+	then PID will work without ball being trapped. For this to case to work height of 
+	downpipe has to be adjusted very precisely so that at zero angle ball is not trapped
+	inside the down pipe.
+	'''
+	if(table_number==1):
+		task_3.setAngles(client_id,revolute_handle,Output=[7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
+	elif(table_number==2):
+		task_3.setAngles(client_id,revolute_handle,Output=[7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
+	elif(table_number==3):
+		task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
+	else:
+		task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])#CASE - 2(STAY)
+	time.sleep(0.5)
+
+	# if(vector[1]>0):#go straight , so bottom decrease
+	#     task_3.setAngles(client_id,revolute_handle,Output=[7, 7])
+	# elif(vector[1]<0):#go back ,so top decrease
+	#     task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])
+	# elif(vector[0]>0):#go right , so right decrease
+	#     task_3.setAngles(client_id,revolute_handle,Output=[7, -7])
+	# elif(vector[0]<0):#go left ,so left decrease
+	#     task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])
+
 
 	# This function should remove the unneccessary setpoint from the pixel_path	
 	pixel_path=shortenPath(pixel_path)
@@ -937,8 +950,8 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 			return_code_signal,start_path=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 			if(return_code_signal== 0):
 				try:
-					start_path=float(start_path)
 					print(" time for previous path was ",start_path-lastTime,end=" ")
+					start_path=float(start_path)
 				except Exception:
 					start_path=0
 
@@ -994,33 +1007,33 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 				dist=(center_x-dst[0])**2+(center_y-dst[1])**2# square of distance between
 				# source and destination
 				if(flag==1):
-					if(dist< 2000):#helps to slow down the ball  
-						kd=np.array([0.345,0.345],dtype='float64')
+					if(dist< 2700):#helps to slow down the ball  
+						kd=np.array([0.385,0.385],dtype='float64')
 					if(dist< 750):# helps in stopping the ball
-						kd=np.array([0.4,0.4],dtype='float64')
-					if( dist< 500):
+						kd=np.array([0.40,0.40],dtype='float64')
+					if( dist <= 500):
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
 					# Ball has to stay at each optimized set point under the threshold value for 
 					# some time 
 					# this help in stability of the ball while traversal. 
-					if(timechange>=0.6):
+					if(timechange>=1):
 						break
 				elif(flag==2):
 					#might have to slow down or stop here
 					if(dist<3500):
-						kd=np.array([0.37,0.37],dtype='float64')
+						kd=np.array([0.375,0.375],dtype='float64')
 					if(dist<800):
 						kd=np.array([0.39,0.39],dtype='float64')
-					if( dist< 500):
+					if( dist <= 500):
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
 					#  Ball has to stay at each optimized set point under the threshold value for 
 					# some time 
 					# this help in stability of the ball while traversal. 
-					if(timechange>=0.9):
+					if(timechange>=0.8):
 						break
 				elif(flag==3):
 					#might have to slow down or stop here
@@ -1028,104 +1041,104 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 						kd=np.array([0.31,0.31],dtype='float64')
 					if(dist<1000):
 						kd=np.array([0.4,0.4],dtype='float64')
-					if( dist< 550):
+					if( dist <= 500):
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
 					# timechange=0
-					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.8 sec 
 					# this help in stability of the ball while traversal. 
 					if(timechange>=0.8):
 						break
 				elif(flag==4):
 					#might have to slow down or stop here
 					if(dist<7000):
-						kd=np.array([0.335,0.335],dtype='float64')
+						kd=np.array([0.43,0.43],dtype='float64')
 					if(dist<900):
-						kd=np.array([0.39,0.39],dtype='float64')
-					if( dist< 700):
+						kd=np.array([0.45,0.45],dtype='float64')
+					if( dist <= 500):
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
 					# timechange=0
-					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.8 sec 
 					# this help in stability of the ball while traversal. 
-					if(timechange>=0.9):
+					if(timechange>=0.8):
 						break
 				elif(flag==5):
 					#might have to slow down or stop here
 					if(dist<9000):
-						kd=np.array([0.355,0.355],dtype='float64')
+						kd=np.array([0.435,0.435],dtype='float64')
 					if(dist<1100):
-						kd=np.array([0.43,0.43],dtype='float64')
-					if( dist< 550):
+						kd=np.array([0.45,0.45],dtype='float64')
+					if( dist <= 500):
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
 					# timechange=0
-					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.8 sec 
 					# this help in stability of the ball while traversal. 
-					if(timechange>=0.9):
+					if(timechange>=0.8):
 						break
 				elif(flag==6):
 					#might have to slow down or stop here
 					if(dist<10000):
-						kd=np.array([0.35,0.35],dtype='float64')
+						kd=np.array([0.36,0.36],dtype='float64')
 					if(dist<1200):
-						kd=np.array([0.42,0.42],dtype='float64')
-					if( dist< 550):
+						kd=np.array([0.425,0.425],dtype='float64')
+					if( dist <= 500):
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
 					# timechange=0
-					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.8 sec 
 					# this help in stability of the ball while traversal. 
-					if(timechange>=0.9):
+					if(timechange>=0.8):
 						break
 				elif(flag==7):
 					#might have to slow down or stop here
 					if(dist<10000):
-						kd=np.array([0.37,0.37],dtype='float64')
+						kd=np.array([0.375,0.375],dtype='float64')
 					if(dist<1200):
 						kd=np.array([0.43,0.43],dtype='float64')
-					if( dist< 550):
+					if( dist <= 500):
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
 					# timechange=0
-					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.8 sec 
 					# this help in stability of the ball while traversal. 
-					if(timechange>=0.9):
+					if(timechange>=0.8):
 						break
 				elif(flag==8):
 					#might have to slow down or stop here
 					if(dist<12000):
-						kd=np.array([0.39,0.39],dtype='float64')
+						kd=np.array([0.40,0.40],dtype='float64')
 					if(dist<1200):
 						kd=np.array([0.44,0.44],dtype='float64')
-					if( dist< 550):
+					if( dist <= 500):
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
 					# timechange=0
-					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.8 sec 
 					# this help in stability of the ball while traversal. 
-					if(timechange>=0.9):
+					if(timechange>=0.8):
 						break
 				elif(flag==9):
 					#might have to slow down or stop here
 					if(dist<14000):
-						kd=np.array([0.39,0.39],dtype='float64')
+						kd=np.array([0.40,0.40],dtype='float64')
 					if(dist<1000):
 						kd=np.array([0.45,0.45],dtype='float64')
-					if( dist< 550):
+					if( dist <= 500):
 						timechange=timechange+(now-prev_Thresold_time)
 					else:
 						timechange=0
 					# timechange=0
-					#  Ball has to stay at each optimized set point under the threshold value for about 0.7 sec 
+					#  Ball has to stay at each optimized set point under the threshold value for about 0.8 sec 
 					# this help in stability of the ball while traversal. 
-					if(timechange>=0.9):
+					if(timechange>=0.8):
 						break
 				prev_Thresold_time=now	
 				#print("Calling PID")
