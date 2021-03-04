@@ -861,7 +861,7 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 			start=0
 
 	#set tilt accorfding to direction in which it has to go in starting
-	# vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
+	vector=[pixel_path[1][0]-pixel_path[0][0],pixel_path[1][1]-pixel_path[0][1]]
 	'''
 	This if else statements have different meaning for different conditions. 
 	I will seperately explain each condition. 
@@ -880,23 +880,26 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 	inside the down pipe.
 	'''
 	if(table_number==1):
-		task_3.setAngles(client_id,revolute_handle,Output=[7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
+		if(vector[0]>=0):
+			task_3.setAngles(client_id,revolute_handle,Output=[7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
+		else:
+			task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
 	elif(table_number==2):
-		task_3.setAngles(client_id,revolute_handle,Output=[7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
+		if(vector[1]>=0):
+			task_3.setAngles(client_id,revolute_handle,Output=[7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
+		else:
+			task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
 	elif(table_number==3):
-		task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
+		if(vector[0]<=0):
+			task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
+		else:
+			task_3.setAngles(client_id,revolute_handle,Output=[7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
 	else:
-		task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])#CASE - 2(STAY)
+		if(vector[1]>=0):
+			task_3.setAngles(client_id,revolute_handle,Output=[7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
+		else:
+			task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
 	time.sleep(0.5)
-
-	# if(vector[1]>0):#go straight , so bottom decrease
-	#     task_3.setAngles(client_id,revolute_handle,Output=[7, 7])
-	# elif(vector[1]<0):#go back ,so top decrease
-	#     task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])
-	# elif(vector[0]>0):#go right , so right decrease
-	#     task_3.setAngles(client_id,revolute_handle,Output=[7, -7])
-	# elif(vector[0]<0):#go left ,so left decrease
-	#     task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])
 
 
 	# This function should remove the unneccessary setpoint from the pixel_path	
