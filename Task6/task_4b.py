@@ -880,22 +880,22 @@ def traverse_path(client_id,pixel_path,vision_sensor_handle,revolute_handle,tabl
 	inside the down pipe.
 	'''
 	if(table_number==1):
-		if(vector[0]>=0):
+		if(vector[0]>0):
 			task_3.setAngles(client_id,revolute_handle,Output=[7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
 		else:
 			task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
 	elif(table_number==2):
-		if(vector[1]>=0):
+		if(vector[1]>0):
 			task_3.setAngles(client_id,revolute_handle,Output=[7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
 		else:
 			task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
 	elif(table_number==3):
-		if(vector[0]<=0):
+		if(vector[0]<0):
 			task_3.setAngles(client_id,revolute_handle,Output=[-7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
 		else:
 			task_3.setAngles(client_id,revolute_handle,Output=[7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
 	else:
-		if(vector[1]>=0):
+		if(vector[1]>0):
 			task_3.setAngles(client_id,revolute_handle,Output=[7, 7])#CASE - 1(MOVE WITH SMALL ANGLE)
 		else:
 			task_3.setAngles(client_id,revolute_handle,Output=[-7, -7])#CASE - 1(MOVE WITH SMALL ANGLE)
