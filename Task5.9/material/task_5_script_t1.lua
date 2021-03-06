@@ -42,7 +42,7 @@
 maze_array = {}
 base_children_list={} --Do not change or delete this variable
 baseHandle = -1       --Do not change or delete this variable
-
+path_handle=-1
 --############################################################
 
 
@@ -124,7 +124,7 @@ function deleteExit(number)
     end
     list={{{1,1,5},{-1,5,11},{1,11,6}},
             {{-1,6,1},{-1,5,11},{1,11,6}},
-            {{-1,5,11},{1,1,5},{1,11,6}},
+            {{-1,6,1},{1,1,5},{1,11,6}},
             {{-1,5,1},{-1,6,11},{1,11,5}}}
     for i=1,3,1
     do
@@ -181,7 +181,13 @@ function createWall()
     return wallObjectHandle
 end
 function deletePath(_lineContainer,inFloats,inStrings,inBuffer)
-    result=sim.removeDrawingObject(_lineContainer[1])
+    if(_lineContainer[1]~=-1)
+    then
+        result=sim.removeDrawingObject(_lineContainer[1])
+    else
+        result=sim.removeDrawingObject(path_handle)
+    end
+    
     ---1 if operation was not successful
 	return {result}, inFloats,inStrings,inBuffer
 end
@@ -744,9 +750,8 @@ function drawPath(inInts,path,table_number,inBuffer)
     --print(table_number)
     wallsGroupHandle=sim.getObjectHandle("walls_t"..table_number[1].."_1")
 	posTable=sim.getObjectPosition(wallsGroupHandle,-1)
-    --print(posTable)
 	print('=========================================')
-	print('Path received is as follows: ')
+	print('Path for table '..table_number[1]..' received is as follows: ')
 	print(path)
 	if not lineContainer then
 		_lineContainer=sim.addDrawingObject(sim.drawing_lines,1,0,wallsGroupHandle,99999,{0.2,0.2,1})
@@ -756,11 +761,10 @@ function drawPath(inInts,path,table_number,inBuffer)
 			for i=1,pc-1,1 do
 				lineDat={posTable[1]+path[(i-1)*2+1],posTable[2]+path[(i-1)*2+2],posTable[3]-0.03,posTable[1]+path[(i)*2+1],posTable[2]+path[(i)*2+2],posTable[3]-0.03}
 				sim.addDrawingObjectItem(_lineContainer,lineDat)
-                --print(lineDat)
 			end
 		end
 	end
-    --print(_lineContainer)
+    path_handle=_lineContainer
 	return {_lineContainer}, path, table_number, inBuffer
 end
 
